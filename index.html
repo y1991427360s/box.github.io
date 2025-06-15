@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>存储柜模拟器 (多视图与搜索版)</title>
+    <title>存储柜模拟器 (云同步版)</title>
     <style>
-        /* --- 全局样式 --- */
         :root {
             --primary-color: #3498db;
             --secondary-color: #2c3e50;
@@ -19,11 +18,12 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
             background-color: var(--background-color);
             margin: 0;
             padding: 20px;
             color: var(--secondary-color);
+            -webkit-text-size-adjust: 100%;
         }
 
         .app-container {
@@ -32,7 +32,6 @@
             margin: 0 auto;
         }
 
-        /* --- 全局头部 --- */
         .app-header {
             background: var(--container-bg);
             padding: 15px 20px;
@@ -42,32 +41,28 @@
             display: flex;
             align-items: center;
             gap: 20px;
+            flex-wrap: wrap;
         }
 
         .app-header h1 {
             margin: 0;
             font-size: 1.5rem;
             color: var(--primary-color);
-            white-space: nowrap;
         }
 
         .search-bar {
             flex-grow: 1;
             position: relative;
+            min-width: 200px;
         }
         
         #global-search-input {
             width: 100%;
-            padding: 12px 15px 12px 40px; /* 左侧留出图标空间 */
+            padding: 12px 15px 12px 40px;
             border: 1px solid #dfe4ea;
             border-radius: 8px;
             font-size: 1rem;
-            transition: all 0.2s ease;
-        }
-        #global-search-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+            box-sizing: border-box;
         }
 
         .search-icon {
@@ -78,22 +73,53 @@
             color: #a4b0be;
         }
 
-        /* --- 视图容器 --- */
-        .view {
-            display: none; /* 默认隐藏所有视图 */
-        }
-        .view.active {
-            display: block; /* 只显示激活的视图 */
-            animation: viewFadeIn 0.5s ease;
-        }
-        @keyframes viewFadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: #666;
         }
 
-        /* --- 主视图：储物柜列表 --- */
-        #main-view .cabinet-controls {
-            margin-bottom: 20px;
+        .sync-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #95a5a6;
+        }
+
+        .sync-indicator.syncing {
+            background-color: #f39c12;
+            animation: pulse 1s infinite;
+        }
+
+        .sync-indicator.synced {
+            background-color: #27ae60;
+        }
+
+        .sync-indicator.error {
+            background-color: #e74c3c;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .sync-button {
+            background: none;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .view {
+            display: none;
+        }
+        .view.active {
+            display: block;
         }
 
         .cabinet-grid {
@@ -109,9 +135,11 @@
             padding: 20px;
             text-align: center;
             cursor: pointer;
-            transition: all var(--transition-speed) ease;
             position: relative;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
         }
         
         .storage-box:hover {
@@ -120,11 +148,9 @@
             border-color: var(--primary-color);
         }
 
-        /* 搜索高亮样式 */
         .storage-box.highlight {
             background-color: var(--highlight-bg);
             border-color: var(--highlight-border);
-            box-shadow: 0 0 10px var(--highlight-bg);
         }
         
         .box-icon { font-size: 3rem; color: var(--primary-color); }
@@ -134,13 +160,10 @@
             position: absolute; top: 8px; right: 8px;
             background: #e74c3c; color: white; border: none;
             border-radius: 50%; width: 24px; height: 24px;
-            font-size: 14px; line-height: 24px; text-align: center;
-            cursor: pointer; opacity: 0; transition: opacity var(--transition-speed);
+            font-size: 14px; cursor: pointer; opacity: 0;
         }
         .storage-box:hover .delete-box-btn { opacity: 1; }
-        .delete-box-btn:hover { background: #c0392b; }
 
-        /* --- 详情视图：储物柜内部 --- */
         #detail-view .detail-header {
             display: flex;
             align-items: center;
@@ -148,34 +171,37 @@
             margin-bottom: 20px;
             padding-bottom: 15px;
             border-bottom: 1px solid #ecf0f1;
+            flex-wrap: wrap;
+            gap: 10px;
         }
-        #detail-view h2 { margin: 0; font-size: 1.8rem; }
         
         .items-list {
-            list-style: none; padding: 0; margin: 0 0 20px 0;
-            max-height: 50vh; overflow-y: auto;
+            list-style: none; 
+            padding: 0; 
+            margin: 0 0 20px 0;
+            max-height: 50vh; 
+            overflow-y: auto;
         }
         
         .items-list li {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 15px; background: #fdfdfd; border: 1px solid #e0e0e0;
-            border-radius: 8px; margin-bottom: 12px;
-            animation: fadeIn 0.4s ease-out forwards;
-            transition: all 0.2s ease;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            padding: 12px 15px; 
+            background: #fdfdfd; 
+            border: 1px solid #e0e0e0;
+            border-radius: 8px; 
+            margin-bottom: 12px;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
         }
         
-        .items-list li:hover {
-            transform: translateX(5px);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        }
-        
-        /* 物品高亮样式 */
         .items-list li.highlight {
              background-color: var(--highlight-bg);
              border-color: var(--highlight-border);
         }
 
-        /* 重命名编辑样式 */
         .rename-input {
             background: transparent;
             border: 2px solid var(--primary-color);
@@ -185,15 +211,11 @@
             font-weight: inherit;
             width: 100%;
             box-sizing: border-box;
-        }
-        .rename-input:focus {
-            outline: none;
-            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+            -webkit-appearance: none;
         }
 
-        /* 长按提示动画 */
         .long-press-active {
-            animation: longPressIndicator 1s ease-in-out;
+            animation: longPressIndicator 0.8s ease-in-out;
         }
         @keyframes longPressIndicator {
             0% { transform: scale(1); }
@@ -201,42 +223,74 @@
             100% { transform: scale(1); }
         }
 
-        .item-content { display: flex; align-items: center; gap: 12px; font-size: 1rem; }
-        .item-icon { font-size: 1.3rem; }
+        .item-content { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            font-size: 1rem; 
+            flex-grow: 1;
+        }
 
         .delete-item-btn {
-            background: transparent; border: none; color: #95a5a6; cursor: pointer;
-            font-size: 1.2rem; padding: 5px; border-radius: 50%; width: 32px; height: 32px;
-            display: flex; align-items: center; justify-content: center;
-            transition: color 0.2s, background-color 0.2s;
+            background: transparent; 
+            border: none; 
+            color: #95a5a6; 
+            cursor: pointer;
+            font-size: 1.2rem; 
+            padding: 5px; 
+            border-radius: 50%;
         }
-        .delete-item-btn:hover { color: #e74c3c; background-color: #fce8e6; }
-        
-        .item-controls { display: flex; gap: 10px; }
-        #item-name-input { flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; }
 
-        /* --- 通用组件 --- */
-        .btn {
-            padding: 10px 15px; border: none; border-radius: 8px; color: white;
-            cursor: pointer; font-size: 1rem; transition: all 0.2s ease-in-out;
-            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-            text-decoration: none;
+        .item-controls { 
+            display: flex; 
+            gap: 10px; 
+            flex-wrap: wrap;
         }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        #item-name-input { 
+            flex-grow: 1; 
+            padding: 10px; 
+            border: 1px solid #ccc; 
+            border-radius: 8px; 
+            font-size: 1rem;
+        }
+
+        .btn {
+            padding: 10px 15px; 
+            border: none; 
+            border-radius: 8px; 
+            color: white;
+            cursor: pointer; 
+            font-size: 1rem;
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px;
+        }
         .btn-primary { background-color: var(--primary-color); }
-        .btn-primary:hover { background-color: #2980b9; }
         .btn-secondary { background-color: #7f8c8d; }
-        .btn-secondary:hover { background-color: #6c7a89; }
-        
-        /* 动画效果 */
-        @keyframes fadeIn {
-          from { opacity: 0; transform: scale(0.95); }
-          to { opacity: 1; transform: scale(1); }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        .toast.success { background: #27ae60; }
+        .toast.error { background: #e74c3c; }
+
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .app-header { flex-direction: column; align-items: stretch; }
+            .storage-box:hover .delete-box-btn { opacity: 1; }
         }
     </style>
 </head>
 <body>
-
     <div class="app-container">
         <header class="app-header">
             <h1>📦 储物系统</h1>
@@ -244,27 +298,26 @@
                 <span class="search-icon">🔍</span>
                 <input type="search" id="global-search-input" placeholder="搜索储物柜或物品...">
             </div>
+            <div class="sync-status">
+                <span class="sync-indicator" id="sync-indicator"></span>
+                <span id="sync-status-text">离线模式</span>
+                <button class="sync-button" id="sync-button">设置同步</button>
+            </div>
         </header>
 
-        <!-- 主视图：储物柜列表 -->
         <main id="main-view" class="view active">
-            <div class="cabinet-controls">
+            <div style="margin-bottom: 20px;">
                 <button id="add-box-btn" class="btn btn-primary">➕ 添加储物柜</button>
             </div>
-            <div class="cabinet-grid" id="cabinet-grid">
-                <!-- 储物柜将动态添加到这里 -->
-            </div>
+            <div class="cabinet-grid" id="cabinet-grid"></div>
         </main>
 
-        <!-- 详情视图：储物柜内部 -->
         <section id="detail-view" class="view">
             <div class="detail-header">
                 <h2 id="detail-title"></h2>
                 <button id="back-to-main-btn" class="btn btn-secondary">⬅️ 返回列表</button>
             </div>
-            <ul class="items-list" id="items-list">
-                <!-- 物品列表将动态添加到这里 -->
-            </ul>
+            <ul class="items-list" id="items-list"></ul>
             <div class="item-controls">
                 <input type="text" id="item-name-input" placeholder="输入新物品名称...">
                 <button id="add-item-btn" class="btn btn-primary">添加物品</button>
@@ -274,21 +327,22 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- DOM 元素获取 ---
+            // DOM元素
             const mainView = document.getElementById('main-view');
             const detailView = document.getElementById('detail-view');
             const searchInput = document.getElementById('global-search-input');
-            
             const addBoxBtn = document.getElementById('add-box-btn');
             const cabinetGrid = document.getElementById('cabinet-grid');
-            
             const detailTitle = document.getElementById('detail-title');
             const backBtn = document.getElementById('back-to-main-btn');
             const itemsList = document.getElementById('items-list');
             const itemNameInput = document.getElementById('item-name-input');
             const addItemBtn = document.getElementById('add-item-btn');
+            const syncIndicator = document.getElementById('sync-indicator');
+            const syncStatusText = document.getElementById('sync-status-text');
+            const syncButton = document.getElementById('sync-button');
 
-            // --- 状态管理 ---
+            // 状态管理
             let boxes = [];
             let nextBoxId = 1;
             let currentView = 'main';
@@ -296,45 +350,265 @@
             let searchQuery = '';
             let longPressTimer = null;
             let isRenaming = false;
+            let isSyncing = false;
             
-            // --- 新增：数据持久化函数 ---
             const STORAGE_KEY = 'storageSystemData';
+            let syncConfig = null;
 
-            function saveData() {
-                const dataToSave = {
-                    boxes: boxes,
-                    nextBoxId: nextBoxId
-                };
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+            // 设备检测
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+            // 提示消息
+            function showToast(message, type = 'info') {
+                const existingToast = document.querySelector('.toast');
+                if (existingToast) existingToast.remove();
+
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    if (toast.parentNode) toast.remove();
+                }, 3000);
             }
 
-            function loadData() {
-                const savedData = localStorage.getItem(STORAGE_KEY);
-                if (savedData) {
+            // 云同步初始化
+            function initSync() {
+                const stored = localStorage.getItem('syncConfig');
+                if (stored) {
                     try {
-                        const data = JSON.parse(savedData);
+                        syncConfig = JSON.parse(stored);
+                    } catch (e) {
+                        console.error('解析同步配置失败:', e);
+                    }
+                }
+                updateSyncStatus();
+            }
+
+            function updateSyncStatus() {
+                if (syncConfig) {
+                    syncStatusText.textContent = '云端同步';
+                    syncIndicator.className = 'sync-indicator synced';
+                    syncButton.textContent = '手动同步';
+                } else {
+                    syncStatusText.textContent = '离线模式';
+                    syncIndicator.className = 'sync-indicator';
+                    syncButton.textContent = '设置同步';
+                }
+            }
+
+            // 云同步功能
+            async function syncData(action = 'both') {
+                if (!syncConfig) {
+                    setupSync();
+                    return;
+                }
+
+                if (isSyncing) {
+                    showToast('正在同步中，请稍候...', 'info');
+                    return;
+                }
+
+                isSyncing = true;
+                syncIndicator.className = 'sync-indicator syncing';
+                syncStatusText.textContent = '同步中...';
+
+                try {
+                    if (syncConfig.type === 'github') {
+                        await syncWithGitHub(action);
+                    } else if (syncConfig.type === 'jsonbin') {
+                        await syncWithJSONBin(action);
+                    }
+                } catch (error) {
+                    console.error('同步失败:', error);
+                    showToast(`同步失败: ${error.message}`, 'error');
+                    syncIndicator.className = 'sync-indicator error';
+                } finally {
+                    isSyncing = false;
+                    setTimeout(() => {
+                        if (syncConfig) {
+                            syncIndicator.className = 'sync-indicator synced';
+                            syncStatusText.textContent = '云端同步';
+                        }
+                    }, 2000);
+                }
+            }
+
+            // GitHub同步
+            async function syncWithGitHub(action) {
+                const { token, repo, owner } = syncConfig;
+                const fileName = 'storage-data.json';
+                const url = `https://api.github.com/repos/${owner}/${repo}/contents/${fileName}`;
+                const headers = {
+                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                };
+
+                if (action === 'download' || action === 'both') {
+                    const response = await fetch(url, { headers });
+                    if (response.ok) {
+                        const fileData = await response.json();
+                        const content = JSON.parse(atob(fileData.content));
+                        if (content.boxes && content.nextBoxId) {
+                            boxes = content.boxes;
+                            nextBoxId = content.nextBoxId;
+                            saveDataLocally();
+                            render();
+                            showToast('数据同步成功！', 'success');
+                        }
+                    } else if (response.status !== 404) {
+                        throw new Error(`下载失败: ${response.status}`);
+                    }
+                }
+                
+                if (action === 'upload' || (action === 'both' && response?.status === 404)) {
+                    const data = { boxes, nextBoxId };
+                    const content = btoa(JSON.stringify(data, null, 2));
+                    
+                    let sha = null;
+                    try {
+                        const fileResponse = await fetch(url, { headers });
+                        if (fileResponse.ok) {
+                            const fileData = await fileResponse.json();
+                            sha = fileData.sha;
+                        }
+                    } catch (e) {}
+
+                    const uploadData = {
+                        message: `更新储物系统数据 ${new Date().toISOString()}`,
+                        content: content
+                    };
+                    if (sha) uploadData.sha = sha;
+
+                    const uploadResponse = await fetch(url, {
+                        method: 'PUT',
+                        headers: { ...headers, 'Content-Type': 'application/json' },
+                        body: JSON.stringify(uploadData)
+                    });
+
+                    if (!uploadResponse.ok) {
+                        throw new Error(`上传失败: ${uploadResponse.status}`);
+                    }
+                    
+                    showToast('数据上传成功！', 'success');
+                }
+            }
+
+            // JSONBin同步
+            async function syncWithJSONBin(action) {
+                const { apiKey, binId } = syncConfig;
+                const headers = {
+                    'X-Master-Key': apiKey,
+                    'Content-Type': 'application/json'
+                };
+
+                if (action === 'download' || action === 'both') {
+                    const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, { headers });
+                    if (response.ok) {
+                        const result = await response.json();
+                        if (result.record && result.record.boxes) {
+                            boxes = result.record.boxes;
+                            nextBoxId = result.record.nextBoxId;
+                            saveDataLocally();
+                            render();
+                            showToast('数据同步成功！', 'success');
+                        }
+                    }
+                }
+                
+                if (action === 'upload' || action === 'both') {
+                    const data = { boxes, nextBoxId };
+                    const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+                        method: 'PUT',
+                        headers,
+                        body: JSON.stringify(data)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`上传失败: ${response.status}`);
+                    }
+                    
+                    showToast('数据上传成功！', 'success');
+                }
+            }
+
+            // 设置同步
+            function setupSync() {
+                const choice = prompt(`选择同步方式：
+1 - GitHub (推荐，免费且稳定)
+2 - JSONBin.io (简单易用)
+请输入 1 或 2:`);
+                
+                if (choice === '1') {
+                    setupGitHubSync();
+                } else if (choice === '2') {
+                    setupJSONBinSync();
+                }
+            }
+
+            function setupGitHubSync() {
+                const token = prompt('请输入GitHub Personal Access Token:');
+                if (!token) return;
+                
+                const repo = prompt('请输入仓库名称 (如: my-storage-data):', 'storage-data');
+                const owner = prompt('请输入GitHub用户名:');
+                if (!owner || !repo) return;
+
+                syncConfig = { type: 'github', token, repo, owner };
+                localStorage.setItem('syncConfig', JSON.stringify(syncConfig));
+                updateSyncStatus();
+                showToast('GitHub同步设置成功！', 'success');
+            }
+
+            function setupJSONBinSync() {
+                const apiKey = prompt('请输入JSONBin.io API Key:');
+                if (!apiKey) return;
+                
+                const binId = prompt('请输入Bin ID (留空将创建新的):');
+                
+                syncConfig = { type: 'jsonbin', apiKey, binId };
+                localStorage.setItem('syncConfig', JSON.stringify(syncConfig));
+                updateSyncStatus();
+                showToast('JSONBin同步设置成功！', 'success');
+            }
+
+            // 本地存储
+            function saveDataLocally() {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({ boxes, nextBoxId }));
+            }
+
+            function loadDataLocally() {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    try {
+                        const data = JSON.parse(saved);
                         boxes = data.boxes || [];
                         nextBoxId = data.nextBoxId || 1;
                     } catch (e) {
-                        console.error("无法解析已保存的数据:", e);
-                        boxes = [];
-                        nextBoxId = 1;
+                        console.error('解析数据失败:', e);
                     }
                 }
             }
 
-            // --- 视图管理 ---
+            function saveData() {
+                saveDataLocally();
+                if (syncConfig && !isSyncing) {
+                    setTimeout(() => syncData('upload'), 1000);
+                }
+            }
+
+            // 视图切换
             function switchView(viewName, boxId = null) {
                 currentView = viewName;
                 selectedBoxId = boxId;
-
                 mainView.classList.toggle('active', viewName === 'main');
                 detailView.classList.toggle('active', viewName === 'detail');
-                
                 render();
             }
 
-            // --- 长按处理函数 ---
+            // 长按处理
             function startLongPress(element, callback) {
                 clearTimeout(longPressTimer);
                 element.classList.add('long-press-active');
@@ -342,19 +616,24 @@
                 longPressTimer = setTimeout(() => {
                     element.classList.remove('long-press-active');
                     callback();
-                }, 1000);
+                }, isMobile ? 800 : 1000);
             }
 
             function cancelLongPress(element) {
                 clearTimeout(longPressTimer);
-                element.classList.remove('long-press-active');
+                if (element) element.classList.remove('long-press-active');
             }
 
-            // --- 重命名函数 ---
+            // 重命名功能 - 专门优化移动端
             function startRenameBox(boxId) {
+                if (isRenaming) return;
                 isRenaming = true;
+                
                 const box = boxes.find(b => b.id === boxId);
-                if (!box) return;
+                if (!box) {
+                    isRenaming = false;
+                    return;
+                }
 
                 const boxElement = document.querySelector(`[data-id="${boxId}"]`);
                 const boxIdElement = boxElement.querySelector('.box-id');
@@ -365,16 +644,44 @@
                 input.value = currentName;
                 input.className = 'rename-input';
                 
-                boxIdElement.textContent = '';
+                // 移动端优化
+                if (isMobile) {
+                    input.setAttribute('inputmode', 'text');
+                    input.setAttribute('autocomplete', 'off');
+                    input.setAttribute('autocorrect', 'off');
+                    input.setAttribute('autocapitalize', 'off');
+                    input.setAttribute('spellcheck', 'false');
+                    
+                    // iOS特殊处理
+                    if (isIOS) {
+                        input.style.webkitUserSelect = 'text';
+                        input.style.userSelect = 'text';
+                        input.style.fontSize = '16px'; // 防止iOS缩放
+                    }
+                }
+                
+                boxIdElement.innerHTML = '';
                 boxIdElement.appendChild(input);
-                input.focus();
-                input.select();
+                
+                // 延迟聚焦确保DOM更新完成
+                requestAnimationFrame(() => {
+                    input.focus();
+                    input.select();
+                    
+                    // iOS额外处理
+                    if (isIOS) {
+                        setTimeout(() => {
+                            input.setSelectionRange(0, input.value.length);
+                        }, 100);
+                    }
+                });
 
                 function finishRename() {
+                    if (!isRenaming) return;
                     const newName = input.value.trim();
                     if (newName && newName !== currentName) {
                         box.name = newName;
-                        saveData(); // 保存更改
+                        saveData();
                     }
                     isRenaming = false;
                     render();
@@ -383,19 +690,31 @@
                 input.addEventListener('blur', finishRename);
                 input.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') {
+                        e.preventDefault();
                         finishRename();
+                    }
+                });
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        isRenaming = false;
+                        render();
                     }
                 });
             }
 
             function startRenameItem(itemIndex) {
+                if (isRenaming) return;
                 isRenaming = true;
+                
                 const box = boxes.find(b => b.id === selectedBoxId);
-                if (!box || !box.items[itemIndex]) return;
+                if (!box || !box.items[itemIndex]) {
+                    isRenaming = false;
+                    return;
+                }
 
                 const itemElements = document.querySelectorAll('.items-list li');
                 const itemElement = itemElements[itemIndex];
-                const itemNameSpan = itemElement.querySelector('.item-content span:last-child');
+                const itemContentSpan = itemElement.querySelector('.item-content span:last-child');
                 const currentName = typeof box.items[itemIndex] === 'string' ? 
                     box.items[itemIndex] : box.items[itemIndex].name;
                 
@@ -404,20 +723,45 @@
                 input.value = currentName;
                 input.className = 'rename-input';
                 
-                itemNameSpan.textContent = '';
-                itemNameSpan.appendChild(input);
-                input.focus();
-                input.select();
+                // 移动端优化
+                if (isMobile) {
+                    input.setAttribute('inputmode', 'text');
+                    input.setAttribute('autocomplete', 'off');
+                    input.setAttribute('autocorrect', 'off');
+                    input.setAttribute('autocapitalize', 'off');
+                    input.setAttribute('spellcheck', 'false');
+                    
+                    if (isIOS) {
+                        input.style.webkitUserSelect = 'text';
+                        input.style.userSelect = 'text';
+                        input.style.fontSize = '16px';
+                    }
+                }
+                
+                itemContentSpan.innerHTML = '';
+                itemContentSpan.appendChild(input);
+                
+                requestAnimationFrame(() => {
+                    input.focus();
+                    input.select();
+                    
+                    if (isIOS) {
+                        setTimeout(() => {
+                            input.setSelectionRange(0, input.value.length);
+                        }, 100);
+                    }
+                });
 
                 function finishRename() {
+                    if (!isRenaming) return;
                     const newName = input.value.trim();
                     if (newName && newName !== currentName) {
                         if (typeof box.items[itemIndex] === 'string') {
-                            box.items[itemIndex] = { name: newName };
+                            box.items[itemIndex] = newName;
                         } else {
                             box.items[itemIndex].name = newName;
                         }
-                        saveData(); // 保存更改
+                        saveData();
                     }
                     isRenaming = false;
                     renderDetailView();
@@ -426,12 +770,19 @@
                 input.addEventListener('blur', finishRename);
                 input.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') {
+                        e.preventDefault();
                         finishRename();
+                    }
+                });
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        isRenaming = false;
+                        renderDetailView();
                     }
                 });
             }
 
-            // --- 渲染函数 ---
+            // 渲染函数
             function render() {
                 if (currentView === 'main') {
                     renderMainView();
@@ -456,47 +807,73 @@
 
                     const boxElement = document.createElement('div');
                     boxElement.className = 'storage-box';
-                    if (isMatch) {
-                        boxElement.classList.add('highlight');
-                    }
+                    if (isMatch) boxElement.classList.add('highlight');
                     boxElement.dataset.id = box.id;
 
                     boxElement.innerHTML = `
-                        <button class="delete-box-btn" title="删除储物柜">×</button>
+                        <button class="delete-box-btn">×</button>
                         <div class="box-icon">🗄️</div>
                         <div class="box-id">${boxName}</div>
                     `;
                     
-                    boxElement.addEventListener('click', (e) => {
-                        if (!e.target.classList.contains('delete-box-btn') && !isRenaming) {
-                            switchView('detail', box.id);
-                        }
-                    });
+                    // 事件处理
+                    let touchTimer = null;
+                    let touchMoved = false;
+                    let touchStartTime = 0;
                     
-                    boxElement.addEventListener('mousedown', (e) => {
-                        if (!e.target.classList.contains('delete-box-btn') && !isRenaming) {
-                            startLongPress(boxElement, () => startRenameBox(box.id));
-                        }
-                    });
+                    function handleClick(e) {
+                        if (e.target.classList.contains('delete-box-btn') || isRenaming || touchMoved) return;
+                        switchView('detail', box.id);
+                    }
                     
-                    boxElement.addEventListener('mouseup', () => cancelLongPress(boxElement));
-                    boxElement.addEventListener('mouseleave', () => cancelLongPress(boxElement));
+                    function handleLongPress() {
+                        if (!isRenaming) startRenameBox(box.id);
+                    }
                     
-                    boxElement.addEventListener('touchstart', (e) => {
-                        if (!e.target.classList.contains('delete-box-btn') && !isRenaming) {
-                            e.preventDefault();
-                            startLongPress(boxElement, () => startRenameBox(box.id));
-                        }
-                    });
-                    
-                    boxElement.addEventListener('touchend', (e) => {
-                        e.preventDefault();
-                        cancelLongPress(boxElement);
-                    });
+                    if (!isMobile) {
+                        boxElement.addEventListener('click', handleClick);
+                        boxElement.addEventListener('mousedown', (e) => {
+                            if (!e.target.classList.contains('delete-box-btn') && !isRenaming) {
+                                startLongPress(boxElement, handleLongPress);
+                            }
+                        });
+                        boxElement.addEventListener('mouseup', () => cancelLongPress(boxElement));
+                        boxElement.addEventListener('mouseleave', () => cancelLongPress(boxElement));
+                    } else {
+                        boxElement.addEventListener('touchstart', (e) => {
+                            if (!e.target.classList.contains('delete-box-btn') && !isRenaming) {
+                                touchMoved = false;
+                                touchStartTime = Date.now();
+                                touchTimer = setTimeout(() => {
+                                    if (!touchMoved) handleLongPress();
+                                }, 800);
+                                startLongPress(boxElement, () => {});
+                            }
+                        }, { passive: true });
+                        
+                        boxElement.addEventListener('touchmove', () => {
+                            touchMoved = true;
+                            clearTimeout(touchTimer);
+                            cancelLongPress(boxElement);
+                        }, { passive: true });
+                        
+                        boxElement.addEventListener('touchend', (e) => {
+                            clearTimeout(touchTimer);
+                            cancelLongPress(boxElement);
+                            const touchDuration = Date.now() - touchStartTime;
+                            if (!touchMoved && touchDuration < 800 && !isRenaming) {
+                                setTimeout(() => handleClick(e), 50);
+                            }
+                        }, { passive: true });
+                    }
                     
                     boxElement.querySelector('.delete-box-btn').addEventListener('click', (e) => {
                         e.stopPropagation();
-                        deleteBox(box.id);
+                        if (confirm('确定要删除这个储物柜及其所有物品吗？')) {
+                            boxes = boxes.filter(b => b.id !== box.id);
+                            saveData();
+                            render();
+                        }
                     });
 
                     cabinetGrid.appendChild(boxElement);
@@ -515,65 +892,81 @@
                 const query = searchQuery.trim().toLowerCase();
 
                 if (box.items.length === 0) {
-                    itemsList.innerHTML = '<li>这个柜子是空的...</li>';
+                    itemsList.innerHTML = '<li style="text-align: center; color: #999;">这个柜子是空的...</li>';
                 } else {
                     box.items.forEach((item, index) => {
                         const li = document.createElement('li');
                         const itemName = typeof item === 'string' ? item : item.name;
                         const isMatch = query !== '' && itemName.toLowerCase().includes(query);
-                        if (isMatch) {
-                            li.classList.add('highlight');
-                        }
+                        if (isMatch) li.classList.add('highlight');
                         
                         li.innerHTML = `
                             <span class="item-content">
-                                <span class="item-icon">📦</span>
+                                <span>📦</span>
                                 <span>${itemName}</span>
                             </span>
-                            <button class="delete-item-btn" title="删除物品">🗑️</button>
+                            <button class="delete-item-btn">🗑️</button>
                         `;
                         
-                        li.addEventListener('mousedown', (e) => {
-                            if (!e.target.classList.contains('delete-item-btn') && !isRenaming) {
-                                startLongPress(li, () => startRenameItem(index));
+                        // 事件处理
+                        let touchTimer = null;
+                        let touchMoved = false;
+                        
+                        function handleLongPress() {
+                            if (!isRenaming) startRenameItem(index);
+                        }
+                        
+                        if (!isMobile) {
+                            li.addEventListener('mousedown', (e) => {
+                                if (!e.target.classList.contains('delete-item-btn') && !isRenaming) {
+                                    startLongPress(li, handleLongPress);
+                                }
+                            });
+                            li.addEventListener('mouseup', () => cancelLongPress(li));
+                            li.addEventListener('mouseleave', () => cancelLongPress(li));
+                        } else {
+                            li.addEventListener('touchstart', (e) => {
+                                if (!e.target.classList.contains('delete-item-btn') && !isRenaming) {
+                                    touchMoved = false;
+                                    touchTimer = setTimeout(() => {
+                                        if (!touchMoved) handleLongPress();
+                                    }, 800);
+                                    startLongPress(li, () => {});
+                                }
+                            }, { passive: true });
+                            
+                            li.addEventListener('touchmove', () => {
+                                touchMoved = true;
+                                clearTimeout(touchTimer);
+                                cancelLongPress(li);
+                            }, { passive: true });
+                            
+                            li.addEventListener('touchend', () => {
+                                clearTimeout(touchTimer);
+                                cancelLongPress(li);
+                            }, { passive: true });
+                        }
+                        
+                        li.querySelector('.delete-item-btn').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            if (confirm('确定要删除这个物品吗？')) {
+                                box.items.splice(index, 1);
+                                saveData();
+                                renderDetailView();
                             }
                         });
                         
-                        li.addEventListener('mouseup', () => cancelLongPress(li));
-                        li.addEventListener('mouseleave', () => cancelLongPress(li));
-                        
-                        li.addEventListener('touchstart', (e) => {
-                            if (!e.target.classList.contains('delete-item-btn') && !isRenaming) {
-                                e.preventDefault();
-                                startLongPress(li, () => startRenameItem(index));
-                            }
-                        });
-                        
-                        li.addEventListener('touchend', (e) => {
-                            e.preventDefault();
-                            cancelLongPress(li);
-                        });
-                        
-                        li.querySelector('.delete-item-btn').onclick = () => deleteItem(index);
                         itemsList.appendChild(li);
                     });
                 }
             }
             
-            // --- 数据操作函数 ---
+            // 数据操作
             function addBox() {
                 const newBox = { id: nextBoxId++, name: null, items: [] };
                 boxes.push(newBox);
-                saveData(); // 保存
+                saveData();
                 render();
-            }
-
-            function deleteBox(boxId) {
-                if (confirm('确定要删除这个储物柜及其所有物品吗？')) {
-                    boxes = boxes.filter(box => box.id !== boxId);
-                    saveData(); // 保存
-                    render();
-                }
             }
 
             function addItem() {
@@ -581,23 +974,14 @@
                 const itemName = itemNameInput.value.trim();
                 if (box && itemName) {
                     box.items.push(itemName);
-                    saveData(); // 保存
+                    saveData();
                     itemNameInput.value = '';
                     itemNameInput.focus();
                     renderDetailView();
                 }
             }
 
-            function deleteItem(itemIndex) {
-                const box = boxes.find(b => b.id === selectedBoxId);
-                if (box) {
-                    box.items.splice(itemIndex, 1);
-                    saveData(); // 保存
-                    renderDetailView();
-                }
-            }
-
-            // --- 事件绑定 ---
+            // 事件绑定
             searchInput.addEventListener('input', (e) => {
                 searchQuery = e.target.value;
                 render();
@@ -607,13 +991,41 @@
             backBtn.addEventListener('click', () => switchView('main'));
             addItemBtn.addEventListener('click', addItem);
             itemNameInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') addItem();
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addItem();
+                }
             });
 
-            // --- 初始化 ---
-            loadData(); // <--- 页面加载时，先加载数据
-            switchView('main'); // 然后再渲染视图
+            syncButton.addEventListener('click', () => {
+                if (syncConfig) {
+                    syncData('both');
+                } else {
+                    setupSync();
+                }
+            });
+
+            // 页面可见性改变时自动同步
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden && syncConfig && !isSyncing) {
+                    setTimeout(() => syncData('download'), 500);
+                }
+            });
+
+            // 初始化
+            initSync();
+            loadDataLocally();
+            
+            if (syncConfig) {
+                setTimeout(() => syncData('download'), 1000);
+            }
+            
+            switchView('main');
+            
+            if (boxes.length === 0) {
+                showToast('长按储物柜或物品可以重命名哦！', 'info');
+            }
         });
     </script>
 </body>
-</html>
+</html> 
