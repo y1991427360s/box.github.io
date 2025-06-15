@@ -1,30 +1,40 @@
 {
-  "boxes": [
-    {
-      "id": 1,
-      "name": "hahah",
-      "items": []
-    },
-    {
-      "id": 2,
-      "name": null,
-      "items": []
-    },
-    {
-      "id": 3,
-      "name": "asdasdasdasdasda",
-      "items": []
-    },
-    {
-      "id": 4,
-      "name": "asdasd",
-      "items": []
-    },
-    {
-      "id": 5,
-      "name": null,
-      "items": []
-    }
-  ],
-  "nextBoxId": 6
-}
+    "boxes": [
+      {
+        "id": 1,
+        "name": "hahah",
+        "items": []
+      },
+      {
+        "id": 2,
+        "name": null,
+        "items": []
+      },
+      {
+        "id": 3,
+        "name": "asdasdasdasdasda",
+        "items": []
+      },
+      {
+        "id": 4,
+        "name": "asdasd",
+        "items": []
+      },
+      {
+        "id": 5,
+        "name": null,
+        "items": []
+      },
+      {
+        "id": 6,
+        "name": "杨森的柜子",
+        "items": []
+      },
+      {
+        "id": 6,
+        "name": null,
+        "items": []
+      }
+    ],
+    "nextBoxId": 7
+  }
