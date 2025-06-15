@@ -30,7 +30,9 @@
     {
       "id": 3,
       "name": "睡觉睡觉就是",
-      "items": []
+      "items": [
+        "你好"
+      ]
     }
   ],
   "nextBoxId": 4
