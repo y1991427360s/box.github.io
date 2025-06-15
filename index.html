@@ -424,16 +424,51 @@
                     }
                 } catch (error) {
                     console.error('同步失败:', error);
-                    showToast(`同步失败: ${error.message}`, 'error');
+                    let errorMessage = error.message;
+                    
+                    // 提供更友好的错误提示
+                    if (errorMessage.includes('401')) {
+                        errorMessage = '认证失败，请检查API密钥';
+                    } else if (errorMessage.includes('403')) {
+                        errorMessage = '权限不足，请检查仓库权限';
+                    } else if (errorMessage.includes('404')) {
+                        errorMessage = '资源未找到，请检查配置';
+                    } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+                        errorMessage = '网络连接失败，请检查网络';
+                    }
+                    
+                    showToast(`同步失败: ${errorMessage}`, 'error');
                     syncIndicator.className = 'sync-indicator error';
                 } finally {
                     isSyncing = false;
                     setTimeout(() => {
-                        if (syncConfig) {
+                        if (syncConfig && syncIndicator.className !== 'sync-indicator error') {
                             syncIndicator.className = 'sync-indicator synced';
                             syncStatusText.textContent = '云端同步';
                         }
                     }, 2000);
+                }
+            }
+
+            // 安全的Base64编码/解码（支持中文）
+            function safeBase64Encode(str) {
+                try {
+                    return btoa(unescape(encodeURIComponent(str)));
+                } catch (e) {
+                    // 如果btoa失败，使用手动编码
+                    return btoa(str.split('').map(char => {
+                        const code = char.charCodeAt(0);
+                        return code > 127 ? '?' : char;
+                    }).join(''));
+                }
+            }
+
+            function safeBase64Decode(str) {
+                try {
+                    return decodeURIComponent(escape(atob(str)));
+                } catch (e) {
+                    // 如果解码失败，直接使用atob
+                    return atob(str);
                 }
             }
 
@@ -447,26 +482,40 @@
                     'Accept': 'application/vnd.github.v3+json'
                 };
 
+                let downloadResponse = null;
+                let needsUpload = false;
+
                 if (action === 'download' || action === 'both') {
-                    const response = await fetch(url, { headers });
-                    if (response.ok) {
-                        const fileData = await response.json();
-                        const content = JSON.parse(atob(fileData.content));
-                        if (content.boxes && content.nextBoxId) {
-                            boxes = content.boxes;
-                            nextBoxId = content.nextBoxId;
-                            saveDataLocally();
-                            render();
-                            showToast('数据同步成功！', 'success');
+                    try {
+                        downloadResponse = await fetch(url, { headers });
+                        if (downloadResponse.ok) {
+                            const fileData = await downloadResponse.json();
+                            const content = JSON.parse(safeBase64Decode(fileData.content));
+                            if (content.boxes && content.nextBoxId) {
+                                boxes = content.boxes;
+                                nextBoxId = content.nextBoxId;
+                                saveDataLocally();
+                                render();
+                                showToast('数据同步成功！', 'success');
+                            }
+                        } else if (downloadResponse.status === 404) {
+                            needsUpload = true;
+                        } else {
+                            throw new Error(`下载失败: ${downloadResponse.status}`);
                         }
-                    } else if (response.status !== 404) {
-                        throw new Error(`下载失败: ${response.status}`);
+                    } catch (error) {
+                        if (error.message.includes('404')) {
+                            needsUpload = true;
+                        } else {
+                            throw error;
+                        }
                     }
                 }
                 
-                if (action === 'upload' || (action === 'both' && response?.status === 404)) {
+                if (action === 'upload' || (action === 'both' && needsUpload)) {
                     const data = { boxes, nextBoxId };
-                    const content = btoa(JSON.stringify(data, null, 2));
+                    const jsonString = JSON.stringify(data, null, 2);
+                    const content = safeBase64Encode(jsonString);
                     
                     let sha = null;
                     try {
@@ -475,7 +524,9 @@
                             const fileData = await fileResponse.json();
                             sha = fileData.sha;
                         }
-                    } catch (e) {}
+                    } catch (e) {
+                        // 忽略获取SHA失败的错误
+                    }
 
                     const uploadData = {
                         message: `更新储物系统数据 ${new Date().toISOString()}`,
@@ -490,7 +541,8 @@
                     });
 
                     if (!uploadResponse.ok) {
-                        throw new Error(`上传失败: ${uploadResponse.status}`);
+                        const errorText = await uploadResponse.text();
+                        throw new Error(`上传失败: ${uploadResponse.status} - ${errorText}`);
                     }
                     
                     showToast('数据上传成功！', 'success');
@@ -502,36 +554,49 @@
                 const { apiKey, binId } = syncConfig;
                 const headers = {
                     'X-Master-Key': apiKey,
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json; charset=utf-8'
                 };
 
                 if (action === 'download' || action === 'both') {
-                    const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, { headers });
-                    if (response.ok) {
-                        const result = await response.json();
-                        if (result.record && result.record.boxes) {
-                            boxes = result.record.boxes;
-                            nextBoxId = result.record.nextBoxId;
-                            saveDataLocally();
-                            render();
-                            showToast('数据同步成功！', 'success');
+                    try {
+                        const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, { headers });
+                        if (response.ok) {
+                            const result = await response.json();
+                            if (result.record && result.record.boxes) {
+                                boxes = result.record.boxes;
+                                nextBoxId = result.record.nextBoxId;
+                                saveDataLocally();
+                                render();
+                                showToast('数据同步成功！', 'success');
+                            }
+                        } else if (response.status !== 404) {
+                            throw new Error(`下载失败: ${response.status}`);
+                        }
+                    } catch (error) {
+                        if (!error.message.includes('404')) {
+                            throw error;
                         }
                     }
                 }
                 
                 if (action === 'upload' || action === 'both') {
                     const data = { boxes, nextBoxId };
-                    const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
-                        method: 'PUT',
-                        headers,
-                        body: JSON.stringify(data)
-                    });
+                    try {
+                        const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+                            method: 'PUT',
+                            headers,
+                            body: JSON.stringify(data, null, 2)
+                        });
 
-                    if (!response.ok) {
-                        throw new Error(`上传失败: ${response.status}`);
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(`上传失败: ${response.status} - ${errorText}`);
+                        }
+                        
+                        showToast('数据上传成功！', 'success');
+                    } catch (error) {
+                        throw new Error(`JSONBin上传失败: ${error.message}`);
                     }
-                    
-                    showToast('数据上传成功！', 'success');
                 }
             }
 
