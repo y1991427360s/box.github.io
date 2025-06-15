@@ -453,22 +453,43 @@
             // 安全的Base64编码/解码（支持中文）
             function safeBase64Encode(str) {
                 try {
-                    return btoa(unescape(encodeURIComponent(str)));
+                    // 使用TextEncoder确保正确的UTF-8编码
+                    const encoder = new TextEncoder();
+                    const data = encoder.encode(str);
+                    const binaryString = Array.from(data, byte => String.fromCharCode(byte)).join('');
+                    return btoa(binaryString);
                 } catch (e) {
-                    // 如果btoa失败，使用手动编码
-                    return btoa(str.split('').map(char => {
-                        const code = char.charCodeAt(0);
-                        return code > 127 ? '?' : char;
-                    }).join(''));
+                    try {
+                        // 备用方案：使用传统的encodeURIComponent方式
+                        return btoa(unescape(encodeURIComponent(str)));
+                    } catch (e2) {
+                        console.error('Base64编码失败:', e2);
+                        // 最后备用方案：过滤非ASCII字符
+                        const asciiStr = str.replace(/[^\x00-\x7F]/g, '?');
+                        return btoa(asciiStr);
+                    }
                 }
             }
 
             function safeBase64Decode(str) {
                 try {
-                    return decodeURIComponent(escape(atob(str)));
+                    // 使用TextDecoder确保正确的UTF-8解码
+                    const binaryString = atob(str);
+                    const bytes = new Uint8Array(binaryString.length);
+                    for (let i = 0; i < binaryString.length; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    const decoder = new TextDecoder('utf-8');
+                    return decoder.decode(bytes);
                 } catch (e) {
-                    // 如果解码失败，直接使用atob
-                    return atob(str);
+                    try {
+                        // 备用方案：使用传统的decodeURIComponent方式
+                        return decodeURIComponent(escape(atob(str)));
+                    } catch (e2) {
+                        console.error('Base64解码失败:', e2);
+                        // 最后备用方案：直接使用atob
+                        return atob(str);
+                    }
                 }
             }
 
@@ -491,6 +512,7 @@
                         if (downloadResponse.ok) {
                             const fileData = await downloadResponse.json();
                             const content = JSON.parse(safeBase64Decode(fileData.content));
+                            console.log('从云端下载的数据:', content);
                             if (content.boxes && content.nextBoxId) {
                                 boxes = content.boxes;
                                 nextBoxId = content.nextBoxId;
@@ -515,6 +537,7 @@
                 if (action === 'upload' || (action === 'both' && needsUpload)) {
                     const data = { boxes, nextBoxId };
                     const jsonString = JSON.stringify(data, null, 2);
+                    console.log('准备上传的数据:', data);
                     const content = safeBase64Encode(jsonString);
                     
                     let sha = null;
@@ -703,14 +726,14 @@
 
                 const boxElement = document.querySelector(`[data-id="${boxId}"]`);
                 const boxIdElement = boxElement.querySelector('.box-id');
-                const currentName = box.name || `储物柜 #${box.id}`;
+                const currentName = box.name;
                 
                 const input = document.createElement('input');
                 input.type = 'text';
-                input.value = currentName;
+                input.value = currentName || `储物柜 #${box.id}`;
                 input.className = 'rename-input';
                 
-                // 移动端优化
+                // 移动端优化 - 专门优化中文输入
                 if (isMobile) {
                     input.setAttribute('inputmode', 'text');
                     input.setAttribute('autocomplete', 'off');
@@ -725,6 +748,10 @@
                         input.style.fontSize = '16px'; // 防止iOS缩放
                     }
                 }
+                
+                // 确保中文输入法兼容性
+                input.setAttribute('lang', 'zh-CN');
+                input.style.imeMode = 'active';
                 
                 boxIdElement.innerHTML = '';
                 boxIdElement.appendChild(input);
@@ -745,9 +772,20 @@
                 function finishRename() {
                     if (!isRenaming) return;
                     const newName = input.value.trim();
-                    if (newName && newName !== currentName) {
+                    const displayedCurrentName = currentName || `储物柜 #${box.id}`;
+                    
+                    // 如果新名字不为空且与当前显示的名字不同
+                    if (newName && newName !== displayedCurrentName) {
+                        console.log('储物柜重命名:', { newName, displayedCurrentName, boxId: box.id });
                         box.name = newName;
                         saveData();
+                        showToast(`储物柜已重命名为: ${newName}`, 'success');
+                    } else if (newName === '' && currentName !== null) {
+                        // 如果用户清空了自定义名字，恢复为默认显示（name设为null）
+                        console.log('储物柜名字已清空，恢复默认名称', { boxId: box.id });
+                        box.name = null;
+                        saveData();
+                        showToast('储物柜名字已恢复默认', 'success');
                     }
                     isRenaming = false;
                     render();
@@ -789,7 +827,7 @@
                 input.value = currentName;
                 input.className = 'rename-input';
                 
-                // 移动端优化
+                // 移动端优化 - 专门优化中文输入
                 if (isMobile) {
                     input.setAttribute('inputmode', 'text');
                     input.setAttribute('autocomplete', 'off');
@@ -803,6 +841,10 @@
                         input.style.fontSize = '16px';
                     }
                 }
+                
+                // 确保中文输入法兼容性
+                input.setAttribute('lang', 'zh-CN');
+                input.style.imeMode = 'active';
                 
                 itemContentSpan.innerHTML = '';
                 itemContentSpan.appendChild(input);
