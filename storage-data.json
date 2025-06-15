@@ -1,0 +1,30 @@
+{
+  "boxes": [
+    {
+      "id": 1,
+      "name": "hahah",
+      "items": []
+    },
+    {
+      "id": 2,
+      "name": null,
+      "items": []
+    },
+    {
+      "id": 3,
+      "name": null,
+      "items": []
+    },
+    {
+      "id": 4,
+      "name": null,
+      "items": []
+    },
+    {
+      "id": 5,
+      "name": null,
+      "items": []
+    }
+  ],
+  "nextBoxId": 6
+}
