@@ -3,7 +3,9 @@
     {
       "id": 1,
       "name": "眼镜盒",
-      "items": []
+      "items": [
+        "Apple Pencil笔尖"
+      ]
     },
     {
       "id": 2,
