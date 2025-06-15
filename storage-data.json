@@ -26,7 +26,12 @@
         "中国农业银行银行卡",
         "蓝底红底证件照"
       ]
+    },
+    {
+      "id": 3,
+      "name": null,
+      "items": []
     }
   ],
-  "nextBoxId": 3
+  "nextBoxId": 4
 }
