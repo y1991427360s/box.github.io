@@ -7,7 +7,12 @@
         "dasdas",
         "案发时发发"
       ]
+    },
+    {
+      "id": 2,
+      "name": null,
+      "items": []
     }
   ],
-  "nextBoxId": 2
+  "nextBoxId": 3
 }
