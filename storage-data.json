@@ -3,7 +3,9 @@
     {
       "id": 1,
       "name": null,
-      "items": []
+      "items": [
+        "dasdas"
+      ]
     }
   ],
   "nextBoxId": 2
