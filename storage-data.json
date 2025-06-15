@@ -1,10 +1,4 @@
 {
-  "boxes": [
-    {
-      "id": 9,
-      "name": "asdasd",
-      "items": []
-    }
-  ],
+  "boxes": [],
   "nextBoxId": 10
 }
