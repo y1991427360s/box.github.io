@@ -51,7 +51,9 @@
     {
       "id": 4,
       "name": "好家伙",
-      "items": []
+      "items": [
+        "asdasd"
+      ]
     }
   ],
   "nextBoxId": 5
