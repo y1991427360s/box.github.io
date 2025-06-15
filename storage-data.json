@@ -11,15 +11,10 @@
       "items": []
     },
     {
-      "id": 6,
-      "name": "杨森的柜子",
-      "items": []
-    },
-    {
-      "id": 6,
+      "id": 9,
       "name": null,
       "items": []
     }
   ],
-  "nextBoxId": 9
+  "nextBoxId": 10
 }
