@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>存储柜模拟器 (多视图与搜索版)</title>
+    <style>
+        /* --- 全局样式 --- */
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --background-color: #f4f6f9;
+            --container-bg: #ffffff;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --border-radius: 12px;
+            --highlight-bg: #fffbe6;
+            --highlight-border: #fadb14;
+            --transition-speed: 0.3s;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 20px;
+            color: var(--secondary-color);
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* --- 全局头部 --- */
+        .app-header {
+            background: var(--container-bg);
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .app-header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            white-space: nowrap;
+        }
+
+        .search-bar {
+            flex-grow: 1;
+            position: relative;
+        }
+        
+        #global-search-input {
+            width: 100%;
+            padding: 12px 15px 12px 40px; /* 左侧留出图标空间 */
+            border: 1px solid #dfe4ea;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+        #global-search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a4b0be;
+        }
+
+        /* --- 视图容器 --- */
+        .view {
+            display: none; /* 默认隐藏所有视图 */
+        }
+        .view.active {
+            display: block; /* 只显示激活的视图 */
+            animation: viewFadeIn 0.5s ease;
+        }
+        @keyframes viewFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- 主视图：储物柜列表 --- */
+        #main-view .cabinet-controls {
+            margin-bottom: 20px;
+        }
+
+        .cabinet-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+        }
+
+        .storage-box {
+            background: var(--container-bg);
+            border: 2px solid #dfe4ea;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .storage-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            border-color: var(--primary-color);
+        }
+
+        /* 搜索高亮样式 */
+        .storage-box.highlight {
+            background-color: var(--highlight-bg);
+            border-color: var(--highlight-border);
+            box-shadow: 0 0 10px var(--highlight-bg);
+        }
+        
+        .box-icon { font-size: 3rem; color: var(--primary-color); }
+        .box-id { margin-top: 15px; font-weight: bold; font-size: 1.1rem; }
+        
+        .delete-box-btn {
+            position: absolute; top: 8px; right: 8px;
+            background: #e74c3c; color: white; border: none;
+            border-radius: 50%; width: 24px; height: 24px;
+            font-size: 14px; line-height: 24px; text-align: center;
+            cursor: pointer; opacity: 0; transition: opacity var(--transition-speed);
+        }
+        .storage-box:hover .delete-box-btn { opacity: 1; }
+        .delete-box-btn:hover { background: #c0392b; }
+
+        /* --- 详情视图：储物柜内部 --- */
+        #detail-view .detail-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        #detail-view h2 { margin: 0; font-size: 1.8rem; }
+        
+        .items-list {
+            list-style: none; padding: 0; margin: 0 0 20px 0;
+            max-height: 50vh; overflow-y: auto;
+        }
+        
+        .items-list li {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 15px; background: #fdfdfd; border: 1px solid #e0e0e0;
+            border-radius: 8px; margin-bottom: 12px;
+            animation: fadeIn 0.4s ease-out forwards;
+            transition: all 0.2s ease;
+        }
+        
+        .items-list li:hover {
+            transform: translateX(5px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        /* 物品高亮样式 */
+        .items-list li.highlight {
+             background-color: var(--highlight-bg);
+             border-color: var(--highlight-border);
+        }
+
+        /* 重命名编辑样式 */
+        .rename-input {
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: inherit;
+            font-weight: inherit;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .rename-input:focus {
+            outline: none;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+
+        /* 长按提示动画 */
+        .long-press-active {
+            animation: longPressIndicator 1s ease-in-out;
+        }
+        @keyframes longPressIndicator {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); box-shadow: 0 0 15px rgba(52, 152, 219, 0.4); }
+            100% { transform: scale(1); }
+        }
+
+        .item-content { display: flex; align-items: center; gap: 12px; font-size: 1rem; }
+        .item-icon { font-size: 1.3rem; }
+
+        .delete-item-btn {
+            background: transparent; border: none; color: #95a5a6; cursor: pointer;
+            font-size: 1.2rem; padding: 5px; border-radius: 50%; width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            transition: color 0.2s, background-color 0.2s;
+        }
+        .delete-item-btn:hover { color: #e74c3c; background-color: #fce8e6; }
+        
+        .item-controls { display: flex; gap: 10px; }
+        #item-name-input { flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; }
+
+        /* --- 通用组件 --- */
+        .btn {
+            padding: 10px 15px; border: none; border-radius: 8px; color: white;
+            cursor: pointer; font-size: 1rem; transition: all 0.2s ease-in-out;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            text-decoration: none;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .btn-primary { background-color: var(--primary-color); }
+        .btn-primary:hover { background-color: #2980b9; }
+        .btn-secondary { background-color: #7f8c8d; }
+        .btn-secondary:hover { background-color: #6c7a89; }
+        
+        /* 动画效果 */
+        @keyframes fadeIn {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <header class="app-header">
+            <h1>📦 储物系统</h1>
+            <div class="search-bar">
+                <span class="search-icon">🔍</span>
+                <input type="search" id="global-search-input" placeholder="搜索储物柜或物品...">
+            </div>
+        </header>
+
+        <!-- 主视图：储物柜列表 -->
+        <main id="main-view" class="view active">
+            <div class="cabinet-controls">
+                <button id="add-box-btn" class="btn btn-primary">➕ 添加储物柜</button>
+            </div>
+            <div class="cabinet-grid" id="cabinet-grid">
+                <!-- 储物柜将动态添加到这里 -->
+            </div>
+        </main>
+
+        <!-- 详情视图：储物柜内部 -->
+        <section id="detail-view" class="view">
+            <div class="detail-header">
+                <h2 id="detail-title"></h2>
+                <button id="back-to-main-btn" class="btn btn-secondary">⬅️ 返回列表</button>
+            </div>
+            <ul class="items-list" id="items-list">
+                <!-- 物品列表将动态添加到这里 -->
+            </ul>
+            <div class="item-controls">
+                <input type="text" id="item-name-input" placeholder="输入新物品名称...">
+                <button id="add-item-btn" class="btn btn-primary">添加物品</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM 元素获取 ---
+            const mainView = document.getElementById('main-view');
+            const detailView = document.getElementById('detail-view');
+            const searchInput = document.getElementById('global-search-input');
+            
+            const addBoxBtn = document.getElementById('add-box-btn');
+            const cabinetGrid = document.getElementById('cabinet-grid');
+            
+            const detailTitle = document.getElementById('detail-title');
+            const backBtn = document.getElementById('back-to-main-btn');
+            const itemsList = document.getElementById('items-list');
+            const itemNameInput = document.getElementById('item-name-input');
+            const addItemBtn = document.getElementById('add-item-btn');
+
+            // --- 状态管理 ---
+            let boxes = [];
+            let nextBoxId = 1;
+            let currentView = 'main';
+            let selectedBoxId = null;
+            let searchQuery = '';
+            let longPressTimer = null;
+            let isRenaming = false;
+            
+            // --- 新增：数据持久化函数 ---
+            const STORAGE_KEY = 'storageSystemData';
+
+            function saveData() {
+                const dataToSave = {
+                    boxes: boxes,
+                    nextBoxId: nextBoxId
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+            }
+
+            function loadData() {
+                const savedData = localStorage.getItem(STORAGE_KEY);
+                if (savedData) {
+                    try {
+                        const data = JSON.parse(savedData);
+                        boxes = data.boxes || [];
+                        nextBoxId = data.nextBoxId || 1;
+                    } catch (e) {
+                        console.error("无法解析已保存的数据:", e);
+                        boxes = [];
+                        nextBoxId = 1;
+                    }
+                }
+            }
+
+            // --- 视图管理 ---
+            function switchView(viewName, boxId = null) {
+                currentView = viewName;
+                selectedBoxId = boxId;
+
+                mainView.classList.toggle('active', viewName === 'main');
+                detailView.classList.toggle('active', viewName === 'detail');
+                
+                render();
+            }
+
+            // --- 长按处理函数 ---
+            function startLongPress(element, callback) {
+                clearTimeout(longPressTimer);
+                element.classList.add('long-press-active');
+                
+                longPressTimer = setTimeout(() => {
+                    element.classList.remove('long-press-active');
+                    callback();
+                }, 1000);
+            }
+
+            function cancelLongPress(element) {
+                clearTimeout(longPressTimer);
+                element.classList.remove('long-press-active');
+            }
+
+            // --- 重命名函数 ---
+            function startRenameBox(boxId) {
+                isRenaming = true;
+                const box = boxes.find(b => b.id === boxId);
+                if (!box) return;
+
+                const boxElement = document.querySelector(`[data-id="${boxId}"]`);
+                const boxIdElement = boxElement.querySelector('.box-id');
+                const currentName = box.name || `储物柜 #${box.id}`;
+                
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = currentName;
+                input.className = 'rename-input';
+                
+                boxIdElement.textContent = '';
+                boxIdElement.appendChild(input);
+                input.focus();
+                input.select();
+
+                function finishRename() {
+                    const newName = input.value.trim();
+                    if (newName && newName !== currentName) {
+                        box.name = newName;
+                        saveData(); // 保存更改
+                    }
+                    isRenaming = false;
+                    render();
+                }
+
+                input.addEventListener('blur', finishRename);
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        finishRename();
+                    }
+                });
+            }
+
+            function startRenameItem(itemIndex) {
+                isRenaming = true;
+                const box = boxes.find(b => b.id === selectedBoxId);
+                if (!box || !box.items[itemIndex]) return;
+
+                const itemElements = document.querySelectorAll('.items-list li');
+                const itemElement = itemElements[itemIndex];
+                const itemNameSpan = itemElement.querySelector('.item-content span:last-child');
+                const currentName = typeof box.items[itemIndex] === 'string' ? 
+                    box.items[itemIndex] : box.items[itemIndex].name;
+                
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = currentName;
+                input.className = 'rename-input';
+                
+                itemNameSpan.textContent = '';
+                itemNameSpan.appendChild(input);
+                input.focus();
+                input.select();
+
+                function finishRename() {
+                    const newName = input.value.trim();
+                    if (newName && newName !== currentName) {
+                        if (typeof box.items[itemIndex] === 'string') {
+                            box.items[itemIndex] = { name: newName };
+                        } else {
+                            box.items[itemIndex].name = newName;
+                        }
+                        saveData(); // 保存更改
+                    }
+                    isRenaming = false;
+                    renderDetailView();
+                }
+
+                input.addEventListener('blur', finishRename);
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        finishRename();
+                    }
+                });
+            }
+
+            // --- 渲染函数 ---
+            function render() {
+                if (currentView === 'main') {
+                    renderMainView();
+                } else if (currentView === 'detail') {
+                    renderDetailView();
+                }
+            }
+
+            function renderMainView() {
+                cabinetGrid.innerHTML = '';
+                const query = searchQuery.trim().toLowerCase();
+                
+                boxes.forEach(box => {
+                    const boxName = box.name || `储物柜 #${box.id}`;
+                    const isMatch = query === '' ? false : 
+                        boxName.toLowerCase().includes(query) ||
+                        box.id.toString().includes(query) ||
+                        box.items.some(item => {
+                            const itemName = typeof item === 'string' ? item : item.name;
+                            return itemName.toLowerCase().includes(query);
+                        });
+
+                    const boxElement = document.createElement('div');
+                    boxElement.className = 'storage-box';
+                    if (isMatch) {
+                        boxElement.classList.add('highlight');
+                    }
+                    boxElement.dataset.id = box.id;
+
+                    boxElement.innerHTML = `
+                        <button class="delete-box-btn" title="删除储物柜">×</button>
+                        <div class="box-icon">🗄️</div>
+                        <div class="box-id">${boxName}</div>
+                    `;
+                    
+                    boxElement.addEventListener('click', (e) => {
+                        if (!e.target.classList.contains('delete-box-btn') && !isRenaming) {
+                            switchView('detail', box.id);
+                        }
+                    });
+                    
+                    boxElement.addEventListener('mousedown', (e) => {
+                        if (!e.target.classList.contains('delete-box-btn') && !isRenaming) {
+                            startLongPress(boxElement, () => startRenameBox(box.id));
+                        }
+                    });
+                    
+                    boxElement.addEventListener('mouseup', () => cancelLongPress(boxElement));
+                    boxElement.addEventListener('mouseleave', () => cancelLongPress(boxElement));
+                    
+                    boxElement.addEventListener('touchstart', (e) => {
+                        if (!e.target.classList.contains('delete-box-btn') && !isRenaming) {
+                            e.preventDefault();
+                            startLongPress(boxElement, () => startRenameBox(box.id));
+                        }
+                    });
+                    
+                    boxElement.addEventListener('touchend', (e) => {
+                        e.preventDefault();
+                        cancelLongPress(boxElement);
+                    });
+                    
+                    boxElement.querySelector('.delete-box-btn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        deleteBox(box.id);
+                    });
+
+                    cabinetGrid.appendChild(boxElement);
+                });
+            }
+
+            function renderDetailView() {
+                const box = boxes.find(b => b.id === selectedBoxId);
+                if (!box) {
+                    switchView('main');
+                    return;
+                }
+
+                detailTitle.textContent = box.name ? `${box.name} 的内容` : `储物柜 #${box.id} 的内容`;
+                itemsList.innerHTML = '';
+                const query = searchQuery.trim().toLowerCase();
+
+                if (box.items.length === 0) {
+                    itemsList.innerHTML = '<li>这个柜子是空的...</li>';
+                } else {
+                    box.items.forEach((item, index) => {
+                        const li = document.createElement('li');
+                        const itemName = typeof item === 'string' ? item : item.name;
+                        const isMatch = query !== '' && itemName.toLowerCase().includes(query);
+                        if (isMatch) {
+                            li.classList.add('highlight');
+                        }
+                        
+                        li.innerHTML = `
+                            <span class="item-content">
+                                <span class="item-icon">📦</span>
+                                <span>${itemName}</span>
+                            </span>
+                            <button class="delete-item-btn" title="删除物品">🗑️</button>
+                        `;
+                        
+                        li.addEventListener('mousedown', (e) => {
+                            if (!e.target.classList.contains('delete-item-btn') && !isRenaming) {
+                                startLongPress(li, () => startRenameItem(index));
+                            }
+                        });
+                        
+                        li.addEventListener('mouseup', () => cancelLongPress(li));
+                        li.addEventListener('mouseleave', () => cancelLongPress(li));
+                        
+                        li.addEventListener('touchstart', (e) => {
+                            if (!e.target.classList.contains('delete-item-btn') && !isRenaming) {
+                                e.preventDefault();
+                                startLongPress(li, () => startRenameItem(index));
+                            }
+                        });
+                        
+                        li.addEventListener('touchend', (e) => {
+                            e.preventDefault();
+                            cancelLongPress(li);
+                        });
+                        
+                        li.querySelector('.delete-item-btn').onclick = () => deleteItem(index);
+                        itemsList.appendChild(li);
+                    });
+                }
+            }
+            
+            // --- 数据操作函数 ---
+            function addBox() {
+                const newBox = { id: nextBoxId++, name: null, items: [] };
+                boxes.push(newBox);
+                saveData(); // 保存
+                render();
+            }
+
+            function deleteBox(boxId) {
+                if (confirm('确定要删除这个储物柜及其所有物品吗？')) {
+                    boxes = boxes.filter(box => box.id !== boxId);
+                    saveData(); // 保存
+                    render();
+                }
+            }
+
+            function addItem() {
+                const box = boxes.find(b => b.id === selectedBoxId);
+                const itemName = itemNameInput.value.trim();
+                if (box && itemName) {
+                    box.items.push(itemName);
+                    saveData(); // 保存
+                    itemNameInput.value = '';
+                    itemNameInput.focus();
+                    renderDetailView();
+                }
+            }
+
+            function deleteItem(itemIndex) {
+                const box = boxes.find(b => b.id === selectedBoxId);
+                if (box) {
+                    box.items.splice(itemIndex, 1);
+                    saveData(); // 保存
+                    renderDetailView();
+                }
+            }
+
+            // --- 事件绑定 ---
+            searchInput.addEventListener('input', (e) => {
+                searchQuery = e.target.value;
+                render();
+            });
+
+            addBoxBtn.addEventListener('click', addBox);
+            backBtn.addEventListener('click', () => switchView('main'));
+            addItemBtn.addEventListener('click', addItem);
+            itemNameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addItem();
+            });
+
+            // --- 初始化 ---
+            loadData(); // <--- 页面加载时，先加载数据
+            switchView('main'); // 然后再渲染视图
+        });
+    </script>
+</body>
+</html>
