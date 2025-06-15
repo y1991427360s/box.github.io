@@ -29,7 +29,12 @@
       "id": 6,
       "name": "杨森的柜子",
       "items": []
+    },
+    {
+      "id": 6,
+      "name": null,
+      "items": []
     }
   ],
-  "nextBoxId": 6
+  "nextBoxId": 7
 }
