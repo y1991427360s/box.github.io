@@ -1,4 +1,10 @@
 {
-  "boxes": [],
-  "nextBoxId": 1
+  "boxes": [
+    {
+      "id": 1,
+      "name": null,
+      "items": []
+    }
+  ],
+  "nextBoxId": 2
 }
