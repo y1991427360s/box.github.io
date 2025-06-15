@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" xml:lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Content-Language" content="zh-CN">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>存储柜模拟器 (云同步版)</title>
     <style>
@@ -18,12 +20,15 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", Roboto, Arial, "Helvetica Neue", sans-serif;
             background-color: var(--background-color);
             margin: 0;
             padding: 20px;
             color: var(--secondary-color);
             -webkit-text-size-adjust: 100%;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
         }
 
         .app-container {
@@ -63,6 +68,9 @@
             border-radius: 8px;
             font-size: 1rem;
             box-sizing: border-box;
+            font-family: inherit;
+            -webkit-text-size-adjust: 100%;
+            -webkit-font-smoothing: antialiased;
         }
 
         .search-icon {
@@ -209,10 +217,14 @@
             padding: 4px 8px;
             font-size: inherit;
             font-weight: inherit;
+            font-family: inherit;
             width: 100%;
             box-sizing: border-box;
             -webkit-appearance: none;
             appearance: none;
+            -webkit-text-size-adjust: 100%;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
         }
 
         .long-press-active {
@@ -327,6 +339,9 @@
     </div>
 
     <script>
+        // 确保文档字符编码正确
+        document.characterSet = document.characterSet || 'UTF-8';
+        
         document.addEventListener('DOMContentLoaded', () => {
             // DOM元素
             const mainView = document.getElementById('main-view');
@@ -663,18 +678,63 @@
                 showToast('JSONBin同步设置成功！', 'success');
             }
 
-            // 本地存储
+            // 本地存储 - 确保中文字符编码正确
             function saveDataLocally() {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify({ boxes, nextBoxId }));
+                try {
+                    const dataString = JSON.stringify({ boxes, nextBoxId }, null, 2);
+                    // 确保中文字符正确存储
+                    localStorage.setItem(STORAGE_KEY, dataString);
+                } catch (e) {
+                    console.error('保存数据失败:', e);
+                    // 尝试使用备用编码方式
+                    try {
+                        const encodedData = encodeURIComponent(JSON.stringify({ boxes, nextBoxId }));
+                        localStorage.setItem(STORAGE_KEY + '_encoded', encodedData);
+                    } catch (e2) {
+                        console.error('备用保存方式也失败:', e2);
+                    }
+                }
             }
 
             function loadDataLocally() {
-                const saved = localStorage.getItem(STORAGE_KEY);
+                let saved = localStorage.getItem(STORAGE_KEY);
+                
+                // 如果主要存储失败，尝试备用编码存储
+                if (!saved) {
+                    const encodedSaved = localStorage.getItem(STORAGE_KEY + '_encoded');
+                    if (encodedSaved) {
+                        try {
+                            saved = decodeURIComponent(encodedSaved);
+                        } catch (e) {
+                            console.error('解码备用数据失败:', e);
+                        }
+                    }
+                }
+                
                 if (saved) {
                     try {
                         const data = JSON.parse(saved);
                         boxes = data.boxes || [];
                         nextBoxId = data.nextBoxId || 1;
+                        
+                        // 确保所有文本数据都是正确的字符串格式
+                        boxes.forEach(box => {
+                            if (box.name && typeof box.name === 'string') {
+                                // 确保中文字符正确显示
+                                box.name = box.name.normalize('NFC');
+                            }
+                            if (box.items && Array.isArray(box.items)) {
+                                box.items = box.items.map(item => {
+                                    if (typeof item === 'string') {
+                                        return item.normalize('NFC');
+                                    } else if (item && typeof item.name === 'string') {
+                                        item.name = item.name.normalize('NFC');
+                                        return item;
+                                    }
+                                    return item;
+                                });
+                            }
+                        });
                     } catch (e) {
                         console.error('解析数据失败:', e);
                     }
@@ -1120,9 +1180,33 @@
                 }
             });
 
+            // 字符编码检查和修复
+            function checkAndFixEncoding() {
+                const testString = '测试中文字符';
+                const testElement = document.createElement('div');
+                testElement.textContent = testString;
+                document.body.appendChild(testElement);
+                
+                // 检查中文是否正确显示
+                const renderedText = testElement.textContent || testElement.innerText;
+                if (renderedText !== testString) {
+                    console.warn('检测到字符编码问题，尝试修复...');
+                    // 尝试重新设置页面编码
+                    document.characterSet = 'UTF-8';
+                    
+                    // 强制重新渲染页面内容
+                    setTimeout(() => {
+                        render();
+                    }, 100);
+                }
+                
+                document.body.removeChild(testElement);
+            }
+
             // 初始化
             initSync();
             loadDataLocally();
+            checkAndFixEncoding();
             
             if (syncConfig) {
                 setTimeout(() => syncData('download'), 1000);

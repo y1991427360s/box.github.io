@@ -1,0 +1,26 @@
+# 设置字符编码
+AddDefaultCharset UTF-8
+
+# 为HTML文件设置正确的Content-Type
+<FilesMatch "\.(html|htm)$">
+    Header set Content-Type "text/html; charset=utf-8"
+</FilesMatch>
+
+# 为JavaScript文件设置正确的Content-Type
+<FilesMatch "\.(js)$">
+    Header set Content-Type "application/javascript; charset=utf-8"
+</FilesMatch>
+
+# 为CSS文件设置正确的Content-Type
+<FilesMatch "\.(css)$">
+    Header set Content-Type "text/css; charset=utf-8"
+</FilesMatch>
+
+# 为JSON文件设置正确的Content-Type
+<FilesMatch "\.(json)$">
+    Header set Content-Type "application/json; charset=utf-8"
+</FilesMatch>
+
+# 强制UTF-8编码
+RewriteEngine On
+RewriteRule .* - [E=HTTP_ACCEPT_CHARSET:utf-8] 
