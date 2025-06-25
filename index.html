@@ -407,7 +407,7 @@
                 if (syncConfig) {
                     syncStatusText.textContent = '云端同步';
                     syncIndicator.className = 'sync-indicator synced';
-                    syncButton.textContent = '手动同步';
+                    syncButton.textContent = '同步管理';
                 } else {
                     syncStatusText.textContent = '离线模式';
                     syncIndicator.className = 'sync-indicator';
@@ -640,9 +640,25 @@
 
             // 显示同步菜单
             function showSyncMenu() {
-                let menuText = `当前同步方式: ${syncConfig.type === 'github' ? 'GitHub' : 'JSONBin.io'}\n\n选择操作：
-1 - 立即同步
-2 - 修改同步设置
+                let configInfo = '';
+                if (syncConfig.type === 'github') {
+                    const maskedToken = syncConfig.token.substring(0, 4) + '*'.repeat(Math.max(0, syncConfig.token.length - 4));
+                    configInfo = `当前GitHub配置：
+• 用户名: ${syncConfig.owner}
+• 仓库: ${syncConfig.repo}
+• Token: ${maskedToken}`;
+                } else if (syncConfig.type === 'jsonbin') {
+                    const maskedApiKey = syncConfig.apiKey.substring(0, 6) + '*'.repeat(Math.max(0, syncConfig.apiKey.length - 6));
+                    configInfo = `当前JSONBin配置：
+• API Key: ${maskedApiKey}
+• Bin ID: ${syncConfig.binId || '(未设置)'}`;
+                }
+
+                let menuText = `${configInfo}
+
+选择操作：
+1 - 立即同步数据
+2 - 修改配置信息
 3 - 删除同步配置
 请输入 1、2 或 3:`;
 
