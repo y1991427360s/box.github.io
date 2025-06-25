@@ -638,6 +638,34 @@
                 }
             }
 
+            // 显示同步菜单
+            function showSyncMenu() {
+                let menuText = `当前同步方式: ${syncConfig.type === 'github' ? 'GitHub' : 'JSONBin.io'}\n\n选择操作：
+1 - 立即同步
+2 - 修改同步设置
+3 - 删除同步配置
+请输入 1、2 或 3:`;
+
+                const choice = prompt(menuText);
+                
+                if (choice === '1') {
+                    syncData('both');
+                } else if (choice === '2') {
+                    if (syncConfig.type === 'github') {
+                        editGitHubSync();
+                    } else if (syncConfig.type === 'jsonbin') {
+                        editJSONBinSync();
+                    }
+                } else if (choice === '3') {
+                    if (confirm('确定要删除同步配置吗？删除后将切换到离线模式。')) {
+                        syncConfig = null;
+                        localStorage.removeItem('syncConfig');
+                        updateSyncStatus();
+                        showToast('同步配置已删除，切换到离线模式', 'success');
+                    }
+                }
+            }
+
             // 设置同步
             function setupSync() {
                 const choice = prompt(`选择同步方式：
@@ -666,6 +694,51 @@
                 showToast('GitHub同步设置成功！', 'success');
             }
 
+            function editGitHubSync() {
+                if (!syncConfig || syncConfig.type !== 'github') return;
+                
+                // 显示当前配置（Token部分隐藏）
+                const maskedToken = syncConfig.token.substring(0, 4) + '*'.repeat(syncConfig.token.length - 4);
+                const currentInfo = `当前GitHub配置：
+用户名: ${syncConfig.owner}
+仓库名: ${syncConfig.repo}
+Token: ${maskedToken}
+
+选择要修改的项目：
+1 - 修改Token
+2 - 修改用户名
+3 - 修改仓库名
+4 - 全部重新设置
+请输入 1、2、3 或 4:`;
+
+                const choice = prompt(currentInfo);
+                
+                if (choice === '1') {
+                    const newToken = prompt('请输入新的GitHub Personal Access Token:', syncConfig.token);
+                    if (newToken && newToken.trim()) {
+                        syncConfig.token = newToken.trim();
+                        localStorage.setItem('syncConfig', JSON.stringify(syncConfig));
+                        showToast('Token已更新！', 'success');
+                    }
+                } else if (choice === '2') {
+                    const newOwner = prompt('请输入新的GitHub用户名:', syncConfig.owner);
+                    if (newOwner && newOwner.trim()) {
+                        syncConfig.owner = newOwner.trim();
+                        localStorage.setItem('syncConfig', JSON.stringify(syncConfig));
+                        showToast('用户名已更新！', 'success');
+                    }
+                } else if (choice === '3') {
+                    const newRepo = prompt('请输入新的仓库名称:', syncConfig.repo);
+                    if (newRepo && newRepo.trim()) {
+                        syncConfig.repo = newRepo.trim();
+                        localStorage.setItem('syncConfig', JSON.stringify(syncConfig));
+                        showToast('仓库名已更新！', 'success');
+                    }
+                } else if (choice === '4') {
+                    setupGitHubSync();
+                }
+            }
+
             function setupJSONBinSync() {
                 const apiKey = prompt('请输入JSONBin.io API Key:');
                 if (!apiKey) return;
@@ -676,6 +749,40 @@
                 localStorage.setItem('syncConfig', JSON.stringify(syncConfig));
                 updateSyncStatus();
                 showToast('JSONBin同步设置成功！', 'success');
+            }
+
+            function editJSONBinSync() {
+                if (!syncConfig || syncConfig.type !== 'jsonbin') return;
+                
+                // 显示当前配置（API Key部分隐藏）
+                const maskedApiKey = syncConfig.apiKey.substring(0, 6) + '*'.repeat(Math.max(0, syncConfig.apiKey.length - 6));
+                const currentInfo = `当前JSONBin配置：
+API Key: ${maskedApiKey}
+Bin ID: ${syncConfig.binId || '(未设置)'}
+
+选择要修改的项目：
+1 - 修改API Key
+2 - 修改Bin ID
+3 - 全部重新设置
+请输入 1、2 或 3:`;
+
+                const choice = prompt(currentInfo);
+                
+                if (choice === '1') {
+                    const newApiKey = prompt('请输入新的JSONBin.io API Key:', syncConfig.apiKey);
+                    if (newApiKey && newApiKey.trim()) {
+                        syncConfig.apiKey = newApiKey.trim();
+                        localStorage.setItem('syncConfig', JSON.stringify(syncConfig));
+                        showToast('API Key已更新！', 'success');
+                    }
+                } else if (choice === '2') {
+                    const newBinId = prompt('请输入新的Bin ID (留空将创建新的):', syncConfig.binId || '');
+                    syncConfig.binId = newBinId.trim() || null;
+                    localStorage.setItem('syncConfig', JSON.stringify(syncConfig));
+                    showToast('Bin ID已更新！', 'success');
+                } else if (choice === '3') {
+                    setupJSONBinSync();
+                }
             }
 
             // 本地存储 - 确保中文字符编码正确
@@ -1167,7 +1274,7 @@
 
             syncButton.addEventListener('click', () => {
                 if (syncConfig) {
-                    syncData('both');
+                    showSyncMenu();
                 } else {
                     setupSync();
                 }
