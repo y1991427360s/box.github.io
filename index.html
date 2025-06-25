@@ -441,13 +441,22 @@
                     console.error('同步失败:', error);
                     let errorMessage = error.message;
                     
-                    // 提供更友好的错误提示
+                    // 提供更友好的错误提示，特别针对iOS Safari
                     if (errorMessage.includes('401')) {
-                        errorMessage = '认证失败，请检查API密钥';
+                        errorMessage = '认证失败，请检查GitHub Token是否有效';
                     } else if (errorMessage.includes('403')) {
-                        errorMessage = '权限不足，请检查仓库权限';
-                    } else if (errorMessage.includes('404')) {
-                        errorMessage = '资源未找到，请检查配置';
+                        errorMessage = '权限不足，请检查仓库权限或Token权限';
+                    } else if (errorMessage.includes('404') || errorMessage.includes('资源未找到')) {
+                        errorMessage = `仓库或文件不存在，请检查：
+• 用户名: ${syncConfig?.owner}
+• 仓库名: ${syncConfig?.repo}
+• 仓库是否存在且可访问`;
+                    } else if (errorMessage.includes('Failed to fetch') || errorMessage.includes('Network request failed')) {
+                        errorMessage = 'iPhone网络请求失败，请检查网络连接';
+                    } else if (errorMessage.includes('cors') || errorMessage.includes('CORS')) {
+                        errorMessage = 'Safari跨域限制，请检查仓库设置';
+                    } else if (errorMessage.includes('Base64')) {
+                        errorMessage = 'iPhone数据编码问题，请重试';
                     } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
                         errorMessage = '网络连接失败，请检查网络';
                     }
@@ -465,69 +474,115 @@
                 }
             }
 
-            // 安全的Base64编码/解码（支持中文）
+            // 安全的Base64编码/解码（支持中文，iOS Safari优化）
             function safeBase64Encode(str) {
                 try {
-                    // 使用TextEncoder确保正确的UTF-8编码
-                    const encoder = new TextEncoder();
-                    const data = encoder.encode(str);
-                    const binaryString = Array.from(data, byte => String.fromCharCode(byte)).join('');
-                    return btoa(binaryString);
-                } catch (e) {
-                    try {
-                        // 备用方案：使用传统的encodeURIComponent方式
+                    // iOS Safari优化：首先尝试传统方法
+                    if (isIOS) {
                         return btoa(unescape(encodeURIComponent(str)));
-                    } catch (e2) {
-                        console.error('Base64编码失败:', e2);
-                        // 最后备用方案：过滤非ASCII字符
+                    }
+                    
+                    // 使用TextEncoder确保正确的UTF-8编码
+                    if (typeof TextEncoder !== 'undefined') {
+                        const encoder = new TextEncoder();
+                        const data = encoder.encode(str);
+                        const binaryString = Array.from(data, byte => String.fromCharCode(byte)).join('');
+                        return btoa(binaryString);
+                    }
+                    
+                    // 备用方案：使用传统的encodeURIComponent方式
+                    return btoa(unescape(encodeURIComponent(str)));
+                } catch (e) {
+                    console.error('Base64编码失败:', e);
+                    try {
+                        // 最后备用方案：过滤非ASCII字符后编码
                         const asciiStr = str.replace(/[^\x00-\x7F]/g, '?');
                         return btoa(asciiStr);
+                    } catch (e2) {
+                        console.error('所有Base64编码方法都失败:', e2);
+                        throw new Error('Base64编码失败');
                     }
                 }
             }
 
             function safeBase64Decode(str) {
                 try {
-                    // 使用TextDecoder确保正确的UTF-8解码
-                    const binaryString = atob(str);
-                    const bytes = new Uint8Array(binaryString.length);
-                    for (let i = 0; i < binaryString.length; i++) {
-                        bytes[i] = binaryString.charCodeAt(i);
-                    }
-                    const decoder = new TextDecoder('utf-8');
-                    return decoder.decode(bytes);
-                } catch (e) {
-                    try {
-                        // 备用方案：使用传统的decodeURIComponent方式
+                    // iOS Safari优化：首先尝试传统方法
+                    if (isIOS) {
                         return decodeURIComponent(escape(atob(str)));
-                    } catch (e2) {
-                        console.error('Base64解码失败:', e2);
+                    }
+                    
+                    // 使用TextDecoder确保正确的UTF-8解码
+                    if (typeof TextDecoder !== 'undefined') {
+                        const binaryString = atob(str);
+                        const bytes = new Uint8Array(binaryString.length);
+                        for (let i = 0; i < binaryString.length; i++) {
+                            bytes[i] = binaryString.charCodeAt(i);
+                        }
+                        const decoder = new TextDecoder('utf-8');
+                        return decoder.decode(bytes);
+                    }
+                    
+                    // 备用方案：使用传统的decodeURIComponent方式
+                    return decodeURIComponent(escape(atob(str)));
+                } catch (e) {
+                    console.error('Base64解码失败:', e);
+                    try {
                         // 最后备用方案：直接使用atob
                         return atob(str);
+                    } catch (e2) {
+                        console.error('所有Base64解码方法都失败:', e2);
+                        throw new Error('Base64解码失败');
                     }
                 }
             }
 
-            // GitHub同步
+            // GitHub同步（iOS Safari优化）
             async function syncWithGitHub(action) {
                 const { token, repo, owner } = syncConfig;
                 const fileName = 'storage-data.json';
                 const url = `https://api.github.com/repos/${owner}/${repo}/contents/${fileName}`;
+                
+                // iOS Safari优化的请求头
                 const headers = {
-                    'Authorization': `token ${token}`,
-                    'Accept': 'application/vnd.github.v3+json'
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'User-Agent': 'StorageApp/1.0'
+                };
+                
+                // iOS Safari需要更严格的fetch配置
+                const fetchConfig = {
+                    headers,
+                    mode: 'cors',
+                    credentials: 'omit'
                 };
 
                 let downloadResponse = null;
                 let needsUpload = false;
 
+                console.log('开始GitHub同步，动作:', action);
+                console.log('请求URL:', url);
+                console.log('用户:', owner, '仓库:', repo);
+
                 if (action === 'download' || action === 'both') {
                     try {
-                        downloadResponse = await fetch(url, { headers });
+                        console.log('尝试从GitHub下载数据...');
+                        downloadResponse = await fetch(url, fetchConfig);
+                        console.log('下载响应状态:', downloadResponse.status);
+                        
                         if (downloadResponse.ok) {
                             const fileData = await downloadResponse.json();
-                            const content = JSON.parse(safeBase64Decode(fileData.content));
+                            console.log('获取到文件数据，准备解码...');
+                            
+                            if (!fileData.content) {
+                                throw new Error('GitHub返回的文件内容为空');
+                            }
+                            
+                            // 清理base64内容（移除换行符和空格）
+                            const cleanContent = fileData.content.replace(/\s/g, '');
+                            const content = JSON.parse(safeBase64Decode(cleanContent));
                             console.log('从云端下载的数据:', content);
+                            
                             if (content.boxes && content.nextBoxId) {
                                 boxes = content.boxes;
                                 nextBoxId = content.nextBoxId;
@@ -536,34 +591,55 @@
                                 showToast('数据同步成功！', 'success');
                             }
                         } else if (downloadResponse.status === 404) {
+                            console.log('文件不存在，需要上传');
                             needsUpload = true;
                         } else {
-                            throw new Error(`下载失败: ${downloadResponse.status}`);
+                            const errorText = await downloadResponse.text();
+                            console.error('下载失败详情:', errorText);
+                            throw new Error(`下载失败: ${downloadResponse.status} - ${errorText.substring(0, 200)}`);
                         }
                     } catch (error) {
-                        if (error.message.includes('404')) {
+                        console.error('下载过程出错:', error);
+                        if (error.message.includes('404') || downloadResponse?.status === 404) {
                             needsUpload = true;
                         } else {
-                            throw error;
+                            // 为iOS Safari提供更友好的错误信息
+                            let errorMessage = error.message;
+                            if (errorMessage.includes('Failed to fetch') || errorMessage.includes('Network request failed')) {
+                                errorMessage = '网络请求失败，请检查网络连接和GitHub配置';
+                            } else if (errorMessage.includes('cors')) {
+                                errorMessage = 'CORS错误，请检查仓库权限设置';
+                            }
+                            throw new Error(errorMessage);
                         }
                     }
                 }
                 
                 if (action === 'upload' || (action === 'both' && needsUpload)) {
+                    console.log('准备上传数据到GitHub...');
                     const data = { boxes, nextBoxId };
                     const jsonString = JSON.stringify(data, null, 2);
                     console.log('准备上传的数据:', data);
-                    const content = safeBase64Encode(jsonString);
+                    
+                    let content;
+                    try {
+                        content = safeBase64Encode(jsonString);
+                    } catch (e) {
+                        console.error('Base64编码失败:', e);
+                        throw new Error('数据编码失败，请重试');
+                    }
                     
                     let sha = null;
                     try {
-                        const fileResponse = await fetch(url, { headers });
+                        console.log('获取文件SHA...');
+                        const fileResponse = await fetch(url, fetchConfig);
                         if (fileResponse.ok) {
                             const fileData = await fileResponse.json();
                             sha = fileData.sha;
+                            console.log('获取到SHA:', sha);
                         }
                     } catch (e) {
-                        // 忽略获取SHA失败的错误
+                        console.log('获取SHA失败，可能是新文件:', e.message);
                     }
 
                     const uploadData = {
@@ -572,15 +648,19 @@
                     };
                     if (sha) uploadData.sha = sha;
 
+                    console.log('发送上传请求...');
                     const uploadResponse = await fetch(url, {
                         method: 'PUT',
-                        headers: { ...headers, 'Content-Type': 'application/json' },
+                        ...fetchConfig,
                         body: JSON.stringify(uploadData)
                     });
 
+                    console.log('上传响应状态:', uploadResponse.status);
+                    
                     if (!uploadResponse.ok) {
                         const errorText = await uploadResponse.text();
-                        throw new Error(`上传失败: ${uploadResponse.status} - ${errorText}`);
+                        console.error('上传失败详情:', errorText);
+                        throw new Error(`上传失败: ${uploadResponse.status} - ${errorText.substring(0, 200)}`);
                     }
                     
                     showToast('数据上传成功！', 'success');
@@ -659,8 +739,8 @@
 选择操作：
 1 - 立即同步数据
 2 - 修改配置信息
-3 - 删除同步配置
-请输入 1、2 或 3:`;
+3 - 删除同步配置${isIOS ? '\n4 - 诊断iOS连接问题' : ''}
+请输入 ${isIOS ? '1、2、3 或 4' : '1、2 或 3'}:`;
 
                 const choice = prompt(menuText);
                 
@@ -679,6 +759,8 @@
                         updateSyncStatus();
                         showToast('同步配置已删除，切换到离线模式', 'success');
                     }
+                } else if (choice === '4' && isIOS) {
+                    diagnoseIOSConnection();
                 }
             }
 
@@ -707,7 +789,13 @@
                 syncConfig = { type: 'github', token, repo, owner };
                 localStorage.setItem('syncConfig', JSON.stringify(syncConfig));
                 updateSyncStatus();
-                showToast('GitHub同步设置成功！', 'success');
+                
+                // iOS Safari特殊提示
+                if (isIOS) {
+                    showToast('GitHub同步设置成功！如遇问题，请确保仓库为public或token有足够权限', 'success');
+                } else {
+                    showToast('GitHub同步设置成功！', 'success');
+                }
             }
 
             function editGitHubSync() {
@@ -798,6 +886,72 @@ Bin ID: ${syncConfig.binId || '(未设置)'}
                     showToast('Bin ID已更新！', 'success');
                 } else if (choice === '3') {
                     setupJSONBinSync();
+                }
+            }
+
+            // iOS Safari连接诊断
+            async function diagnoseIOSConnection() {
+                if (!syncConfig || syncConfig.type !== 'github') {
+                    showToast('当前不是GitHub同步，无需诊断', 'info');
+                    return;
+                }
+
+                showToast('开始诊断iOS Safari连接问题...', 'info');
+                const { token, repo, owner } = syncConfig;
+                
+                // 诊断1: 检查仓库是否存在
+                try {
+                    const repoUrl = `https://api.github.com/repos/${owner}/${repo}`;
+                    const response = await fetch(repoUrl, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        },
+                        mode: 'cors',
+                        credentials: 'omit'
+                    });
+                    
+                    if (response.ok) {
+                        const repoData = await response.json();
+                        const diagnosis = `诊断结果：
+• 仓库连接: ✅ 正常
+• 仓库名称: ${repoData.name}
+• 仓库类型: ${repoData.private ? '私有' : '公开'}
+• 权限检查: ${repoData.permissions?.push ? '✅ 有写入权限' : '❌ 无写入权限'}
+
+建议：
+${repoData.private ? '• 私有仓库需要token有完整repo权限' : '• 公开仓库权限正常'}
+• 如仍有问题，请检查token是否过期
+• 确保网络连接稳定`;
+                        
+                        alert(diagnosis);
+                        showToast('诊断完成，请查看详细信息', 'success');
+                    } else {
+                        alert(`仓库访问失败：
+状态码: ${response.status}
+可能原因:
+• 仓库名或用户名错误
+• Token权限不足
+• 仓库不存在或无权访问
+• 网络连接问题
+
+请检查配置信息：
+用户名: ${owner}
+仓库名: ${repo}`);
+                    }
+                } catch (error) {
+                    alert(`网络诊断失败：
+错误: ${error.message}
+
+常见原因：
+• iPhone网络连接不稳定
+• Safari隐私设置限制
+• GitHub API访问被限制
+
+建议：
+• 切换到WiFi网络重试
+• 检查Safari设置->隐私与安全
+• 确认GitHub Token有效性`);
                 }
             }
 
