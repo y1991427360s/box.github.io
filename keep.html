@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的便签</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        /* 顶部导航栏 */
+        .header {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 600;
+            color: #fbbc04;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 600px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            background: #f1f3f4;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            background: white;
+            border-color: #1a73e8;
+            box-shadow: 0 1px 6px rgba(32,33,36,.28);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #5f6368;
+        }
+
+        /* 同步状态 - 与 task.html 一致 */
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .sync-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #95a5a6;
+        }
+
+        .sync-indicator.syncing { background-color: #f39c12; animation: pulse 1s infinite; }
+        .sync-indicator.synced  { background-color: #27ae60; }
+        .sync-indicator.error  { background-color: #e74c3c; }
+
+        @keyframes pulse {
+            0%,100% { opacity: 1; }
+            50%     { opacity: 0.5; }
+        }
+
+        .sync-button {
+            background: none;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #5f6368;
+            transition: all 0.2s;
+        }
+
+        .sync-button:hover {
+            background: #f8f9fa;
+        }
+
+        /* 主要内容区域 */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 新建便签区域 */
+        .new-note-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            margin-bottom: 32px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .new-note-form {
+            padding: 16px;
+        }
+
+        .note-title-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            background: transparent;
+            color: #202124;
+        }
+
+        .note-title-input::placeholder {
+            color: #5f6368;
+        }
+
+        .note-content-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            background: transparent;
+            color: #202124;
+            resize: none;
+            min-height: 60px;
+            font-family: inherit;
+            line-height: 1.5;
+        }
+
+        .note-content-input::placeholder {
+            color: #5f6368;
+        }
+
+        .note-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 16px 16px;
+            border-top: 1px solid #e8eaed;
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 8px;
+        }
+
+        .color-option {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .color-option:hover,
+        .color-option.selected {
+            border-color: #1a73e8;
+            transform: scale(1.1);
+        }
+
+        .save-btn {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .save-btn:hover {
+            background: #1557b0;
+        }
+
+        /* 便签网格 */
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        /* 便签卡片 */
+        .note-card {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .note-card:hover {
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        }
+
+        .note-card.highlight {
+            box-shadow: 0 2px 8px rgba(26, 115, 232, 0.3);
+            border-color: #1a73e8;
+        }
+
+        .note-title {
+            font-weight: 500;
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #202124;
+            line-height: 1.3;
+        }
+
+        .note-content {
+            font-size: 14px;
+            color: #5f6368;
+            line-height: 1.4;
+            white-space: pre-wrap;
+        }
+
+        .note-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            font-size: 12px;
+            color: #5f6368;
+        }
+
+        .note-actions-mini {
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .note-card:hover .note-actions-mini {
+            opacity: 1;
+        }
+
+        .action-btn {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #5f6368;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #f1f3f4;
+        }
+
+        .action-btn.delete:hover {
+            color: #ea4335;
+        }
+
+        /* 颜色主题 */
+        .note-card[data-color="yellow"] { background-color: #fff9c4; }
+        .note-card[data-color="orange"] { background-color: #feecb3; }
+        .note-card[data-color="pink"] { background-color: #fdd7e4; }
+        .note-card[data-color="purple"] { background-color: #e1bee7; }
+        .note-card[data-color="blue"] { background-color: #bbdefb; }
+        .note-card[data-color="green"] { background-color: #c8e6c9; }
+        .note-card[data-color="gray"] { background-color: #f5f5f5; }
+
+        .new-note-container[data-color="yellow"] { background-color: #fff9c4; }
+        .new-note-container[data-color="orange"] { background-color: #feecb3; }
+        .new-note-container[data-color="pink"] { background-color: #fdd7e4; }
+        .new-note-container[data-color="purple"] { background-color: #e1bee7; }
+        .new-note-container[data-color="blue"] { background-color: #bbdefb; }
+        .new-note-container[data-color="green"] { background-color: #c8e6c9; }
+        .new-note-container[data-color="gray"] { background-color: #f5f5f5; }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #5f6368;
+        }
+
+        .empty-icon {
+            font-size: 72px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        .empty-text {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .empty-subtext {
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        /* 编辑模态框 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            padding: 16px;
+            border-bottom: 1px solid #e8eaed;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #5f6368;
+            padding: 4px;
+            border-radius: 50%;
+        }
+
+        .close-btn:hover {
+            background: #f1f3f4;
+        }
+
+        .modal-body {
+            padding: 16px;
+        }
+
+        .edit-title-input,
+        .edit-content-input {
+            width: 100%;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            margin-bottom: 16px;
+        }
+
+        .edit-content-input {
+            min-height: 200px;
+            resize: vertical;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .modal-footer {
+            padding: 16px;
+            border-top: 1px solid #e8eaed;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #1a73e8;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1557b0;
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #5f6368;
+            border: 1px solid #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            background: #e8f0fe;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 12px;
+                padding: 16px;
+            }
+
+            .search-container {
+                order: -1;
+                max-width: 100%;
+            }
+
+            .main-container {
+                padding: 16px;
+            }
+
+            .notes-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 12px;
+            }
+
+            .new-note-container {
+                margin-bottom: 24px;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部导航 -->
+    <header class="header">
+        <div class="logo">
+            📝 我的便签
+        </div>
+        <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="searchInput" placeholder="搜索便签...">
+        </div>
+        <div class="sync-status">
+            <span class="sync-indicator" id="sync-indicator"></span>
+            <span id="sync-status-text">离线模式</span>
+            <button class="sync-button" id="sync-button">设置同步</button>
+        </div>
+    </header>
+
+    <!-- 主要内容 -->
+    <main class="main-container">
+        <!-- 新建便签 -->
+        <div class="new-note-container" id="newNoteContainer">
+            <form class="new-note-form" id="newNoteForm">
+                <input type="text" class="note-title-input" id="newNoteTitle" placeholder="写下便签标题...">
+                <textarea class="note-content-input" id="newNoteContent" placeholder="写点什么..."></textarea>
+            </form>
+            <div class="note-actions">
+                <div class="color-picker">
+                    <div class="color-option" data-color="white" style="background-color: white; border: 1px solid #e0e0e0;"></div>
+                    <div class="color-option" data-color="yellow" style="background-color: #fff9c4;"></div>
+                    <div class="color-option" data-color="orange" style="background-color: #feecb3;"></div>
+                    <div class="color-option" data-color="pink" style="background-color: #fdd7e4;"></div>
+                    <div class="color-option" data-color="purple" style="background-color: #e1bee7;"></div>
+                    <div class="color-option" data-color="blue" style="background-color: #bbdefb;"></div>
+                    <div class="color-option" data-color="green" style="background-color: #c8e6c9;"></div>
+                    <div class="color-option" data-color="gray" style="background-color: #f5f5f5;"></div>
+                </div>
+                <button type="submit" class="save-btn">保存便签</button>
+            </div>
+        </div>
+
+        <!-- 便签列表 -->
+        <div class="notes-grid" id="notesGrid">
+            <!-- 便签卡片将动态生成 -->
+        </div>
+
+        <!-- 空状态 -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <div class="empty-icon">📝</div>
+            <div class="empty-text">还没有便签</div>
+            <div class="empty-subtext">点击上方输入框开始记录想法</div>
+        </div>
+    </main>
+
+    <!-- 编辑模态框 -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">编辑便签</div>
+                <button class="close-btn" onclick="closeEditModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="edit-title-input" id="editNoteTitle" placeholder="便签标题">
+                <textarea class="edit-content-input" id="editNoteContent" placeholder="便签内容"></textarea>
+            </div>
+            <div class="modal-footer">
+                <div class="color-picker">
+                    <div class="color-option" data-color="white" style="background-color: white; border: 1px solid #e0e0e0;"></div>
+                    <div class="color-option" data-color="yellow" style="background-color: #fff9c4;"></div>
+                    <div class="color-option" data-color="orange" style="background-color: #feecb3;"></div>
+                    <div class="color-option" data-color="pink" style="background-color: #fdd7e4;"></div>
+                    <div class="color-option" data-color="purple" style="background-color: #e1bee7;"></div>
+                    <div class="color-option" data-color="blue" style="background-color: #bbdefb;"></div>
+                    <div class="color-option" data-color="green" style="background-color: #c8e6c9;"></div>
+                    <div class="color-option" data-color="gray" style="background-color: #f5f5f5;"></div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="closeEditModal()">取消</button>
+                    <button class="btn btn-primary" onclick="saveEditedNote()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let notes = [];
+        let currentEditId = null;
+        let currentNewNoteColor = 'white';
+        let currentEditColor = 'white';
+        let searchQuery = '';
+        
+        // 云同步相关变量 - 与 task.html 一致
+        let syncConfig = null;
+        let isSyncing = false;
+        const STORAGE_KEY = 'keepNotesData';
+
+        // DOM 元素
+        const newNoteContainer = document.getElementById('newNoteContainer');
+        const newNoteForm = document.getElementById('newNoteForm');
+        const newNoteTitle = document.getElementById('newNoteTitle');
+        const newNoteContent = document.getElementById('newNoteContent');
+        const notesGrid = document.getElementById('notesGrid');
+        const emptyState = document.getElementById('emptyState');
+        const searchInput = document.getElementById('searchInput');
+        const editModal = document.getElementById('editModal');
+        const editNoteTitle = document.getElementById('editNoteTitle');
+        const editNoteContent = document.getElementById('editNoteContent');
+
+        /* ---------- Base64 安全编码/解码（与 task.html 一致） ---------- */
+        function safeBase64Encode(str) {
+            try {
+                return btoa(unescape(encodeURIComponent(str)));
+            } catch (e) {
+                console.error('Base64 编码失败:', e);
+                return btoa(str);
+            }
+        }
+
+        function safeBase64Decode(str) {
+            try {
+                return decodeURIComponent(escape(atob(str)));
+            } catch (e) {
+                console.error('Base64 解码失败:', e);
+                return atob(str);
+            }
+        }
+
+        /* ---------- 本地存储 ---------- */
+        function saveDataLocally() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({ notes }, null, 2));
+            } catch (e) {
+                console.error('保存本地数据失败:', e);
+            }
+        }
+
+        function loadDataLocally() {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                try {
+                    const data = JSON.parse(raw);
+                    if (Array.isArray(data.notes)) {
+                        notes = data.notes;
+                    }
+                } catch (e) {
+                    console.error('解析本地数据失败:', e);
+                }
+            }
+        }
+
+        function saveData() {
+            saveDataLocally();
+            if (syncConfig && !isSyncing) {
+                setTimeout(() => syncData('upload'), 1000);
+            }
+        }
+
+        /* ---------- 同步核心逻辑 ---------- */
+        function updateSyncStatus() {
+            const text = document.getElementById('sync-status-text');
+            const dot = document.getElementById('sync-indicator');
+            if (syncConfig) {
+                text.textContent = '云端同步';
+                dot.className = 'sync-indicator synced';
+                document.getElementById('sync-button').textContent = '同步管理';
+            } else {
+                text.textContent = '离线模式';
+                dot.className = 'sync-indicator';
+                document.getElementById('sync-button').textContent = '设置同步';
+            }
+        }
+
+        function initSync() {
+            try {
+                const stored = localStorage.getItem('syncConfig');
+                if (stored) syncConfig = JSON.parse(stored);
+            } catch (e) { 
+                console.error('读取同步配置失败:', e); 
+            }
+            updateSyncStatus();
+        }
+
+        async function syncData(action = 'both') {
+            if (!syncConfig) {
+                setupSync();
+                return;
+            }
+            if (isSyncing) return;
+            isSyncing = true;
+            const dot = document.getElementById('sync-indicator');
+            const text = document.getElementById('sync-status-text');
+            dot.className = 'sync-indicator syncing';
+            text.textContent = '同步中...';
+            try {
+                if (syncConfig.type === 'github') {
+                    await syncWithGitHub(action);
+                } else if (syncConfig.type === 'jsonbin') {
+                    await syncWithJSONBin(action);
+                }
+                dot.className = 'sync-indicator synced';
+                text.textContent = '云端同步';
+            } catch (e) {
+                console.error('同步失败:', e);
+                dot.className = 'sync-indicator error';
+                alert(`同步失败: ${e.message}`);
+            } finally {
+                isSyncing = false;
+            }
+        }
+
+        /* ---------- GitHub 同步 ---------- */
+        async function syncWithGitHub(action) {
+            const { token, repo, owner } = syncConfig;
+            const fileName = 'notes.json';
+            const url = `https://api.github.com/repos/${owner}/${repo}/contents/${fileName}`;
+            const headers = {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/vnd.github.v3+json'
+            };
+
+            let needsUpload = false;
+            if (action === 'download' || action === 'both') {
+                const res = await fetch(url, { headers });
+                if (res.ok) {
+                    const data = await res.json();
+                    const clean = data.content.replace(/\s/g, '');
+                    const content = JSON.parse(safeBase64Decode(clean));
+                    if (Array.isArray(content.notes)) {
+                        notes = content.notes;
+                        renderNotes();
+                        saveDataLocally();
+                    }
+                } else if (res.status === 404) {
+                    needsUpload = true;
+                } else {
+                    throw new Error(`下载失败 ${res.status}`);
+                }
+            }
+            if (action === 'upload' || (action === 'both' && needsUpload)) {
+                const body = {
+                    message: `Update notes ${new Date().toISOString()}`,
+                    content: safeBase64Encode(JSON.stringify({ notes }, null, 2))
+                };
+                try {
+                    const r = await fetch(url, { headers });
+                    if (r.ok) {
+                        const js = await r.json();
+                        body.sha = js.sha;
+                    }
+                } catch {}
+                const res = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(body) });
+                if (!res.ok) throw new Error(`上传失败 ${res.status}`);
+            }
+        }
+
+        /* ---------- JSONBin 同步 ---------- */
+        async function syncWithJSONBin(action) {
+            const { apiKey, binId } = syncConfig;
+            const headers = {
+                'X-Master-Key': apiKey,
+                'Content-Type': 'application/json; charset=utf-8'
+            };
+            if (action === 'download' || action === 'both') {
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, { headers });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.record && Array.isArray(data.record.notes)) {
+                        notes = data.record.notes;
+                        renderNotes();
+                        saveDataLocally();
+                    }
+                } else if (res.status !== 404) {
+                    throw new Error(`下载失败 ${res.status}`);
+                }
+            }
+            if (action === 'upload' || action === 'both') {
+                const body = JSON.stringify({ notes }, null, 2);
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, { method: 'PUT', headers, body });
+                if (!res.ok) throw new Error(`上传失败 ${res.status}`);
+            }
+        }
+
+        /* ---------- 同步配置 ---------- */
+        function showSyncMenu() {
+            let info = '';
+            if (syncConfig.type === 'github') {
+                const masked = syncConfig.token.slice(0,4) + '*'.repeat(Math.max(0, syncConfig.token.length-4));
+                info = `当前 GitHub 配置:\n• 用户名: ${syncConfig.owner}\n• 仓库: ${syncConfig.repo}\n• Token: ${masked}`;
+            } else if (syncConfig.type === 'jsonbin') {
+                const masked = syncConfig.apiKey.slice(0,6) + '*'.repeat(Math.max(0, syncConfig.apiKey.length-6));
+                info = `当前 JSONBin 配置:\n• API Key: ${masked}\n• Bin ID: ${syncConfig.binId}`;
+            }
+            const choice = prompt(`${info}\n\n选择操作:\n1 - 立即同步数据\n2 - 修改配置信息\n3 - 删除同步配置\n请输入 1、2 或 3:`);
+            if (choice === '1') {
+                syncData('both');
+            } else if (choice === '2') {
+                if (syncConfig.type === 'github') editGitHubSync();
+                else editJSONBinSync();
+            } else if (choice === '3') {
+                if (confirm('确定删除同步配置?')) {
+                    syncConfig = null;
+                    localStorage.removeItem('syncConfig');
+                    updateSyncStatus();
+                }
+            }
+        }
+
+        function setupSync() {
+            const choice = prompt('选择同步方式:\n1 - GitHub\n2 - JSONBin.io\n请输入 1 或 2:');
+            if (choice === '1') setupGitHubSync();
+            else if (choice === '2') setupJSONBinSync();
+        }
+
+        function setupGitHubSync() {
+            const token = prompt('GitHub Token:');
+            if (!token) return;
+            const repo = prompt('仓库名:', 'notes-data');
+            const owner = prompt('GitHub 用户名:');
+            if (!owner || !repo) return;
+            syncConfig = { type: 'github', token, repo, owner };
+            localStorage.setItem('syncConfig', JSON.stringify(syncConfig));
+            updateSyncStatus();
+        }
+
+        function editGitHubSync() {
+            if (!syncConfig || syncConfig.type !== 'github') return;
+            const masked = syncConfig.token.slice(0,4) + '*'.repeat(Math.max(0, syncConfig.token.length-4));
+            const c = prompt(`当前 GitHub 配置:\n用户名: ${syncConfig.owner}\n仓库名: ${syncConfig.repo}\nToken: ${masked}\n\n选择要修改:\n1 - Token\n2 - 用户名\n3 - 仓库名`, '');
+            if (c === '1') {
+                const t = prompt('新 Token:', syncConfig.token);
+                if (t) syncConfig.token = t.trim();
+            } else if (c === '2') {
+                const o = prompt('新用户名:', syncConfig.owner);
+                if (o) syncConfig.owner = o.trim();
+            } else if (c === '3') {
+                const r = prompt('新仓库名:', syncConfig.repo);
+                if (r) syncConfig.repo = r.trim();
+            }
+            localStorage.setItem('syncConfig', JSON.stringify(syncConfig));
+            updateSyncStatus();
+        }
+
+        function setupJSONBinSync() {
+            const apiKey = prompt('JSONBin API Key:');
+            if (!apiKey) return;
+            const binId = prompt('Bin ID(留空自动创建):');
+            syncConfig = { type: 'jsonbin', apiKey, binId };
+            localStorage.setItem('syncConfig', JSON.stringify(syncConfig));
+            updateSyncStatus();
+        }
+
+        function editJSONBinSync() {
+            if (!syncConfig || syncConfig.type !== 'jsonbin') return;
+            const masked = syncConfig.apiKey.slice(0,6) + '*'.repeat(Math.max(0, syncConfig.apiKey.length-6));
+            const c = prompt(`当前 JSONBin 配置:\nAPI Key: ${masked}\nBin ID: ${syncConfig.binId}\n\n选择要修改:\n1 - API Key\n2 - Bin ID`, '');
+            if (c === '1') {
+                const k = prompt('新 API Key:', syncConfig.apiKey);
+                if (k) syncConfig.apiKey = k.trim();
+            } else if (c === '2') {
+                const b = prompt('新 Bin ID:', syncConfig.binId);
+                syncConfig.binId = b.trim();
+            }
+            localStorage.setItem('syncConfig', JSON.stringify(syncConfig));
+            updateSyncStatus();
+        }
+
+        /* ---------- 便签功能 ---------- */
+        // 生成便签 ID
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        // 格式化时间
+        function formatTime(date) {
+            const now = new Date();
+            const diff = now - date;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            
+            if (days === 0) {
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                if (hours === 0) {
+                    const minutes = Math.floor(diff / (1000 * 60));
+                    return minutes < 1 ? '刚刚' : `${minutes}分钟前`;
+                }
+                return `${hours}小时前`;
+            } else if (days === 1) {
+                return '昨天';
+            } else if (days < 7) {
+                return `${days}天前`;
+            } else {
+                return date.toLocaleDateString('zh-CN');
+            }
+        }
+
+        // 创建新便签
+        function createNote() {
+            const title = newNoteTitle.value.trim();
+            const content = newNoteContent.value.trim();
+            
+            if (!title && !content) return;
+            
+            const note = {
+                id: generateId(),
+                title: title || '无标题',
+                content: content,
+                color: currentNewNoteColor,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            };
+            
+            notes.unshift(note);
+            clearNewNoteForm();
+            renderNotes();
+            saveData();
+        }
+
+        // 清空新建便签表单
+        function clearNewNoteForm() {
+            newNoteTitle.value = '';
+            newNoteContent.value = '';
+            currentNewNoteColor = 'white';
+            updateNewNoteColor();
+        }
+
+        // 更新新建便签的颜色
+        function updateNewNoteColor() {
+            newNoteContainer.setAttribute('data-color', currentNewNoteColor);
+            
+            // 更新颜色选择器
+            const colorOptions = newNoteContainer.querySelectorAll('.color-option');
+            colorOptions.forEach(option => {
+                option.classList.toggle('selected', option.dataset.color === currentNewNoteColor);
+            });
+        }
+
+        // 渲染便签列表
+        function renderNotes() {
+            const filteredNotes = notes.filter(note => {
+                if (!searchQuery) return true;
+                const query = searchQuery.toLowerCase();
+                return note.title.toLowerCase().includes(query) ||
+                       note.content.toLowerCase().includes(query);
+            });
+
+            if (filteredNotes.length === 0) {
+                notesGrid.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            notesGrid.style.display = 'grid';
+            emptyState.style.display = 'none';
+            
+            notesGrid.innerHTML = filteredNotes.map(note => {
+                const isHighlight = searchQuery && (
+                    note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    note.content.toLowerCase().includes(searchQuery.toLowerCase())
+                );
+                
+                return `
+                    <div class="note-card ${isHighlight ? 'highlight' : ''}" 
+                         data-color="${note.color}" 
+                         data-id="${note.id}"
+                         onclick="openEditModal('${note.id}')">
+                        <div class="note-title">${escapeHtml(note.title)}</div>
+                        <div class="note-content">${escapeHtml(note.content)}</div>
+                        <div class="note-footer">
+                            <span>${formatTime(new Date(note.updatedAt))}</span>
+                            <div class="note-actions-mini">
+                                <button class="action-btn delete" onclick="deleteNote('${note.id}', event)" title="删除">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // HTML 转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 删除便签
+        function deleteNote(id, event) {
+            event.stopPropagation();
+            if (confirm('确定要删除这个便签吗？')) {
+                notes = notes.filter(note => note.id !== id);
+                renderNotes();
+                saveData();
+            }
+        }
+
+        // 打开编辑模态框
+        function openEditModal(id) {
+            const note = notes.find(n => n.id === id);
+            if (!note) return;
+            
+            currentEditId = id;
+            currentEditColor = note.color;
+            editNoteTitle.value = note.title;
+            editNoteContent.value = note.content;
+            
+            updateEditModalColor();
+            editModal.classList.add('show');
+            editNoteTitle.focus();
+        }
+
+        // 关闭编辑模态框
+        function closeEditModal() {
+            editModal.classList.remove('show');
+            currentEditId = null;
+            currentEditColor = 'white';
+        }
+
+        // 更新编辑模态框的颜色
+        function updateEditModalColor() {
+            const modalContent = editModal.querySelector('.modal-content');
+            modalContent.setAttribute('data-color', currentEditColor);
+            
+            // 更新颜色选择器
+            const colorOptions = editModal.querySelectorAll('.color-option');
+            colorOptions.forEach(option => {
+                option.classList.toggle('selected', option.dataset.color === currentEditColor);
+            });
+        }
+
+        // 保存编辑的便签
+        function saveEditedNote() {
+            if (!currentEditId) return;
+            
+            const note = notes.find(n => n.id === currentEditId);
+            if (!note) return;
+            
+            const title = editNoteTitle.value.trim();
+            const content = editNoteContent.value.trim();
+            
+            if (!title && !content) {
+                if (confirm('便签内容为空，是否删除？')) {
+                    deleteNote(currentEditId, { stopPropagation: () => {} });
+                }
+                closeEditModal();
+                return;
+            }
+            
+            note.title = title || '无标题';
+            note.content = content;
+            note.color = currentEditColor;
+            note.updatedAt = new Date();
+            
+            renderNotes();
+            saveData();
+            closeEditModal();
+        }
+
+        // 事件监听器
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载数据
+            loadDataLocally();
+            initSync();
+            renderNotes();
+            updateNewNoteColor();
+
+            // 新建便签表单提交
+            newNoteForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                createNote();
+            });
+
+            // 搜索功能
+            searchInput.addEventListener('input', function(e) {
+                searchQuery = e.target.value.trim();
+                renderNotes();
+            });
+
+            // 新建便签颜色选择
+            newNoteContainer.addEventListener('click', function(e) {
+                if (e.target.classList.contains('color-option')) {
+                    currentNewNoteColor = e.target.dataset.color;
+                    updateNewNoteColor();
+                }
+            });
+
+            // 编辑模态框颜色选择
+            editModal.addEventListener('click', function(e) {
+                if (e.target.classList.contains('color-option')) {
+                    currentEditColor = e.target.dataset.color;
+                    updateEditModalColor();
+                }
+            });
+
+            // 模态框外部点击关闭
+            editModal.addEventListener('click', function(e) {
+                if (e.target === editModal) {
+                    closeEditModal();
+                }
+            });
+
+            // ESC 键关闭模态框
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && editModal.classList.contains('show')) {
+                    closeEditModal();
+                }
+            });
+
+            // 同步按钮
+            document.getElementById('sync-button').addEventListener('click', () => {
+                if (syncConfig) {
+                    showSyncMenu();
+                } else {
+                    setupSync();
+                }
+            });
+
+            // 页面可见性改变时自动同步
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden && syncConfig && !isSyncing) {
+                    setTimeout(() => syncData('download'), 500);
+                }
+            });
+
+            // 如果有同步配置，启动时尝试同步
+            if (syncConfig) {
+                setTimeout(() => syncData('download'), 1000);
+            }
+        });
+
+        // 全局函数（供 HTML 调用）
+        window.openEditModal = openEditModal;
+        window.closeEditModal = closeEditModal;
+        window.saveEditedNote = saveEditedNote;
+        window.deleteNote = deleteNote;
+    </script>
+</body>
+</html>
