@@ -512,20 +512,20 @@
             <form class="new-note-form" id="newNoteForm">
                 <input type="text" class="note-title-input" id="newNoteTitle" placeholder="写下便签标题...">
                 <textarea class="note-content-input" id="newNoteContent" placeholder="写点什么..."></textarea>
-            </form>
-            <div class="note-actions">
-                <div class="color-picker">
-                    <div class="color-option" data-color="white" style="background-color: white; border: 1px solid #e0e0e0;"></div>
-                    <div class="color-option" data-color="yellow" style="background-color: #fff9c4;"></div>
-                    <div class="color-option" data-color="orange" style="background-color: #feecb3;"></div>
-                    <div class="color-option" data-color="pink" style="background-color: #fdd7e4;"></div>
-                    <div class="color-option" data-color="purple" style="background-color: #e1bee7;"></div>
-                    <div class="color-option" data-color="blue" style="background-color: #bbdefb;"></div>
-                    <div class="color-option" data-color="green" style="background-color: #c8e6c9;"></div>
-                    <div class="color-option" data-color="gray" style="background-color: #f5f5f5;"></div>
+                <div class="note-actions">
+                    <div class="color-picker">
+                        <div class="color-option" data-color="white" style="background-color: white; border: 1px solid #e0e0e0;"></div>
+                        <div class="color-option" data-color="yellow" style="background-color: #fff9c4;"></div>
+                        <div class="color-option" data-color="orange" style="background-color: #feecb3;"></div>
+                        <div class="color-option" data-color="pink" style="background-color: #fdd7e4;"></div>
+                        <div class="color-option" data-color="purple" style="background-color: #e1bee7;"></div>
+                        <div class="color-option" data-color="blue" style="background-color: #bbdefb;"></div>
+                        <div class="color-option" data-color="green" style="background-color: #c8e6c9;"></div>
+                        <div class="color-option" data-color="gray" style="background-color: #f5f5f5;"></div>
+                    </div>
+                    <button type="submit" class="save-btn">保存便签</button>
                 </div>
-                <button type="submit" class="save-btn">保存便签</button>
-            </div>
+            </form>
         </div>
 
         <!-- 便签列表 -->
@@ -884,10 +884,15 @@
 
         // 创建新便签
         function createNote() {
+            console.log('创建便签函数被调用');
             const title = newNoteTitle.value.trim();
             const content = newNoteContent.value.trim();
+            console.log('标题:', title, '内容:', content);
             
-            if (!title && !content) return;
+            if (!title && !content) {
+                console.log('标题和内容都为空，不创建便签');
+                return;
+            }
             
             const note = {
                 id: generateId(),
@@ -898,10 +903,12 @@
                 updatedAt: new Date()
             };
             
+            console.log('创建的便签:', note);
             notes.unshift(note);
             clearNewNoteForm();
             renderNotes();
             saveData();
+            console.log('便签创建完成');
         }
 
         // 清空新建便签表单
@@ -1056,6 +1063,7 @@
 
             // 新建便签表单提交
             newNoteForm.addEventListener('submit', function(e) {
+                console.log('表单提交事件触发');
                 e.preventDefault();
                 createNote();
             });
