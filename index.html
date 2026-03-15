@@ -4,799 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SEN - 记录生活的碎片，捕捉平凡中的光</title>
-    <meta name="description" content="SEN的个人博客与工具集。记录生活、旅行、美食、技术的点滴，分享实用小工具。">
-    <meta name="keywords" content="SEN, 博客, 生活记录, 旅行, 美食, 技术, 个人工具">
+    <meta name="description" content="SEN的个人生活日记与相册。从大学到工作，用照片和文字记录这些年走过的城市、遇见的风景和平凡日子里的光。">
+    <meta name="keywords" content="SEN, 生活日记, 旅行记录, 相册, 个人博客">
     <meta name="author" content="SEN">
     <meta property="og:title" content="SEN - 记录生活的碎片，捕捉平凡中的光">
-    <meta property="og:description" content="SEN的个人博客与工具集。记录生活、旅行、美食、技术的点滴。">
+    <meta property="og:description" content="从大学到工作，用照片和文字记录这些年走过的城市、遇见的风景和平凡日子里的光。">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://sen666.cn">
     <meta property="og:locale" content="zh_CN">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        /* ===== Reset & Variables ===== */
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-        :root {
-            --bg: #ffffff;
-            --bg-alt: #f8fafc;
-            --card: #ffffff;
-            --text: #0f172a;
-            --text-muted: #64748b;
-            --text-light: #94a3b8;
-            --accent: #3b82f6;
-            --accent-dark: #2563eb;
-            --accent-bg: #eff6ff;
-            --accent-border: #bfdbfe;
-            --border: #e2e8f0;
-            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
-            --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-            --shadow-md: 0 4px 6px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.04);
-            --shadow-lg: 0 10px 25px rgba(0,0,0,0.08), 0 4px 10px rgba(0,0,0,0.04);
-            --radius: 16px;
-            --radius-sm: 10px;
-            --radius-xs: 6px;
-            --max-w: 1100px;
-            --nav-h: 64px;
-            --green: #10b981;
-            --green-bg: #ecfdf5;
-            --orange: #f59e0b;
-            --orange-bg: #fffbeb;
-            --purple: #8b5cf6;
-            --purple-bg: #f5f3ff;
-            --indigo: #6366f1;
-            --indigo-bg: #eef2ff;
-            --rose: #f43f5e;
-            --rose-bg: #fff1f2;
-            --teal: #14b8a6;
-            --teal-bg: #f0fdfa;
-        }
-
-        html { scroll-behavior: smooth; scroll-padding-top: calc(var(--nav-h) + 24px); }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Sans SC', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.7;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        .container {
-            max-width: var(--max-w);
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-
-        /* ===== Navbar ===== */
-        .navbar {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            height: var(--nav-h);
-            background: rgba(255,255,255,0.88);
-            backdrop-filter: blur(16px) saturate(1.8);
-            -webkit-backdrop-filter: blur(16px) saturate(1.8);
-            border-bottom: 1px solid var(--border);
-            z-index: 1000;
-            transition: box-shadow 0.3s;
-        }
-
-        .navbar.scrolled {
-            box-shadow: 0 1px 8px rgba(0,0,0,0.06);
-        }
-
-        .nav-inner {
-            max-width: var(--max-w);
-            margin: 0 auto;
-            padding: 0 24px;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .nav-brand {
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: var(--text);
-            text-decoration: none;
-            letter-spacing: -0.5px;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 4px;
-            list-style: none;
-        }
-
-        .nav-links a {
-            display: block;
-            padding: 8px 16px;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            border-radius: var(--radius-sm);
-            transition: color 0.2s, background 0.2s;
-        }
-
-        .nav-links a:hover { color: var(--accent); background: var(--accent-bg); }
-        .nav-links a.active { color: var(--accent); background: var(--accent-bg); font-weight: 600; }
-
-        .nav-toggle {
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            gap: 5px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            width: 40px; height: 40px;
-            padding: 8px;
-            border-radius: var(--radius-sm);
-            transition: background 0.2s;
-        }
-
-        .nav-toggle:hover { background: var(--accent-bg); }
-
-        .nav-toggle span {
-            display: block;
-            width: 100%;
-            height: 2px;
-            background: var(--text);
-            border-radius: 1px;
-            transition: all 0.3s ease;
-            transform-origin: center;
-        }
-
-        .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-        .nav-toggle.open span:nth-child(2) { opacity: 0; }
-        .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-        /* ===== Sections ===== */
-        .section {
-            padding: 80px 0;
-        }
-
-        .section-alt {
-            background: var(--bg-alt);
-        }
-
-        .section-header {
-            text-align: center;
-            margin-bottom: 48px;
-        }
-
-        .section-badge {
-            display: inline-block;
-            font-size: 0.78rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--accent);
-            background: var(--accent-bg);
-            padding: 4px 14px;
-            border-radius: 20px;
-            margin-bottom: 12px;
-        }
-
-        .section-header h2 {
-            font-size: 2rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            margin-bottom: 8px;
-        }
-
-        .section-header p {
-            color: var(--text-muted);
-            font-size: 1rem;
-        }
-
-        /* ===== Hero ===== */
-        .hero {
-            padding: calc(var(--nav-h) + 80px) 0 80px;
-            text-align: center;
-        }
-
-        .hero-avatar {
-            width: 100px; height: 100px;
-            border-radius: 28px;
-            margin: 0 auto 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.6rem;
-            font-weight: 800;
-            color: var(--accent);
-            background: linear-gradient(135deg, var(--accent-bg), #dbeafe);
-            border: 2px solid var(--accent-border);
-            position: relative;
-            animation: float 5s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-        }
-
-        .hero-title {
-            font-size: 3.2rem;
-            font-weight: 800;
-            letter-spacing: -1.5px;
-            line-height: 1.2;
-            margin-bottom: 16px;
-            color: var(--text);
-        }
-
-        .hero-subtitle {
-            font-size: 1.15rem;
-            color: var(--text-muted);
-            line-height: 1.8;
-            margin-bottom: 36px;
-            max-width: 500px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .hero-buttons {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 28px;
-            border-radius: var(--radius-sm);
-            font-size: 0.95rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.25s ease;
-            cursor: pointer;
-            border: none;
-            font-family: inherit;
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: #fff;
-            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
-        }
-
-        .btn-primary:hover {
-            background: var(--accent-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
-        }
-
-        .btn-outline {
-            background: transparent;
-            color: var(--text);
-            border: 1.5px solid var(--border);
-        }
-
-        .btn-outline:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-            background: var(--accent-bg);
-            transform: translateY(-2px);
-        }
-
-        /* ===== Blog Grid ===== */
-        .blog-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-        }
-
-        .blog-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 24px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .blog-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg);
-            border-color: transparent;
-        }
-
-        .blog-card .card-meta {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 12px;
-        }
-
-        .blog-card .card-date {
-            font-size: 0.82rem;
-            color: var(--text-light);
-            font-weight: 500;
-        }
-
-        .card-tag {
-            font-size: 0.72rem;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-weight: 600;
-            letter-spacing: 0.3px;
-        }
-
-        .tag-life { background: var(--green-bg); color: var(--green); }
-        .tag-travel { background: var(--accent-bg); color: var(--accent); }
-        .tag-food { background: var(--orange-bg); color: var(--orange); }
-        .tag-thought { background: var(--purple-bg); color: var(--purple); }
-        .tag-tech { background: var(--indigo-bg); color: var(--indigo); }
-
-        .blog-card h3 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-            letter-spacing: -0.3px;
-            line-height: 1.4;
-            color: var(--text);
-        }
-
-        .blog-card .card-excerpt {
-            font-size: 0.88rem;
-            color: var(--text-muted);
-            line-height: 1.7;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            flex: 1;
-        }
-
-        .blog-card .card-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            margin-top: 16px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--accent);
-            transition: gap 0.2s;
-        }
-
-        .blog-card:hover .card-link { gap: 8px; }
-
-        /* ===== Apps Grid ===== */
-        .apps-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-        }
-
-        .app-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 32px 24px;
-            text-align: center;
-            text-decoration: none;
-            color: var(--text);
-            transition: all 0.3s ease;
-        }
-
-        .app-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg);
-            border-color: var(--accent-border);
-        }
-
-        .app-icon {
-            font-size: 2.4rem;
-            margin-bottom: 12px;
-            display: block;
-        }
-
-        .app-card h3 {
-            font-size: 1.05rem;
-            font-weight: 700;
-            margin-bottom: 6px;
-        }
-
-        .app-card .app-desc {
-            font-size: 0.88rem;
-            color: var(--text-muted);
-            margin-bottom: 16px;
-        }
-
-        .app-card .app-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--accent);
-            transition: gap 0.2s;
-        }
-
-        .app-card:hover .app-link { gap: 8px; }
-
-        /* ===== Tags ===== */
-        .tags-wall {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .tag-pill {
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 0.88rem;
-            font-weight: 500;
-            color: var(--text-muted);
-            background: var(--card);
-            border: 1px solid var(--border);
-            cursor: pointer;
-            transition: all 0.25s ease;
-            user-select: none;
-        }
-
-        .tag-pill:hover {
-            color: var(--accent);
-            border-color: var(--accent-border);
-            background: var(--accent-bg);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .tag-pill.active {
-            color: #fff;
-            background: var(--accent);
-            border-color: var(--accent);
-        }
-
-        /* ===== About ===== */
-        .about-content {
-            max-width: 680px;
-            margin: 0 auto;
-        }
-
-        .about-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 36px;
-        }
-
-        .about-card p {
-            font-size: 1rem;
-            color: var(--text-muted);
-            line-height: 1.9;
-            margin-bottom: 12px;
-        }
-
-        .about-card p strong {
-            color: var(--text);
-        }
-
-        .about-card ul {
-            list-style: none;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-top: 16px;
-        }
-
-        .about-card li {
-            font-size: 0.92rem;
-            color: var(--text-muted);
-            padding: 8px 12px;
-            border-radius: var(--radius-xs);
-            background: var(--bg-alt);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .about-card li::before {
-            content: '';
-            width: 6px; height: 6px;
-            border-radius: 50%;
-            background: var(--accent);
-            flex-shrink: 0;
-        }
-
-        /* ===== Activity Timeline ===== */
-        .timeline {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .timeline-item {
-            display: flex;
-            gap: 16px;
-            padding-bottom: 24px;
-            position: relative;
-        }
-
-        .timeline-item:not(:last-child)::after {
-            content: '';
-            position: absolute;
-            left: 11px;
-            top: 28px;
-            bottom: 0;
-            width: 2px;
-            background: var(--border);
-        }
-
-        .timeline-dot {
-            width: 24px; height: 24px;
-            border-radius: 50%;
-            background: var(--accent-bg);
-            border: 2px solid var(--accent);
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            z-index: 1;
-        }
-
-        .timeline-dot::after {
-            content: '';
-            width: 8px; height: 8px;
-            border-radius: 50%;
-            background: var(--accent);
-        }
-
-        .timeline-body {
-            flex: 1;
-            padding-top: 1px;
-        }
-
-        .timeline-date {
-            font-size: 0.78rem;
-            color: var(--text-light);
-            font-weight: 500;
-            margin-bottom: 2px;
-        }
-
-        .timeline-text {
-            font-size: 0.95rem;
-            color: var(--text);
-            font-weight: 500;
-        }
-
-        /* ===== Contact ===== */
-        .contact-content {
-            display: flex;
-            justify-content: center;
-        }
-
-        .contact-card {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 20px 36px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            text-decoration: none;
-            color: var(--text);
-            transition: all 0.3s ease;
-        }
-
-        .contact-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-            border-color: var(--accent-border);
-        }
-
-        .contact-icon {
-            width: 48px; height: 48px;
-            border-radius: 14px;
-            background: var(--accent-bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.3rem;
-        }
-
-        .contact-info .contact-label {
-            display: block;
-            font-size: 0.78rem;
-            color: var(--text-light);
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .contact-info .contact-value {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        /* ===== Footer ===== */
-        .footer {
-            background: var(--text);
-            color: rgba(255,255,255,0.6);
-            padding: 40px 0;
-            text-align: center;
-        }
-
-        .footer-nav {
-            display: flex;
-            justify-content: center;
-            gap: 24px;
-            margin-bottom: 20px;
-        }
-
-        .footer-nav a {
-            color: rgba(255,255,255,0.5);
-            text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 500;
-            transition: color 0.2s;
-        }
-
-        .footer-nav a:hover { color: #fff; }
-
-        .footer p {
-            font-size: 0.82rem;
-        }
-
-        /* ===== Modal ===== */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            z-index: 2000;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .modal-overlay.show { display: flex; opacity: 1; }
-
-        .modal-content {
-            width: 100%;
-            max-width: 640px;
-            max-height: 80vh;
-            overflow-y: auto;
-            padding: 36px;
-            background: var(--card);
-            border-radius: var(--radius);
-            box-shadow: 0 24px 48px rgba(0,0,0,0.15);
-            transform: translateY(16px) scale(0.98);
-            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .modal-overlay.show .modal-content {
-            transform: translateY(0) scale(1);
-        }
-
-        .modal-content::-webkit-scrollbar { width: 0; }
-
-        .modal-close {
-            float: right;
-            width: 36px; height: 36px;
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--border);
-            background: var(--bg-alt);
-            color: var(--text-muted);
-            font-size: 1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .modal-close:hover { background: var(--border); color: var(--text); }
-
-        .modal-tag { margin-bottom: 10px; }
-
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 6px;
-            letter-spacing: -0.5px;
-        }
-
-        .modal-date {
-            font-size: 0.85rem;
-            color: var(--text-light);
-            margin-bottom: 24px;
-        }
-
-        .modal-body {
-            font-size: 1rem;
-            line-height: 2;
-            color: var(--text-muted);
-        }
-
-        .modal-body p { margin-bottom: 12px; }
-
-        /* ===== Reveal Animation ===== */
-        .reveal {
-            opacity: 0;
-            transform: translateY(24px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
-        }
-
-        .reveal.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* ===== Responsive ===== */
-        @media (max-width: 1024px) {
-            .blog-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-
-        @media (max-width: 768px) {
-            .nav-toggle { display: flex; }
-
-            .nav-links {
-                position: absolute;
-                top: var(--nav-h);
-                left: 0; right: 0;
-                flex-direction: column;
-                background: rgba(255,255,255,0.96);
-                backdrop-filter: blur(16px);
-                -webkit-backdrop-filter: blur(16px);
-                border-bottom: 1px solid var(--border);
-                padding: 8px 16px;
-                display: none;
-                box-shadow: var(--shadow-md);
-            }
-
-            .nav-links.open { display: flex; }
-
-            .nav-links a {
-                padding: 12px 16px;
-                border-radius: var(--radius-sm);
-            }
-
-            .section { padding: 56px 0; }
-
-            .section-header { margin-bottom: 32px; }
-            .section-header h2 { font-size: 1.6rem; }
-
-            .hero { padding: calc(var(--nav-h) + 48px) 0 48px; }
-            .hero-title { font-size: 2.4rem; }
-            .hero-subtitle { font-size: 1rem; }
-
-            .blog-grid { grid-template-columns: 1fr; gap: 16px; }
-            .apps-grid { grid-template-columns: 1fr; gap: 16px; }
-
-            .about-card { padding: 24px; }
-            .about-card ul { grid-template-columns: 1fr; }
-
-            .modal-content { padding: 24px; }
-
-            .contact-card { padding: 16px 24px; }
-        }
-
-        @media (max-width: 480px) {
-            .hero-title { font-size: 2rem; }
-            .hero-avatar { width: 80px; height: 80px; font-size: 2rem; border-radius: 22px; }
-            .container { padding: 0 16px; }
-            .btn { padding: 11px 22px; font-size: 0.9rem; }
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
@@ -811,7 +30,6 @@
             <li><a href="#home" class="active">Home</a></li>
             <li><a href="#blog">Blog</a></li>
             <li><a href="#apps">Apps</a></li>
-            <li><a href="#tags">Tags</a></li>
             <li><a href="#about">About</a></li>
             <li><a href="#contact">Contact</a></li>
         </ul>
@@ -823,28 +41,29 @@
     <div class="container">
         <div class="hero-avatar reveal">S</div>
         <h1 class="hero-title reveal">Hello, I'm SEN</h1>
-        <p class="hero-subtitle reveal">记录生活的碎片，捕捉平凡中的光。</p>
+        <p class="hero-subtitle reveal">记录生活的碎片，捕捉平凡中的光。<br>这些年走过的路，遇见的风景，都在这里。</p>
         <div class="hero-buttons reveal">
-            <a href="#blog" class="btn btn-primary">开始阅读</a>
+            <a href="#blog" class="btn btn-primary">浏览日记</a>
             <a href="#apps" class="btn btn-outline">探索工具</a>
         </div>
     </div>
 </section>
 
-<!-- Latest Blog Posts -->
-<section class="section section-alt" id="blog">
+<!-- Blog / Photo Diary -->
+<section class="section" id="blog">
     <div class="container">
         <div class="section-header reveal">
-            <span class="section-badge">Blog</span>
-            <h2>最新文章</h2>
-            <p>记录每一个值得记住的瞬间</p>
+            <span class="section-badge">Diary</span>
+            <h2>生活日记</h2>
+            <p>从大学到工作，那些值得记住的日子</p>
         </div>
-        <div class="blog-grid" id="blogGrid"></div>
     </div>
+    <nav class="year-nav" id="yearNav"></nav>
+    <div class="container" id="diaryContent"></div>
 </section>
 
-<!-- Featured Apps -->
-<section class="section" id="apps">
+<!-- Apps -->
+<section class="section section-alt" id="apps">
     <div class="container">
         <div class="section-header reveal">
             <span class="section-badge">Apps</span>
@@ -874,19 +93,7 @@
     </div>
 </section>
 
-<!-- Topics / Tags -->
-<section class="section section-alt" id="tags">
-    <div class="container">
-        <div class="section-header reveal">
-            <span class="section-badge">Topics</span>
-            <h2>探索话题</h2>
-            <p>点击标签浏览相关内容</p>
-        </div>
-        <div class="tags-wall reveal" id="tagsWall"></div>
-    </div>
-</section>
-
-<!-- About Me -->
+<!-- About -->
 <section class="section" id="about">
     <div class="container">
         <div class="section-header reveal">
@@ -896,12 +103,12 @@
         <div class="about-content reveal">
             <div class="about-card">
                 <p>嗨，我是 <strong>SEN</strong>。</p>
-                <p>电气工程专业，喜欢记录生活和技术探索。</p>
+                <p>电气工程专业，喜欢记录生活和技术探索。从哈尔滨的大学时光，到广东的实习日子，再到青岛的工作生活——每一段路都值得被记住。</p>
                 <p>我会在这里分享：</p>
                 <ul>
-                    <li>技术学习</li>
                     <li>旅行记录</li>
-                    <li>阅读笔记</li>
+                    <li>校园生活</li>
+                    <li>技术学习</li>
                     <li>有趣的小工具</li>
                 </ul>
             </div>
@@ -909,55 +116,8 @@
     </div>
 </section>
 
-<!-- Recent Activity -->
-<section class="section section-alt" id="activity">
-    <div class="container">
-        <div class="section-header reveal">
-            <span class="section-badge">Activity</span>
-            <h2>最近动态</h2>
-        </div>
-        <div class="timeline reveal">
-            <div class="timeline-item">
-                <div class="timeline-dot"></div>
-                <div class="timeline-body">
-                    <div class="timeline-date">2025-03-15</div>
-                    <div class="timeline-text">发布文章：搬进新房子的第一天</div>
-                </div>
-            </div>
-            <div class="timeline-item">
-                <div class="timeline-dot"></div>
-                <div class="timeline-body">
-                    <div class="timeline-date">2025-03-08</div>
-                    <div class="timeline-text">发布文章：周末的菜市场才是人间真实</div>
-                </div>
-            </div>
-            <div class="timeline-item">
-                <div class="timeline-dot"></div>
-                <div class="timeline-body">
-                    <div class="timeline-date">2025-03-01</div>
-                    <div class="timeline-text">更新应用：储物柜云同步功能</div>
-                </div>
-            </div>
-            <div class="timeline-item">
-                <div class="timeline-dot"></div>
-                <div class="timeline-body">
-                    <div class="timeline-date">2025-02-20</div>
-                    <div class="timeline-text">发布文章：第一次独自旅行去了厦门</div>
-                </div>
-            </div>
-            <div class="timeline-item">
-                <div class="timeline-dot"></div>
-                <div class="timeline-body">
-                    <div class="timeline-date">2025-02-10</div>
-                    <div class="timeline-text">新项目：个人生活博客上线</div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
 <!-- Contact -->
-<section class="section" id="contact">
+<section class="section section-alt" id="contact">
     <div class="container">
         <div class="section-header reveal">
             <span class="section-badge">Contact</span>
@@ -967,7 +127,7 @@
         <div class="contact-content reveal">
             <a href="mailto:ys1991427360@gmail.com" class="contact-card">
                 <div class="contact-icon">&#x2709;&#xFE0F;</div>
-                <div class="contact-info">
+                <div>
                     <span class="contact-label">Email</span>
                     <span class="contact-value">ys1991427360@gmail.com</span>
                 </div>
@@ -983,7 +143,6 @@
             <a href="#home">Home</a>
             <a href="#blog">Blog</a>
             <a href="#apps">Apps</a>
-            <a href="#tags">Tags</a>
             <a href="#about">About</a>
             <a href="#contact">Contact</a>
         </div>
@@ -991,228 +150,272 @@
     </div>
 </footer>
 
-<!-- Modal -->
-<div class="modal-overlay" id="modal">
-    <div class="modal-content">
-        <button class="modal-close" onclick="closeModal()">&#x2715;</button>
-        <div class="modal-tag" id="modalTag"></div>
-        <h2 class="modal-title" id="modalTitle"></h2>
-        <div class="modal-date" id="modalDate"></div>
-        <div class="modal-body" id="modalBody"></div>
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+    <button class="lightbox-close" onclick="closeLightbox()">&#x2715;</button>
+    <div class="lightbox-media-wrap" id="lbMediaWrap"></div>
+    <div class="lightbox-nav" id="lbNav" style="display:none">
+        <button onclick="lbPrev()">&#x2039;</button>
+        <span class="lightbox-counter" id="lbCounter"></span>
+        <button onclick="lbNext()">&#x203A;</button>
+    </div>
+    <div class="lightbox-info">
+        <div class="lightbox-date" id="lbDate"></div>
+        <div class="lightbox-title" id="lbTitle"></div>
+        <div class="lightbox-text" id="lbText"></div>
     </div>
 </div>
 
 <script>
-    // ===== Blog Data =====
-    const posts = [
-        {
-            id: 1,
-            title: "搬进新房子的第一天",
-            date: "2025-03-15",
-            tag: "life",
-            tagLabel: "日常",
-            excerpt: "终于有了属于自己的小窝。纸箱还没拆完，但已经迫不及待地在阳台上坐了一会儿，看着远处的天际线发了好久的呆。",
-            content: `<p>今天是搬进新房子的第一天。</p><p>其实东西还没有完全归位，客厅里堆满了纸箱。但当我推开阳台的门，感受到那阵风的时候，突然觉得一切都值得了。</p><p>傍晚的时候，一个人坐在阳台上，看着远处的建筑渐渐亮起灯光。没有电视的声音，没有手机的打扰，只有风和城市远处隐隐约约的声响。</p><p>这种安静的感觉，好像已经很久没有过了。</p><p>新的空间，新的开始。慢慢来，把这里变成自己最喜欢的样子。</p>`
-        },
-        {
-            id: 2,
-            title: "周末的菜市场才是人间真实",
-            date: "2025-03-08",
-            tag: "food",
-            tagLabel: "美食",
-            excerpt: "清晨的菜市场带着露水的潮湿味道，混合着葱姜蒜的浓烈气息。今天买了新鲜的基围虾和嫩豆腐，准备试试酸辣虾汤。",
-            content: `<p>每到周末，我都喜欢早起去逛菜市场。</p><p>没有什么地方比菜市场更有人间烟火气了。卖鱼的大叔会热情地推荐今天最新鲜的货，卖菜的阿姨总会多塞给你几根葱。</p><p>今天收获满满：一斤基围虾、一块嫩豆腐、几个番茄和一把小葱。计划做一道酸辣虾汤，配上热腾腾的米饭，想想就开心。</p><p>在厨房忙活了一个小时，汤的味道竟然出奇的好。酸酸辣辣的，虾肉弹牙，豆腐入口即化。给自己打了个 9 分（毕竟盐稍微多了一点点）。</p><p>生活的幸福感，有时候真的就藏在一顿自己做的饭里。</p>`
-        },
-        {
-            id: 3,
-            title: "三月，适合重新开始",
-            date: "2025-03-01",
-            tag: "thought",
-            tagLabel: "随想",
-            excerpt: "三月的风不一样了。吹过来的时候，会有一种「好像什么事情正在悄悄发生」的感觉。也许该清理一下房间和心情了。",
-            content: `<p>三月一号，什么都没做，只是出门走了走。</p><p>路边的樱花树还没完全开放，但枝头已经冒出了粉色的小苞。空气里多了一点潮润的味道，阳光也比冬天温柔了许多。</p><p>最近一直在想，人为什么会在某些时刻突然有"要重新开始"的冲动？也许是季节的暗示，也许是身体比大脑更早感知到了变化。</p><p>总之，今天回家后清理了书桌，扔掉了三袋旧东西，然后泡了一杯茶，坐在窗边写了这篇日记。</p><p>三月，请多多关照。</p>`
-        },
-        {
-            id: 4,
-            title: "第一次独自旅行：去了厦门",
-            date: "2025-02-20",
-            tag: "travel",
-            tagLabel: "旅行",
-            excerpt: "一个人背着包去了厦门。没有详细计划，也没有赶行程，只是沿着海边慢慢走，吹了一整天的海风。",
-            content: `<p>说走就走的旅行，终于不只是一句口号了。</p><p>周五下班后直接去了火车站，买了张去厦门的票。抵达的时候已经是深夜，海风带着咸味扑面而来。</p><p>第二天睡到自然醒，没有闹钟，没有行程表。随便找了一家街边小店吃了沙茶面，然后沿着环岛路一直走。</p><p>海很蓝，天很高，路上遇到了一只很亲人的橘猫，蹲下来和它玩了好一会儿。</p><p>晚上在海边坐着听浪声，想起一句话："一个人的旅行不是孤独，是自由。" 现在我终于真正理解了这句话的意思。</p>`
-        },
-        {
-            id: 5,
-            title: "用 Obsidian 重新整理知识体系",
-            date: "2025-02-10",
-            tag: "tech",
-            tagLabel: "技术",
-            excerpt: "折腾了一整天的笔记系统，终于从散乱的备忘录迁移到了 Obsidian。双链笔记的感觉确实不一样。",
-            content: `<p>一直以来，我的笔记都散落在各种地方：手机备忘录、微信收藏、浏览器书签、各种 App……想找点东西的时候，翻遍全世界都找不到。</p><p>今天下定决心，把所有东西迁移到 Obsidian。花了大半天整理，但过程中也重新发现了很多之前记下来却忘掉的好东西。</p><p>双链的魅力在于，它让你看到知识之间的联系。一条读书笔记链接到一个项目想法，一个技术思路链接到一篇随笔。慢慢地，这些零散的点连成了一张网。</p><p>虽然还在不断调整结构，但已经有了一种"大脑被整理过"的清爽感。</p>`
-        },
-        {
-            id: 6,
-            title: "深夜的一碗泡面",
-            date: "2025-01-28",
-            tag: "life",
-            tagLabel: "日常",
-            excerpt: "加班到凌晨一点，回到家煮了一碗泡面。加了一个蛋和两片火腿，在安静的厨房里，这大概是世界上最好吃的东西了。",
-            content: `<p>今晚加班到很晚。回家的路上，街道已经安静了，只有便利店的灯还亮着。</p><p>到家之后不想点外卖，翻出了一包泡面。烧水的时候打了一个鸡蛋，切了两片火腿。</p><p>面煮好的时候，热气腾起来，厨房里充满了熟悉的香味。端着碗坐在桌前，窗外是深蓝色的夜空和几点零星的灯光。</p><p>一口汤下去，整个人都暖了。</p><p>有时候觉得，生活的温柔就藏在这些不起眼的时刻里。不需要多隆重，一碗热气腾腾的泡面就够了。</p>`
-        }
-    ];
+// ===== Diary Entries Data =====
+const entries = [
+// 2026
+{date:'2026-02-25',title:'在尼山圣境',text:'到了尼山圣境，周围的氛围会让人不自觉安静下来。旅行并不总是为了热闹打卡，有时候只是想在一个更有文化和意味的地方，认真地待上一会儿。',media:['pic/26.2.25在尼山圣境.jpg']},
+{date:'2026-02-20',title:'在周口市第一高山',text:'名字里带着一点幽默感的地方，往往会让旅途多一点轻松。到了所谓"周口市第一高山"，也许高度不是重点，重点是愿意为了某个特别的地点出发，这本身就很好。',media:['pic/26.2.20在周口市第一高山.jpg']},
+{date:'2026-02-12',title:'在家',text:'忙了一阵之后回到家，生活就像重新切回了更熟悉的频道。哪怕什么特别的事都没发生，只要是在家，就已经是一种很具体的治愈。',media:['pic/26.2.12在家.jpg']},
+{date:'2026-02-02',title:'公司年会抽到了大疆无人机',text:'年会这种场合，抽奖永远最能调动情绪。真的抽到一台大疆无人机的时候，那种惊喜一定很直接，也很适合作为新一年里一个足够明亮的开场。',media:['pic/26.2.2公式年会抽到了大疆无人机.jpg']},
+{date:'2026-01-11',title:'在淮安的一个不知名的小镇',text:'旅行里最打动人的，很多时候不是著名景点，反而是这样一个叫不上名字的小镇。它没有那么多预设期待，所以眼前看到的一切都会显得更真实、更生活。',media:['pic/26.1.11在淮安的一个不知名的小镇.jpg']},
+{date:'2026-01-10',title:'在南京中山陵',text:'中山陵总给人一种庄重又开阔的感觉，走在那样的地方，自然会把脚步放慢一些。旅行到这里，不只是看景点，更像是在和一段更厚重的历史短暂地靠近。',media:['pic/26.1.10在南京中山陵.jpg']},
+{date:'2026-01-03',title:'在济南趵突泉',text:'趵突泉这样的地方，有一种很稳定的文化记忆感。去到那里，不需要刻意安排很多情节，光是看着泉水、走在周围，心情就已经慢慢沉静下来了。',media:['pic/26.1.3在济南趵突泉.jpg']},
+{date:'2026-01-02',title:'在八达岭长城',text:'长城这种地方，亲自站上去和在图片里看到完全是两回事。脚下的路、眼前的山势，还有历史沉淀出来的重量，都让"到此一游"变成了一次更有实感的经历。',media:['pic/26.1.2在八达岭长城.jpg']},
+{date:'2026-01-01',title:'在天安门',text:'新年的第一天出现在天安门，这个开头已经足够有纪念意义。很多人会在这样的地点给新一年寄托一点愿望，而真正重要的，也许只是提醒自己继续认真生活。',media:['pic/26.1.1在天安门.jpg']},
+// 2025
+{date:'2025-12-28',title:'在青岛栈桥',text:'到了青岛，栈桥总像是必须去看看的地方。它之所以经典，大概正因为它承载了太多人关于海边、关于旅行、关于"我真的到过这里"的共同记忆。',media:['pic/25.12.28在青岛栈桥.jpg']},
+{date:'2025-12-20',title:'在青岛山海明月间',text:'"山海明月间"这个名字本身就很有画面感，像把风景和心情都放大了一层。站在那样的地方，人很容易生出一种温柔的感慨，觉得辛苦生活之外，世界还是一直在认真地好看。',media:['pic/25.12.20在青岛山海明月间.jpg']},
+{date:'2025-12-13',title:'在威海',text:'威海给人的感觉常常是清爽、开阔，又带一点海边城市特有的从容。去到这样的地方，会让人觉得生活未必要总是冲得很快，也可以慢一点，好好看一看路边的风景。',media:['pic/25.12.13在威海.jpg']},
+{date:'2025-12-08',title:'在海水浴场',text:'冬天或者淡季去海水浴场，会和热闹时候完全不同。没有喧闹的人群，反而更能听见海本身的声音，也更容易让人安静地和自己待一会儿。',media:['pic/25.12.8在海水浴场.jpg']},
+{date:'2025-12-07',title:'在小珠山上',text:'爬到山上看风景，总会觉得视野和心情是一起被抬高的。小珠山这一天留下来的，大概不只是风景，还有一步一步往上走之后那种很扎实的满足感。',media:['pic/25.12.7在小珠山上.jpg']},
+{date:'2025-12-02',title:'华北平原的落日',text:'平原上的落日有一种很开阔的美，没有太多遮挡，于是天色变化也显得更完整。那种被晚霞慢慢包住的感觉，会让人暂时忘记脚下还有很多路要赶。',media:['pic/25.12.2华北平原的落日.jpg']},
+{date:'2025-11-29',title:'临时通知的出差',text:'临时出差总会打乱原本的节奏，但也因此更容易留下印象。事情来得突然的时候，反而能看清自己面对变化时的状态，是慌乱、兴奋，还是已经慢慢学会适应。',media:['pic/25.11.29临时通知的出差.jpg']},
+{date:'2025-11-14',title:'周五下班和同事吃个小饭',text:'工作以后才会发现，"下班后一起吃个饭"是一种很朴素但很治愈的社交方式。周五的晚饭尤其好，因为它意味着一周结束了，人终于能把紧绷感稍微放下。',media:['pic/25.11.14周五下班和同事吃个小饭.jpg']},
+{date:'2025-11-01',title:'鱼鸣嘴村',text:'一个名字特别的地方，通常会让人更容易记住它。鱼鸣嘴村这天留下来的，不只是到此一游，更像是一种走进陌生地理和生活现场的感觉。',media:['pic/25.11.1鱼鸣嘴村.jpg']},
+{date:'2025-10-19',title:'在小麦岛公园',text:'海边、公园、风和慢慢走路的人，这样的组合总会让日子显得轻一些。到了小麦岛公园，感觉像是从工作和安排里短暂抽身，给自己留了一点呼吸的空地。',media:['pic/25.10.19在小麦岛公园.jpg']},
+{date:'2025-09-26',title:'对，这就是我',text:'有些照片像是在确认一个阶段的自己。也许不是最完美的状态，但它足够真实，所以会忍不住想说一句，对，这就是我。',media:['pic/25.9.26对这就是我.jpg']},
+{date:'2025-07-24',title:'公司在军训晚会上给举办的生日会',text:'成年后的生日如果还能被认真对待，会让人觉得很温暖。尤其是在新的环境、新的群体里，被大家记住并准备一个小小的生日会，本身就已经是一份难得的善意。',media:['pic/25.7.24公司在军训晚会上给举办的生日会.jpg']},
+{date:'2025-06-23',title:'最后一次看一眼大学宿舍',text:'离开宿舍的那一刻，总会比想象中更让人难受一点。住了这么久的地方，最后竟然也只剩下一眼，但正因为这样，它才会在记忆里停留得更久。',media:['pic/25.6.23最后一次看一眼大学宿舍.jpg']},
+{date:'2025-06-16',title:'在松花江',text:'再去看松花江的时候，心情可能已经和刚入学时不一样了。熟悉的地方总能承接很多复杂的情绪，尤其在毕业前后，它会像一个沉默的旁观者，看着人慢慢长大。',media:['pic/25.6.16在松花江.jpg']},
+{date:'2025-04-15',title:'打印毕业论文',text:'毕业论文真正被打印出来的时候，很多事情才会突然有了实感。那些熬过的夜、改过的字、反复确认过的细节，终于从电脑里的文件变成了可以拿在手上的一摞纸。',media:['pic/25.4.15打印毕业论文.jpg']},
+{date:'2025-03-18',title:'最爱听的周杰伦的《枫》',text:'有些歌之所以会被反复听，不只是因为旋律好听，更因为它总能准确碰到当下的心情。《枫》这种歌，很适合在某些安静的时刻陪着人，把没说出口的情绪慢慢放出来。',media:['pic/25.3.18最爱听的周杰伦的枫.jpg']},
+// 2024
+{date:'2024-12-29',title:'在西安',text:'到了年末又去了西安，像是给这一年的脚步再添上一座城市。古老和现代混在一起的地方，总会让旅行多一点厚重感，也让人忍不住想把这段路走得更慢些。',media:['pic/24.12.29在西安.jpg']},
+{date:'2024-12-14',title:'哈尔滨的雪',text:'哈尔滨的雪看再多次，好像也还是会想拍下来。它不只是天气，而是一种季节真正降临的证据，也是这座城市最有辨识度的样子。',media:['pic/24.12.14哈尔滨的雪.jpg']},
+{date:'2024-12-10',title:'玩星露谷',text:'《星露谷》这种游戏总有一种治愈的力量，打开之后，节奏会自动慢下来。现实生活已经够忙了，所以偶尔沉进一个种地、钓鱼、经营小日子的世界里，也是一种很好的休息。',media:['pic/24.12.10玩星露谷.jpg']},
+{date:'2024-11-15',title:'买了个大屏幕',text:'给自己添置一个大屏幕，本质上也是在给日常使用电脑的生活升级。不是为了炫耀什么，只是想让学习、娱乐或者工作这件事，变得更舒服一点。',media:['pic/24.11.15买了个大屏幕.jpg']},
+{date:'2024-10-27',title:'和室友一起玩恐怖游戏',text:'很多快乐其实都来自"有人一起"。恐怖游戏一个人玩可能只剩下紧张，但和室友一起，就会变成笑声、吓一跳、互相起哄，还有以后想起来都会觉得很鲜活的夜晚。',media:['pic/24.10.27和室友一起玩恐怖游戏.jpg']},
+{date:'2024-09-24',title:'新故事开始的地方',text:'这个标题本身就很好，像是在给人生某个阶段留下注脚。所谓新故事开始的地方，未必是多么盛大的场景，它更像一个提醒，告诉自己从今天起，很多事情会慢慢不一样了。',media:['pic/24.9.24新故事开始的地方.jpg']},
+{date:'2024-08-20',title:'黑神话悟空发布',text:'有些日期会因为一款期待已久的作品而被记住。对喜欢游戏的人来说，等到它正式发布的那一刻，不只是"终于能玩了"，也是一种参与时代记忆的小小兴奋。',media:['pic/24.8.20黑神话悟空发布.jpg']},
+{date:'2024-08-05',title:'在化州',text:'继续走在广东的城市和县镇之间，会慢慢感受到另一种生活的纹理。化州这一天，也许没有特别大的事件，但地方本身就足够成为记忆的一部分。',media:['pic/24.8.5在化州.jpg']},
+{date:'2024-07-17',title:'第一次见到南方的村落',text:'第一次看见南方的村落，应该会很直观地感受到地域的差异。原来书里和视频里看过的那些景象，真的会出现在自己眼前，而这种亲眼见到的体验，总比想象更深刻。',media:['pic/24.7.17第一次见到南方的村落.jpg']},
+{date:'2024-07-07',title:'在茂名的海边',text:'海边总是有能力把人从忙碌里暂时拉出来。站在茂名的海边，风一吹，很多原本挤在心里的东西都会散开一些，剩下的只是当下很真实的轻松。',media:['pic/24.7.7在茂名的海边.jpg']},
+{date:'2024-07-04',title:'到达茂名高州供电局',text:'到达一个和未来工作、实习或者成长有关的地方时，心情往往会复杂一点。既有新鲜感，也有对未知的试探，而真正的故事通常都是从"我到了"这一刻开始。',media:['pic/24.7.4到达茂名高州供电局.jpg']},
+{date:'2024-06-07',title:'学校的汪汪队',text:'校园里有猫有狗的时候，很多人的一天都会因此变得柔软一点。所谓"汪汪队"，大概就是那种一眼看见就想停下来多看几秒的小温暖。',media:['pic/24.6.7学校的汪汪队.jpg']},
+{date:'2024-06-03',title:'在海拉尔和满洲里',text:'同一天出现在两个地名里，说明这趟路走得很满，也很有流动感。从海拉尔到满洲里，沿途的景色和心情应该都在变化，而旅行最迷人的地方，恰恰就是这种不断切换的过程。',media:['pic/24.6.3在海拉尔.jpg','pic/24.6.3在满洲里.jpg']},
+{date:'2024-05-27',title:'在牡丹江',text:'坐上路途去到另一座城市，本身就像是在给日常开一个小口。牡丹江这一天，也许没有特别宏大的叙事，但它仍然属于那种走过以后会留下余温的旅程。',media:['pic/24.5.27在牡丹江.mp4']},
+{date:'2024-05-23',title:'亚布力熊猫馆，思嘉太可爱了',text:'有些快乐很直接，比如见到可爱的动物时，整个人都会不自觉变得柔软一点。思嘉被单独记下来，说明那天的可爱是真的击中了人，让普通的一次出行也变得特别起来。',media:['pic/24.5.23亚布力熊猫馆，思嘉太可爱了.jpg']},
+{date:'2024-05-18',title:'学校冰激凌一般的天空',text:'这天的天空被形容成冰激凌，说明它一定柔软、轻盈，又带着一点让人心情变好的甜。很多美好的瞬间都没有多复杂，只是刚好抬头的时候看见了值得记住的颜色。',media:['pic/24.5.18学校冰激淋一般的天空.jpg']},
+{date:'2024-05-15',title:'学校的天总是很蓝',text:'有时候不是生活突然变好了，而是抬头的时候恰好看见了一片很好看的天。那一刻会觉得，哪怕日子还是照常重复，蓝天也能替平凡加一点滤镜。',media:['pic/24.5.15学校的天总是很蓝.jpg']},
+{date:'2024-05-13',title:'学校的北门',text:'在学校待久了，连一扇门都会变成记忆的一部分。北门不只是进出校园的地方，它还收纳了很多赶路的早晨、散步的傍晚，还有想回寝室休息的普通心情。',media:['pic/24.5.13学校的北门.jpg']},
+{date:'2024-05-07',title:'吃西瓜',text:'天气一热，西瓜就成了很直接的快乐来源。这样的瞬间之所以值得拍下来，可能就是因为它足够简单，简单到不用解释也能让人回想起当天的心情。',media:['pic/24.5.7吃西瓜.jpg']},
+{date:'2024-04-28',title:'学习的室友',text:'寝室里最能带动气氛的人，往往不是说话最多的，而是那个默默坐在桌前学习的人。看着室友认真投入，也会提醒自己，普通的一天其实最适合悄悄拉开差距。',media:['pic/24.4.28学习的室友.jpg']},
+{date:'2024-04-08',title:'在大连',text:'海边城市总有一种能让人松口气的能力，大连也是这样。哪怕只是短暂停留，看到那里的天空和风，心里都会有一点被打开的感觉。',media:['pic/24.4.8在大连.jpg']},
+{date:'2024-04-06',title:'在学校门口',text:'学校门口是个很神奇的地方，往里走是日常，往外走是短暂的逃离。每次经过这里，都像在两个世界之间切换，一边是要完成的任务，一边是想去透口气的自己。',media:['pic/24.4.6在学校门口.jpg']},
+{date:'2024-04-02',title:'买了三本龙族',text:'买书的时候总会有一种对未来阅读时光的提前期待。一下子带回三本《龙族》，像是把很久没认真投入的某种热爱又重新捡了起来。',media:['pic/24.4.2买了三本龙族.jpg']},
+{date:'2024-03-27',title:'在大庆',text:'去到新的地方，不一定每次都轰轰烈烈，但只要它被记下来，就说明那一天有值得留住的意义。大庆这一天，更像是一段行程里平稳而实在的一页。',media:['pic/24.3.27在大庆.jpg']},
+{date:'2024-02-28',title:'在长白山',text:'到了长白山，风景本身就已经足够让人安静下来。面对自然的时候，人很容易把平时那些反复纠结的小事放到一边，只剩下"眼前真好看"这样很简单的感受。',media:['pic/24.2.28在长白山.jpg']},
+{date:'2024-02-27',title:'在沈阳',text:'继续往北走的时候，会觉得城市和城市之间既相似又不同。沈阳的街道、天气和人的状态，都在旅行里多加了一层真实感，让这趟路不只是简单的"到过"。',media:['pic/24.2.27在沈阳.jpg']},
+{date:'2024-02-26',title:'在天津',text:'每到一个新的城市，都会下意识去感受它和别处有什么不同。天津给人的感觉像是离得不远，却仍然有自己独特的节奏和气质，短暂停留也足够留下印象。',media:['pic/24.2.26在天津.jpg']},
+{date:'2024-02-25',title:'我的相册',text:'偶尔翻看自己的相册，会发现原来生活里已经存下了这么多零碎又真实的瞬间。那些当时顺手拍下来的画面，后来都变成了可以把记忆重新叫醒的钥匙。',media:['pic/24.2.25我的相册.jpg']},
+{date:'2024-01-19',title:'在家',text:'连续走了很多地方以后，回到家反而是最让人安心的时刻。外面的世界当然精彩，但家里那种不用解释什么、也不用保持状态的感觉，始终无可替代。',media:['pic/24.1.19在家.jpg']},
+{date:'2024-01-16',title:'在洛阳',text:'洛阳这座城市，总让人想到很厚的时间感。即使只是站在其中某个普通的角落，也会觉得这座城身上有太多故事，而自己只是恰好路过。',media:['pic/24.1.16在洛阳.jpg']},
+{date:'2024-01-14',title:'在许昌',text:'从大城市回到更熟悉的中原地带，心里的距离感也会跟着缩短。许昌这样的地方，会让人想起很多和"回程"有关的情绪，像是热闹之后重新靠近自己的生活。',media:['pic/24.1.14在许昌.jpg']},
+{date:'2024-01-13',title:'在广州',text:'广州给人的感觉总是更松弛一些，热闹里有日常，繁华里也带烟火气。旅行最好的地方，就是每到一座城市，都会多一种理解世界的方式。',media:['pic/24.1.13在广州.jpg']},
+{date:'2024-01-12',title:'在深圳',text:'城市的节奏到了深圳，好像会自动加快一点。站在陌生的地方，能感觉到一种很强的向前感，也会忍不住想，未来的自己会不会也在这样的城市里生活很久。',media:['pic/24.1.12  在深圳.jpg']},
+{date:'2024-01-11',title:'在长沙',text:'旅行的第一站总是带着一点刚刚出发的兴奋。到了长沙，心情像被切换到了另一个频道，街道、口音、空气里的味道都在提醒我，接下来会有新的见闻。',media:['pic/24.1.11  在长沙.jpg']},
+{date:'2024-01-07',title:'哈尔滨美术馆',text:'冬天去美术馆，很像给自己找了一个能暂时从外面世界退出来的地方。安静地看展、走路、发呆，比起热闹的打卡，我更愿意把那种慢慢沉下来的感觉记住。',media:['pic/24.1.7  哈尔滨美术馆.jpg']},
+// 2023
+{date:'2023-12-31',title:'圆梦之星雪雕',text:'一年走到最后一天，能用一座雪雕来作结，倒也很符合北方冬天的气质。站在年末回头看，很多愿望未必都实现了，但只要还在继续往前走，新的期待就总会在下一年等着自己。',media:['pic/23.12.31  圆梦之星雪雕.jpg']},
+{date:'2023-11-06',title:'哈尔滨的大风把三轮车吹倒了',text:'风大到把三轮车都吹倒的时候，城市一下子就有了电影镜头一样的夸张感。天气有时候会把平凡的一天变得格外难忘，只因为它让人亲眼看见了自然的力气。',media:['pic/23.11.6  哈尔滨的大风把三轮车吹倒了.jpg']},
+{date:'2023-09-08',title:'上课画画',text:'有时候人坐在教室里，心思却会从公式和板书里悄悄逃开一点，落到纸上的线条和涂鸦里。那些随手画下来的东西未必有多成熟，但它们很诚实，记录的是当时那个片刻真正的注意力。',media:['pic/23.9.8  上课画画1.jpg','pic/23.9.8  上课画画2.jpg','pic/23.9.8  上课画画3.jpg','pic/23.9.8  上课画画4.jpg','pic/23.9.8  上课画画5.jpg']},
+{date:'2023-06-24',title:'和郑老师通宵组装电脑',text:'通宵做一件具体的事，会让时间变得很特别。和郑老师一起组装电脑，大概既有折腾的疲惫，也有把一堆零件慢慢拼成完整机器的成就感，这种记忆比单纯"买了一台电脑"要生动得多。',media:['pic/23.6.24  和郑老师通宵组装电脑.jpg']},
+{date:'2023-03-22',title:'哈尔滨沙尘暴',text:'原来北方的城市也会被沙尘裹住，天空一下子变得陌生，人走在路上都有种不真实的感觉。天气变化总会把平常的日子切开，让人短暂意识到自己只是城市里很小的一部分。',media:['pic/23.3.22  哈尔滨沙尘暴.jpg']},
+{date:'2023-03-09',title:'疑似学习电机学破防',text:'有些崩溃是认真的，有些崩溃过后又会变成以后拿来笑自己的素材。电机学大概就是这样一门课，当时觉得难得过不去，后来回头看，反而成了学生时代很鲜明的一块记忆。',media:['pic/23.3.9  疑似学习电机学破防.mp4']},
+// 2022
+{date:'2022-12-10',title:'第一次使用 ChatGPT',text:'第一次接触新的工具时，总会有一种很新鲜的感觉，像是突然看见另一种可能。回头再看，这一天其实挺有纪念意义，因为很多事情就是从某个不起眼的"第一次"开始慢慢改变的。',media:['pic/22.12.10  第一次使用ChatGPT.mp4']},
+{date:'2022-11-25',title:'哈尔滨又下雪了',text:'哈尔滨的冬天，好像总能用一场雪把城市重新覆盖一遍。看到雪落下来，天气虽然更冷了，心里却会莫名安静，像是那些琐碎的情绪也一起被埋进了白色里。',media:['pic/22.11.25  哈尔滨又下雪了.jpg']},
+{date:'2022-11-06',title:'学电气破防的一天',text:'有些课学到某个阶段，真的会让人怀疑自己到底适不适合继续往下走。可回头看，所谓"破防"的那一天，其实也是在告诉自己，成长从来不是轻轻松松就能完成的。',media:['pic/22.11.6  学电气破防的一天.jpg']},
+{date:'2022-10-18',title:'在学校饭堂吃饭',text:'饭堂大概是大学里最日常、也最真实的地方，课上完了，饿了，和朋友坐下来吃一顿，就算普通的一天也有了落点。学生生活很多时候没有大事发生，但一顿安稳的饭就已经足够让人满足。',media:['pic/22.10.18  在学校饭堂吃饭.jpg']},
+{date:'2022-09-10',title:'学校音乐节',text:'音乐节最动人的地方，不只是台上的声音，而是那种很多人一起短暂忘记烦恼的氛围。站在人群里听歌的时候，会觉得校园生活也不是只有上课和作业，它也有亮起来的时候。',media:['pic/22.9.10  学校音乐节.mp4']},
+{date:'2022-09-02',title:'给寝室室友带饭',text:'学生时代的情谊常常藏在这样的小事里，顺手带一份饭，比很多客套的话都更真诚。大家住在同一个寝室，一起熬课、熬夜、熬情绪，慢慢也就成了可以互相照应的人。',media:['pic/22.9.2  给寝室室友带饭.jpg']},
+{date:'2022-06-01',title:'在实验室做迈克尔逊实验',text:'实验室里的时间总是和外面不太一样，安静、重复，又带着一点必须认真对待的紧张。做迈克尔逊实验的时候，感觉自己像是在和课本上的知识面对面，原来那些抽象的原理也真的会落在眼前。',media:['pic/22.6.1  在实验室做迈克尔逊实验.jpg']},
+{date:'2022-01-05',title:'高铁站防疫',text:'那时候出门还带着很强的时代印记，进站、排队、检查，每一步都提醒着人们生活还没有完全恢复如常。站在高铁站里，既有要出发的期待，也有一点对现实环境的无奈。',media:['pic/22.1.5  高铁站防疫.jpg']},
+// 2021
+{date:'2021-12-30',title:'在家喝胡辣汤',text:'冬天的早晨适合一碗热乎的胡辣汤，端起来的时候，连空气都像慢了下来。假期最舒服的地方，大概就是不用赶时间，可以安心把一顿早餐吃出一点生活的味道。',media:['pic/21.12.30  在家喝胡辣汤.jpg']},
+{date:'2021-12-22',title:'学期结束，回家',text:'学期终于画上句号，心里最明显的感觉不是轻松，而是终于可以把紧绷了很久的自己放下来。回家的路上总会觉得，熟悉的人和熟悉的饭菜，才是这一段时间里最踏实的归处。',media:['pic/21.12.22  学期结束，回家.jpg']},
+];
 
-    const tagClassMap = {
-        life: 'tag-life', travel: 'tag-travel', food: 'tag-food',
-        thought: 'tag-thought', tech: 'tag-tech'
-    };
+// ===== Render =====
+const years = [...new Set(entries.map(e => e.date.slice(0,4)))];
 
-    const tagConfig = [
-        { key: 'life', label: '日常', icon: '&#x2615;' },
-        { key: 'travel', label: '旅行', icon: '&#x2708;&#xFE0F;' },
-        { key: 'food', label: '美食', icon: '&#x1F372;' },
-        { key: 'thought', label: '随想', icon: '&#x1F4AD;' },
-        { key: 'tech', label: '技术', icon: '&#x1F4BB;' },
-        { key: 'reading', label: '阅读', icon: '&#x1F4DA;' },
-        { key: 'photo', label: '摄影', icon: '&#x1F4F8;' }
-    ];
+function isVideo(src) { return src.endsWith('.mp4'); }
 
-    let activeTag = null;
+function formatDate(d) {
+    const [y,m,day] = d.split('-');
+    return `${y}年${parseInt(m)}月${parseInt(day)}日`;
+}
 
-    // ===== Render Blog Cards =====
-    function renderPosts(filter) {
-        const grid = document.getElementById('blogGrid');
-        const filtered = filter ? posts.filter(p => p.tag === filter) : posts;
+function renderYearNav() {
+    document.getElementById('yearNav').innerHTML = years.map(y =>
+        `<button class="year-pill" data-year="${y}" onclick="scrollToYear('${y}')">${y}</button>`
+    ).join('');
+}
 
-        grid.innerHTML = filtered.map((post, i) => `
-            <div class="blog-card reveal" data-tag="${post.tag}" style="transition-delay:${i * 0.06}s" onclick="openModal(${post.id})">
-                <div class="card-meta">
-                    <span class="card-date">${post.date}</span>
-                    <span class="card-tag ${tagClassMap[post.tag]}">${post.tagLabel}</span>
-                </div>
-                <h3>${post.title}</h3>
-                <p class="card-excerpt">${post.excerpt}</p>
-                <span class="card-link">阅读全文 &rarr;</span>
-            </div>
-        `).join('');
+function scrollToYear(y) {
+    const el = document.getElementById('year-' + y);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+}
 
-        observeReveal();
-    }
-
-    // ===== Render Tags =====
-    function renderTags() {
-        const wall = document.getElementById('tagsWall');
-        wall.innerHTML = tagConfig.map(t =>
-            `<span class="tag-pill" data-tag="${t.key}" onclick="filterByTag('${t.key}')">${t.icon} ${t.label}</span>`
-        ).join('');
-    }
-
-    function filterByTag(tag) {
-        const pills = document.querySelectorAll('.tag-pill');
-        if (activeTag === tag) {
-            activeTag = null;
-            pills.forEach(p => p.classList.remove('active'));
-            renderPosts();
-        } else {
-            activeTag = tag;
-            pills.forEach(p => {
-                p.classList.toggle('active', p.dataset.tag === tag);
-            });
-            renderPosts(tag);
-            document.getElementById('blog').scrollIntoView({ behavior: 'smooth' });
-        }
-    }
-
-    // ===== Modal =====
-    function openModal(id) {
-        const post = posts.find(p => p.id === id);
-        if (!post) return;
-        document.getElementById('modalTag').innerHTML =
-            `<span class="card-tag ${tagClassMap[post.tag]}">${post.tagLabel}</span>`;
-        document.getElementById('modalTitle').textContent = post.title;
-        document.getElementById('modalDate').textContent = post.date;
-        document.getElementById('modalBody').innerHTML = post.content;
-
-        const modal = document.getElementById('modal');
-        modal.style.display = 'flex';
-        requestAnimationFrame(() => modal.classList.add('show'));
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeModal() {
-        const modal = document.getElementById('modal');
-        modal.classList.remove('show');
-        setTimeout(() => {
-            modal.style.display = 'none';
-            document.body.style.overflow = '';
-        }, 300);
-    }
-
-    document.getElementById('modal').addEventListener('click', e => {
-        if (e.target === e.currentTarget) closeModal();
-    });
-
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') closeModal();
-    });
-
-    // ===== Mobile Menu =====
-    const navToggle = document.getElementById('navToggle');
-    const navLinksEl = document.getElementById('navLinks');
-
-    navToggle.addEventListener('click', () => {
-        navToggle.classList.toggle('open');
-        navLinksEl.classList.toggle('open');
-    });
-
-    navLinksEl.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-            navToggle.classList.remove('open');
-            navLinksEl.classList.remove('open');
-        });
-    });
-
-    // ===== Navbar Scroll Shadow =====
-    window.addEventListener('scroll', () => {
-        document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
-    }, { passive: true });
-
-    // ===== Scroll Spy =====
-    const spySections = document.querySelectorAll('section[id]');
-    const spyLinks = document.querySelectorAll('.nav-links a');
-
-    function updateSpy() {
-        const scrollY = window.scrollY + 100;
-        let currentId = 'home';
-        spySections.forEach(sec => {
-            if (scrollY >= sec.offsetTop) {
-                currentId = sec.id;
+function renderDiary() {
+    const wrap = document.getElementById('diaryContent');
+    let html = '';
+    for (const year of years) {
+        const yearEntries = entries.filter(e => e.date.startsWith(year));
+        html += `<div class="year-section" id="year-${year}">`;
+        html += `<div class="year-header"><span class="year-number">${year}</span>`;
+        html += `<span class="year-count">${yearEntries.length} 篇</span>`;
+        html += `<span class="year-line"></span></div>`;
+        html += `<div class="diary-grid">`;
+        for (let i = 0; i < yearEntries.length; i++) {
+            const e = yearEntries[i];
+            const idx = entries.indexOf(e);
+            const hasVideo = e.media.some(isVideo);
+            const multiImg = e.media.length > 1;
+            html += `<div class="diary-card reveal" style="transition-delay:${(i % 6) * 0.06}s" onclick="openLightbox(${idx})">`;
+            if (hasVideo) {
+                html += `<div class="card-media"><div class="card-video-ph">`;
+                html += `<div class="play-icon">&#x25B6;</div>`;
+                html += `<span class="video-label">${e.title}</span></div></div>`;
+            } else {
+                html += `<div class="card-media">`;
+                html += `<img src="${e.media[0]}" alt="${e.title}" loading="lazy">`;
+                if (multiImg) html += `<span class="media-badge">${e.media.length} 张</span>`;
+                html += `</div>`;
             }
-        });
-        spyLinks.forEach(link => {
-            link.classList.toggle('active', link.getAttribute('href') === '#' + currentId);
-        });
+            html += `<div class="card-body">`;
+            html += `<div class="card-date">${formatDate(e.date)}</div>`;
+            html += `<div class="card-title">${e.title}</div>`;
+            html += `<div class="card-text">${e.text}</div>`;
+            html += `</div></div>`;
+        }
+        html += `</div></div>`;
     }
-
-    window.addEventListener('scroll', updateSpy, { passive: true });
-
-    // ===== Reveal on Scroll =====
-    function observeReveal() {
-        const observer = new IntersectionObserver(entries => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
-
-        document.querySelectorAll('.reveal:not(.visible)').forEach(el => observer.observe(el));
-    }
-
-    // ===== Init =====
-    renderPosts();
-    renderTags();
+    wrap.innerHTML = html;
     observeReveal();
-    updateSpy();
+}
+
+// ===== Lightbox =====
+let lbIdx = 0, lbMediaIdx = 0, lbEntry = null;
+
+function openLightbox(idx) {
+    lbIdx = idx; lbMediaIdx = 0;
+    lbEntry = entries[idx];
+    renderLightboxMedia();
+    document.getElementById('lbDate').textContent = formatDate(lbEntry.date);
+    document.getElementById('lbTitle').textContent = lbEntry.title;
+    document.getElementById('lbText').textContent = lbEntry.text;
+    const nav = document.getElementById('lbNav');
+    nav.style.display = lbEntry.media.length > 1 ? 'flex' : 'none';
+    const lb = document.getElementById('lightbox');
+    lb.style.display = 'flex';
+    requestAnimationFrame(() => lb.classList.add('show'));
+    document.body.style.overflow = 'hidden';
+}
+
+function renderLightboxMedia() {
+    const wrap = document.getElementById('lbMediaWrap');
+    const src = lbEntry.media[lbMediaIdx];
+    if (isVideo(src)) {
+        wrap.innerHTML = `<video src="${src}" controls autoplay playsinline style="max-width:100%;max-height:65vh;border-radius:8px"></video>`;
+    } else {
+        wrap.innerHTML = `<img src="${src}" alt="${lbEntry.title}">`;
+    }
+    if (lbEntry.media.length > 1) {
+        document.getElementById('lbCounter').textContent = `${lbMediaIdx + 1} / ${lbEntry.media.length}`;
+    }
+}
+
+function lbPrev() {
+    lbMediaIdx = (lbMediaIdx - 1 + lbEntry.media.length) % lbEntry.media.length;
+    renderLightboxMedia();
+}
+function lbNext() {
+    lbMediaIdx = (lbMediaIdx + 1) % lbEntry.media.length;
+    renderLightboxMedia();
+}
+
+function closeLightbox() {
+    const lb = document.getElementById('lightbox');
+    lb.classList.remove('show');
+    setTimeout(() => {
+        lb.style.display = 'none';
+        document.body.style.overflow = '';
+        document.getElementById('lbMediaWrap').innerHTML = '';
+    }, 300);
+}
+
+document.getElementById('lightbox').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeLightbox();
+});
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft' && lbEntry && lbEntry.media.length > 1) lbPrev();
+    if (e.key === 'ArrowRight' && lbEntry && lbEntry.media.length > 1) lbNext();
+});
+
+// ===== Mobile Menu =====
+const navToggle = document.getElementById('navToggle');
+const navLinksEl = document.getElementById('navLinks');
+navToggle.addEventListener('click', () => {
+    navToggle.classList.toggle('open');
+    navLinksEl.classList.toggle('open');
+});
+navLinksEl.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    navToggle.classList.remove('open');
+    navLinksEl.classList.remove('open');
+}));
+
+// ===== Navbar Shadow + Scroll Spy =====
+const spySections = document.querySelectorAll('section[id]');
+const spyLinks = document.querySelectorAll('.nav-links a');
+
+window.addEventListener('scroll', () => {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
+    // nav spy
+    const y = window.scrollY + 120;
+    let cur = 'home';
+    spySections.forEach(s => { if (y >= s.offsetTop) cur = s.id; });
+    spyLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + cur));
+    // year nav spy
+    const pills = document.querySelectorAll('.year-pill');
+    let curYear = years[0];
+    years.forEach(yr => {
+        const el = document.getElementById('year-' + yr);
+        if (el && y >= el.offsetTop) curYear = yr;
+    });
+    pills.forEach(p => p.classList.toggle('active', p.dataset.year === curYear));
+}, { passive: true });
+
+// ===== Reveal =====
+function observeReveal() {
+    const obs = new IntersectionObserver(es => {
+        es.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.08, rootMargin: '0px 0px -20px 0px' });
+    document.querySelectorAll('.reveal:not(.visible)').forEach(el => obs.observe(el));
+}
+
+// ===== Init =====
+renderYearNav();
+renderDiary();
+observeReveal();
 </script>
 
 </body>
