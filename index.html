@@ -19,6 +19,18 @@
 </head>
 <body>
 
+<!-- iOS 26 Liquid Glass Background -->
+<div class="bg-canvas">
+    <div class="bg-orb"></div>
+    <div class="bg-orb"></div>
+    <div class="bg-orb"></div>
+    <div class="bg-orb"></div>
+</div>
+<div class="particles" id="particles"></div>
+
+<!-- Content Layer -->
+<div class="content-layer">
+
 <!-- Navbar -->
 <nav class="navbar" id="navbar">
     <div class="nav-inner">
@@ -150,6 +162,8 @@
     </div>
 </footer>
 
+</div><!-- /content-layer -->
+
 <!-- Lightbox -->
 <div class="lightbox" id="lightbox">
     <button class="lightbox-close" onclick="closeLightbox()">&#x2715;</button>
@@ -167,6 +181,10 @@
 </div>
 
 <script>
+// ===== CDN Config (jsDelivr for China acceleration) =====
+const CDN_BASE = 'https://cdn.jsdelivr.net/gh/y1991427360s/box.github.io@main/';
+function cdnUrl(path) { return CDN_BASE + encodeURI(path); }
+
 // ===== Diary Entries Data =====
 const entries = [
 // 2026
@@ -296,7 +314,7 @@ function renderDiary() {
                 html += `<span class="video-label">${e.title}</span></div></div>`;
             } else {
                 html += `<div class="card-media">`;
-                html += `<img src="${e.media[0]}" alt="${e.title}" loading="lazy">`;
+                html += `<img src="${cdnUrl(e.media[0])}" alt="${e.title}" loading="lazy" onerror="this.onerror=null;this.src='${e.media[0]}'">`;
                 if (multiImg) html += `<span class="media-badge">${e.media.length} 张</span>`;
                 html += `</div>`;
             }
@@ -334,9 +352,9 @@ function renderLightboxMedia() {
     const wrap = document.getElementById('lbMediaWrap');
     const src = lbEntry.media[lbMediaIdx];
     if (isVideo(src)) {
-        wrap.innerHTML = `<video src="${src}" controls autoplay playsinline style="max-width:100%;max-height:65vh;border-radius:8px"></video>`;
+        wrap.innerHTML = `<video src="${cdnUrl(src)}" controls autoplay playsinline style="max-width:100%;max-height:65vh;border-radius:8px"></video>`;
     } else {
-        wrap.innerHTML = `<img src="${src}" alt="${lbEntry.title}">`;
+        wrap.innerHTML = `<img src="${cdnUrl(src)}" alt="${lbEntry.title}" onerror="this.onerror=null;this.src='${src}'">`;
     }
     if (lbEntry.media.length > 1) {
         document.getElementById('lbCounter').textContent = `${lbMediaIdx + 1} / ${lbEntry.media.length}`;
@@ -412,10 +430,26 @@ function observeReveal() {
     document.querySelectorAll('.reveal:not(.visible)').forEach(el => obs.observe(el));
 }
 
+// ===== Particles =====
+function createParticles() {
+    const c = document.getElementById('particles');
+    for (let i = 0; i < 25; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.animationDuration = (10 + Math.random() * 14) + 's';
+        p.style.animationDelay = Math.random() * 12 + 's';
+        p.style.width = p.style.height = (2 + Math.random() * 3) + 'px';
+        p.style.opacity = 0.15 + Math.random() * 0.35;
+        c.appendChild(p);
+    }
+}
+
 // ===== Init =====
 renderYearNav();
 renderDiary();
 observeReveal();
+createParticles();
 </script>
 
 </body>
