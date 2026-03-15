@@ -3,712 +3,737 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SEN's Life Blog</title>
+    <title>SEN - 记录生活的碎片，捕捉平凡中的光</title>
+    <meta name="description" content="SEN的个人博客与工具集。记录生活、旅行、美食、技术的点滴，分享实用小工具。">
+    <meta name="keywords" content="SEN, 博客, 生活记录, 旅行, 美食, 技术, 个人工具">
+    <meta name="author" content="SEN">
+    <meta property="og:title" content="SEN - 记录生活的碎片，捕捉平凡中的光">
+    <meta property="og:description" content="SEN的个人博客与工具集。记录生活、旅行、美食、技术的点滴。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sen666.cn">
+    <meta property="og:locale" content="zh_CN">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        /* ===== Reset & Variables ===== */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --glass-bg: rgba(255, 255, 255, 0.12);
-            --glass-border: rgba(255, 255, 255, 0.18);
-            --glass-shadow: rgba(0, 0, 0, 0.08);
-            --glass-highlight: rgba(255, 255, 255, 0.25);
-            --text-primary: #1a1a2e;
-            --text-secondary: rgba(30, 30, 60, 0.65);
-            --accent: #007AFF;
-            --accent-glow: rgba(0, 122, 255, 0.3);
-            --bg-base: #e8ecf4;
+            --bg: #ffffff;
+            --bg-alt: #f8fafc;
+            --card: #ffffff;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --text-light: #94a3b8;
+            --accent: #3b82f6;
+            --accent-dark: #2563eb;
+            --accent-bg: #eff6ff;
+            --accent-border: #bfdbfe;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.04);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.08), 0 4px 10px rgba(0,0,0,0.04);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --radius-xs: 6px;
+            --max-w: 1100px;
+            --nav-h: 64px;
+            --green: #10b981;
+            --green-bg: #ecfdf5;
+            --orange: #f59e0b;
+            --orange-bg: #fffbeb;
+            --purple: #8b5cf6;
+            --purple-bg: #f5f3ff;
+            --indigo: #6366f1;
+            --indigo-bg: #eef2ff;
+            --rose: #f43f5e;
+            --rose-bg: #fff1f2;
+            --teal: #14b8a6;
+            --teal-bg: #f0fdfa;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
+        html { scroll-behavior: smooth; scroll-padding-top: calc(var(--nav-h) + 24px); }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', sans-serif;
-            background: var(--bg-base);
-            color: var(--text-primary);
-            line-height: 1.6;
-            overflow-x: hidden;
-            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Sans SC', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
             -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        /* ====================== 动态背景 ====================== */
-        .bg-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            overflow: hidden;
-            background: linear-gradient(135deg, #dfe6f0 0%, #c3cfe2 30%, #e0c3fc 60%, #c3cfe2 100%);
+        .container {
+            max-width: var(--max-w);
+            margin: 0 auto;
+            padding: 0 24px;
         }
 
-        .bg-orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.5;
-            animation: orbFloat 20s ease-in-out infinite;
-        }
-
-        .bg-orb:nth-child(1) {
-            width: 500px; height: 500px;
-            background: radial-gradient(circle, rgba(0, 122, 255, 0.35), transparent 70%);
-            top: -10%; left: -5%;
-            animation-duration: 22s;
-        }
-
-        .bg-orb:nth-child(2) {
-            width: 600px; height: 600px;
-            background: radial-gradient(circle, rgba(175, 82, 222, 0.3), transparent 70%);
-            top: 40%; right: -10%;
-            animation-duration: 28s;
-            animation-delay: -5s;
-        }
-
-        .bg-orb:nth-child(3) {
-            width: 400px; height: 400px;
-            background: radial-gradient(circle, rgba(52, 199, 89, 0.25), transparent 70%);
-            bottom: -5%; left: 30%;
-            animation-duration: 25s;
-            animation-delay: -10s;
-        }
-
-        .bg-orb:nth-child(4) {
-            width: 350px; height: 350px;
-            background: radial-gradient(circle, rgba(255, 149, 0, 0.2), transparent 70%);
-            top: 20%; left: 50%;
-            animation-duration: 30s;
-            animation-delay: -15s;
-        }
-
-        @keyframes orbFloat {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            25% { transform: translate(60px, -40px) scale(1.1); }
-            50% { transform: translate(-30px, 50px) scale(0.95); }
-            75% { transform: translate(40px, 20px) scale(1.05); }
-        }
-
-        /* 粒子层 */
-        .particles {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        .particle {
-            position: absolute;
-            width: 3px; height: 3px;
-            background: rgba(255, 255, 255, 0.6);
-            border-radius: 50%;
-            animation: particleRise linear infinite;
-        }
-
-        @keyframes particleRise {
-            0% { transform: translateY(100vh) scale(0); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
-        }
-
-        /* ====================== Liquid Glass 通用样式 ====================== */
-        .glass {
-            background: linear-gradient(135deg,
-                rgba(255, 255, 255, 0.25) 0%,
-                rgba(255, 255, 255, 0.10) 50%,
-                rgba(255, 255, 255, 0.15) 100%);
-            backdrop-filter: blur(40px) saturate(1.8);
-            -webkit-backdrop-filter: blur(40px) saturate(1.8);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            box-shadow:
-                0 8px 32px var(--glass-shadow),
-                inset 0 1px 0 var(--glass-highlight),
-                0 0 0 0.5px rgba(255, 255, 255, 0.1);
-        }
-
-        .glass-subtle {
-            background: linear-gradient(135deg,
-                rgba(255, 255, 255, 0.18) 0%,
-                rgba(255, 255, 255, 0.06) 100%);
-            backdrop-filter: blur(30px) saturate(1.6);
-            -webkit-backdrop-filter: blur(30px) saturate(1.6);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 20px;
-            box-shadow:
-                0 4px 24px rgba(0, 0, 0, 0.06),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        }
-
-        /* ====================== 导航栏 ====================== */
+        /* ===== Navbar ===== */
         .navbar {
             position: fixed;
-            top: 12px;
-            left: 50%;
-            transform: translateX(-50%);
+            top: 0; left: 0; right: 0;
+            height: var(--nav-h);
+            background: rgba(255,255,255,0.88);
+            backdrop-filter: blur(16px) saturate(1.8);
+            -webkit-backdrop-filter: blur(16px) saturate(1.8);
+            border-bottom: 1px solid var(--border);
             z-index: 1000;
-            padding: 10px 28px;
+            transition: box-shadow 0.3s;
+        }
+
+        .navbar.scrolled {
+            box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+        }
+
+        .nav-inner {
+            max-width: var(--max-w);
+            margin: 0 auto;
+            padding: 0 24px;
+            height: 100%;
             display: flex;
             align-items: center;
-            gap: 2rem;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            justify-content: space-between;
         }
 
-        .navbar .brand {
-            font-size: 1.15rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            color: var(--text-primary);
+        .nav-brand {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text);
             text-decoration: none;
-            white-space: nowrap;
+            letter-spacing: -0.5px;
         }
 
-        .navbar .nav-links {
+        .nav-links {
             display: flex;
-            gap: 0.3rem;
+            gap: 4px;
             list-style: none;
         }
 
-        .navbar .nav-links a {
+        .nav-links a {
+            display: block;
+            padding: 8px 16px;
+            color: var(--text-muted);
             text-decoration: none;
-            color: var(--text-secondary);
-            font-size: 0.88rem;
+            font-size: 0.9rem;
             font-weight: 500;
-            padding: 6px 14px;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            white-space: nowrap;
+            border-radius: var(--radius-sm);
+            transition: color 0.2s, background 0.2s;
         }
 
-        .navbar .nav-links a:hover,
-        .navbar .nav-links a.active {
-            color: var(--text-primary);
-            background: rgba(255, 255, 255, 0.3);
-        }
+        .nav-links a:hover { color: var(--accent); background: var(--accent-bg); }
+        .nav-links a.active { color: var(--accent); background: var(--accent-bg); font-weight: 600; }
 
-        /* ====================== Hero ====================== */
-        .hero {
-            position: relative;
-            z-index: 2;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
+        .nav-toggle {
+            display: none;
+            flex-direction: column;
             justify-content: center;
-            padding: 2rem;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 40px; height: 40px;
+            padding: 8px;
+            border-radius: var(--radius-sm);
+            transition: background 0.2s;
         }
 
-        .hero-content {
+        .nav-toggle:hover { background: var(--accent-bg); }
+
+        .nav-toggle span {
+            display: block;
+            width: 100%;
+            height: 2px;
+            background: var(--text);
+            border-radius: 1px;
+            transition: all 0.3s ease;
+            transform-origin: center;
+        }
+
+        .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .nav-toggle.open span:nth-child(2) { opacity: 0; }
+        .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        /* ===== Sections ===== */
+        .section {
+            padding: 80px 0;
+        }
+
+        .section-alt {
+            background: var(--bg-alt);
+        }
+
+        .section-header {
             text-align: center;
-            max-width: 700px;
+            margin-bottom: 48px;
+        }
+
+        .section-badge {
+            display: inline-block;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent);
+            background: var(--accent-bg);
+            padding: 4px 14px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+        }
+
+        .section-header h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        .section-header p {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        /* ===== Hero ===== */
+        .hero {
+            padding: calc(var(--nav-h) + 80px) 0 80px;
+            text-align: center;
         }
 
         .hero-avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 36px;
-            margin: 0 auto 2rem;
+            width: 100px; height: 100px;
+            border-radius: 28px;
+            margin: 0 auto 28px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 3rem;
+            font-size: 2.6rem;
+            font-weight: 800;
+            color: var(--accent);
+            background: linear-gradient(135deg, var(--accent-bg), #dbeafe);
+            border: 2px solid var(--accent-border);
             position: relative;
-            overflow: hidden;
-            animation: avatarFloat 6s ease-in-out infinite;
-            background: linear-gradient(135deg,
-                rgba(0, 122, 255, 0.2),
-                rgba(175, 82, 222, 0.2));
-            backdrop-filter: blur(40px);
-            border: 1.5px solid rgba(255, 255, 255, 0.3);
-            box-shadow:
-                0 12px 40px rgba(0, 122, 255, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            animation: float 5s ease-in-out infinite;
         }
 
-        .hero-avatar::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                45deg,
-                transparent 30%,
-                rgba(255, 255, 255, 0.15) 50%,
-                transparent 70%
-            );
-            animation: sheen 4s ease-in-out infinite;
-        }
-
-        @keyframes avatarFloat {
+        @keyframes float {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        @keyframes sheen {
-            0%, 100% { transform: translateX(-100%) rotate(45deg); }
-            50% { transform: translateX(100%) rotate(45deg); }
+            50% { transform: translateY(-8px); }
         }
 
         .hero-title {
-            font-size: 3.8rem;
+            font-size: 3.2rem;
             font-weight: 800;
             letter-spacing: -1.5px;
-            line-height: 1.15;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, #1a1a2e 0%, #007AFF 50%, #AF52DE 100%);
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: gradientShift 5s ease-in-out infinite;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            color: var(--text);
         }
 
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% center; }
-            50% { background-position: 100% center; }
-        }
-
-        .hero-desc {
+        .hero-subtitle {
             font-size: 1.15rem;
-            color: var(--text-secondary);
-            font-weight: 400;
-            margin-bottom: 2.5rem;
+            color: var(--text-muted);
             line-height: 1.8;
+            margin-bottom: 36px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        .hero-actions {
+        .hero-buttons {
             display: flex;
-            gap: 1rem;
+            gap: 12px;
             justify-content: center;
             flex-wrap: wrap;
         }
 
-        .btn-liquid {
+        .btn {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 8px;
             padding: 12px 28px;
-            border-radius: 16px;
+            border-radius: var(--radius-sm);
             font-size: 0.95rem;
             font-weight: 600;
             text-decoration: none;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.25s ease;
             cursor: pointer;
             border: none;
             font-family: inherit;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #007AFF, #5856D6);
+            background: var(--accent);
             color: #fff;
-            box-shadow: 0 6px 24px rgba(0, 122, 255, 0.3);
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px) scale(1.03);
-            box-shadow: 0 10px 36px rgba(0, 122, 255, 0.4);
+            background: var(--accent-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
         }
 
-        .btn-glass {
-            background: rgba(255, 255, 255, 0.2);
-            color: var(--text-primary);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(20px);
+        .btn-outline {
+            background: transparent;
+            color: var(--text);
+            border: 1.5px solid var(--border);
         }
 
-        .btn-glass:hover {
-            background: rgba(255, 255, 255, 0.35);
+        .btn-outline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-bg);
             transform: translateY(-2px);
         }
 
-        /* ====================== 内容区域 ====================== */
-        .content-wrap {
-            position: relative;
-            z-index: 2;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 0 1.5rem 4rem;
-        }
-
-        .section {
-            margin-bottom: 4rem;
-        }
-
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .section-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            background: linear-gradient(135deg, rgba(0, 122, 255, 0.15), rgba(175, 82, 222, 0.15));
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .section-label {
-            font-size: 1.5rem;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-
-        /* ====================== 博客卡片 ====================== */
+        /* ===== Blog Grid ===== */
         .blog-grid {
             display: grid;
-            gap: 1.2rem;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
         }
 
         .blog-card {
-            padding: 1.6rem 1.8rem;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
             cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .blog-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border-radius: 24px;
-            background: linear-gradient(135deg,
-                rgba(255, 255, 255, 0) 0%,
-                rgba(255, 255, 255, 0.08) 100%);
-            opacity: 0;
-            transition: opacity 0.4s;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
         }
 
         .blog-card:hover {
-            transform: translateY(-4px) scale(1.01);
-            box-shadow:
-                0 16px 48px rgba(0, 0, 0, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: transparent;
         }
 
-        .blog-card:hover::before {
-            opacity: 1;
-        }
-
-        .blog-card .card-top {
+        .blog-card .card-meta {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 0.8rem;
+            margin-bottom: 12px;
         }
 
         .blog-card .card-date {
             font-size: 0.82rem;
-            color: var(--text-secondary);
+            color: var(--text-light);
             font-weight: 500;
         }
 
-        .blog-card .card-tag {
-            font-size: 0.75rem;
+        .card-tag {
+            font-size: 0.72rem;
             padding: 3px 10px;
-            border-radius: 8px;
+            border-radius: 20px;
             font-weight: 600;
             letter-spacing: 0.3px;
         }
 
-        .tag-life {
-            background: rgba(52, 199, 89, 0.15);
-            color: #34C759;
-        }
-
-        .tag-travel {
-            background: rgba(0, 122, 255, 0.12);
-            color: #007AFF;
-        }
-
-        .tag-food {
-            background: rgba(255, 149, 0, 0.15);
-            color: #FF9500;
-        }
-
-        .tag-thought {
-            background: rgba(175, 82, 222, 0.15);
-            color: #AF52DE;
-        }
-
-        .tag-tech {
-            background: rgba(88, 86, 214, 0.15);
-            color: #5856D6;
-        }
+        .tag-life { background: var(--green-bg); color: var(--green); }
+        .tag-travel { background: var(--accent-bg); color: var(--accent); }
+        .tag-food { background: var(--orange-bg); color: var(--orange); }
+        .tag-thought { background: var(--purple-bg); color: var(--purple); }
+        .tag-tech { background: var(--indigo-bg); color: var(--indigo); }
 
         .blog-card h3 {
-            font-size: 1.18rem;
+            font-size: 1.1rem;
             font-weight: 700;
-            margin-bottom: 0.5rem;
+            margin-bottom: 8px;
             letter-spacing: -0.3px;
             line-height: 1.4;
+            color: var(--text);
         }
 
         .blog-card .card-excerpt {
-            font-size: 0.92rem;
-            color: var(--text-secondary);
+            font-size: 0.88rem;
+            color: var(--text-muted);
             line-height: 1.7;
             display: -webkit-box;
             -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            flex: 1;
         }
 
-        .blog-card .card-footer {
-            display: flex;
+        .blog-card .card-link {
+            display: inline-flex;
             align-items: center;
-            gap: 1rem;
-            margin-top: 1rem;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
+            gap: 4px;
+            margin-top: 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent);
+            transition: gap 0.2s;
         }
 
-        .blog-card .card-footer span {
-            display: flex;
+        .blog-card:hover .card-link { gap: 8px; }
+
+        /* ===== Apps Grid ===== */
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .app-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px 24px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.3s ease;
+        }
+
+        .app-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--accent-border);
+        }
+
+        .app-icon {
+            font-size: 2.4rem;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .app-card h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .app-card .app-desc {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .app-card .app-link {
+            display: inline-flex;
             align-items: center;
-            gap: 0.3rem;
+            gap: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent);
+            transition: gap 0.2s;
         }
 
-        /* ====================== 关于我 ====================== */
+        .app-card:hover .app-link { gap: 8px; }
+
+        /* ===== Tags ===== */
+        .tags-wall {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .tag-pill {
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            background: var(--card);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            user-select: none;
+        }
+
+        .tag-pill:hover {
+            color: var(--accent);
+            border-color: var(--accent-border);
+            background: var(--accent-bg);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .tag-pill.active {
+            color: #fff;
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* ===== About ===== */
+        .about-content {
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
         .about-card {
-            padding: 2rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 36px;
         }
 
         .about-card p {
             font-size: 1rem;
-            color: var(--text-secondary);
+            color: var(--text-muted);
             line-height: 1.9;
-            margin-bottom: 1rem;
+            margin-bottom: 12px;
         }
 
-        .about-card p:last-child {
-            margin-bottom: 0;
+        .about-card p strong {
+            color: var(--text);
         }
 
-        /* ====================== 标签墙 ====================== */
-        .tag-wall {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.6rem;
-        }
-
-        .tag-pill {
-            padding: 8px 18px;
-            border-radius: 14px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--text-secondary);
-            transition: all 0.3s ease;
-            cursor: default;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-        }
-
-        .tag-pill:hover {
-            background: rgba(255, 255, 255, 0.3);
-            color: var(--text-primary);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-        }
-
-        /* ====================== 工具入口 ====================== */
-        .app-grid {
+        .about-card ul {
+            list-style: none;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 16px;
         }
 
-        .app-card {
-            padding: 1.5rem;
-            text-align: center;
-            text-decoration: none;
-            color: var(--text-primary);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .app-card:hover {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
-        }
-
-        .app-card .app-icon {
-            font-size: 2.2rem;
-            margin-bottom: 0.6rem;
-        }
-
-        .app-card h4 {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-bottom: 0.3rem;
-        }
-
-        .app-card p {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-
-        /* ====================== 联系区域 ====================== */
-        .contact-row {
+        .about-card li {
+            font-size: 0.92rem;
+            color: var(--text-muted);
+            padding: 8px 12px;
+            border-radius: var(--radius-xs);
+            background: var(--bg-alt);
             display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .about-card li::before {
+            content: '';
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+        }
+
+        /* ===== Activity Timeline ===== */
+        .timeline {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 16px;
+            padding-bottom: 24px;
+            position: relative;
+        }
+
+        .timeline-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 11px;
+            top: 28px;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .timeline-dot {
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            background: var(--accent-bg);
+            border: 2px solid var(--accent);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .timeline-dot::after {
+            content: '';
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        .timeline-body {
+            flex: 1;
+            padding-top: 1px;
+        }
+
+        .timeline-date {
+            font-size: 0.78rem;
+            color: var(--text-light);
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .timeline-text {
+            font-size: 0.95rem;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        /* ===== Contact ===== */
+        .contact-content {
+            display: flex;
             justify-content: center;
         }
 
-        .contact-pill {
-            display: inline-flex;
+        .contact-card {
+            display: flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 10px 22px;
-            border-radius: 16px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: var(--text-secondary);
+            gap: 16px;
+            padding: 20px 36px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
             text-decoration: none;
+            color: var(--text);
             transition: all 0.3s ease;
         }
 
-        .contact-pill:hover {
-            color: var(--text-primary);
-            background: rgba(255, 255, 255, 0.35);
+        .contact-card:hover {
             transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--accent-border);
         }
 
-        /* ====================== 页脚 ====================== */
+        .contact-icon {
+            width: 48px; height: 48px;
+            border-radius: 14px;
+            background: var(--accent-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+
+        .contact-info .contact-label {
+            display: block;
+            font-size: 0.78rem;
+            color: var(--text-light);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .contact-info .contact-value {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        /* ===== Footer ===== */
         .footer {
-            position: relative;
-            z-index: 2;
+            background: var(--text);
+            color: rgba(255,255,255,0.6);
+            padding: 40px 0;
             text-align: center;
-            padding: 2.5rem 1.5rem;
-            font-size: 0.82rem;
-            color: var(--text-secondary);
         }
 
-        .footer a {
-            color: var(--accent);
+        .footer-nav {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 20px;
+        }
+
+        .footer-nav a {
+            color: rgba(255,255,255,0.5);
             text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: color 0.2s;
         }
 
-        /* ====================== 文章详情弹窗 ====================== */
+        .footer-nav a:hover { color: #fff; }
+
+        .footer p {
+            font-size: 0.82rem;
+        }
+
+        /* ===== Modal ===== */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             z-index: 2000;
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
             display: none;
             align-items: center;
             justify-content: center;
-            padding: 2rem;
+            padding: 24px;
             opacity: 0;
-            transition: opacity 0.35s ease;
+            transition: opacity 0.3s ease;
         }
 
-        .modal-overlay.show {
-            display: flex;
-            opacity: 1;
-        }
+        .modal-overlay.show { display: flex; opacity: 1; }
 
         .modal-content {
             width: 100%;
             max-width: 640px;
             max-height: 80vh;
             overflow-y: auto;
-            padding: 2.5rem;
-            background: linear-gradient(135deg,
-                rgba(255, 255, 255, 0.45) 0%,
-                rgba(255, 255, 255, 0.20) 100%);
-            backdrop-filter: blur(60px) saturate(2);
-            -webkit-backdrop-filter: blur(60px) saturate(2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 28px;
-            box-shadow:
-                0 24px 80px rgba(0, 0, 0, 0.12),
-                inset 0 1px 0 rgba(255, 255, 255, 0.5);
-            transform: translateY(20px) scale(0.97);
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 36px;
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: 0 24px 48px rgba(0,0,0,0.15);
+            transform: translateY(16px) scale(0.98);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .modal-overlay.show .modal-content {
             transform: translateY(0) scale(1);
         }
 
-        .modal-content::-webkit-scrollbar {
-            width: 0;
-        }
+        .modal-content::-webkit-scrollbar { width: 0; }
 
         .modal-close {
             float: right;
-            width: 32px; height: 32px;
-            border-radius: 10px;
-            border: none;
-            background: rgba(0, 0, 0, 0.06);
-            color: var(--text-secondary);
-            font-size: 1.1rem;
+            width: 36px; height: 36px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: var(--bg-alt);
+            color: var(--text-muted);
+            font-size: 1rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s;
+            transition: all 0.2s;
         }
 
-        .modal-close:hover {
-            background: rgba(0, 0, 0, 0.12);
-        }
+        .modal-close:hover { background: var(--border); color: var(--text); }
 
-        .modal-tag { margin-bottom: 0.8rem; }
+        .modal-tag { margin-bottom: 10px; }
 
         .modal-title {
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             font-weight: 700;
-            margin-bottom: 0.4rem;
+            margin-bottom: 6px;
             letter-spacing: -0.5px;
         }
 
         .modal-date {
             font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin-bottom: 1.5rem;
+            color: var(--text-light);
+            margin-bottom: 24px;
         }
 
         .modal-body {
             font-size: 1rem;
             line-height: 2;
-            color: rgba(30, 30, 60, 0.75);
+            color: var(--text-muted);
         }
 
-        .modal-body p {
-            margin-bottom: 1rem;
-        }
+        .modal-body p { margin-bottom: 12px; }
 
-        /* ====================== 滚动动画 ====================== */
+        /* ===== Reveal Animation ===== */
         .reveal {
             opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(24px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
         }
 
         .reveal.visible {
@@ -716,195 +741,259 @@
             transform: translateY(0);
         }
 
-        /* ====================== 响应式 ====================== */
+        /* ===== Responsive ===== */
+        @media (max-width: 1024px) {
+            .blog-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
         @media (max-width: 768px) {
-            .navbar {
-                top: 8px;
+            .nav-toggle { display: flex; }
+
+            .nav-links {
+                position: absolute;
+                top: var(--nav-h);
+                left: 0; right: 0;
+                flex-direction: column;
+                background: rgba(255,255,255,0.96);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+                border-bottom: 1px solid var(--border);
                 padding: 8px 16px;
-                gap: 1rem;
+                display: none;
+                box-shadow: var(--shadow-md);
             }
 
-            .navbar .nav-links a {
-                padding: 5px 10px;
-                font-size: 0.82rem;
+            .nav-links.open { display: flex; }
+
+            .nav-links a {
+                padding: 12px 16px;
+                border-radius: var(--radius-sm);
             }
 
-            .hero-title {
-                font-size: 2.4rem;
-            }
+            .section { padding: 56px 0; }
 
-            .hero-desc {
-                font-size: 1rem;
-            }
+            .section-header { margin-bottom: 32px; }
+            .section-header h2 { font-size: 1.6rem; }
 
-            .content-wrap {
-                padding: 0 1rem 3rem;
-            }
+            .hero { padding: calc(var(--nav-h) + 48px) 0 48px; }
+            .hero-title { font-size: 2.4rem; }
+            .hero-subtitle { font-size: 1rem; }
 
-            .modal-content {
-                padding: 1.8rem;
-                border-radius: 24px;
-            }
+            .blog-grid { grid-template-columns: 1fr; gap: 16px; }
+            .apps-grid { grid-template-columns: 1fr; gap: 16px; }
+
+            .about-card { padding: 24px; }
+            .about-card ul { grid-template-columns: 1fr; }
+
+            .modal-content { padding: 24px; }
+
+            .contact-card { padding: 16px 24px; }
         }
 
         @media (max-width: 480px) {
-            .navbar {
-                width: calc(100% - 24px);
-                gap: 0.5rem;
-                padding: 8px 12px;
-            }
-
-            .navbar .brand {
-                font-size: 1rem;
-            }
-
-            .navbar .nav-links a {
-                padding: 4px 8px;
-                font-size: 0.78rem;
-            }
-
-            .hero-title {
-                font-size: 2rem;
-            }
-
-            .hero-avatar {
-                width: 90px;
-                height: 90px;
-                border-radius: 28px;
-                font-size: 2.4rem;
-            }
-
-            .app-grid {
-                grid-template-columns: 1fr 1fr;
-            }
+            .hero-title { font-size: 2rem; }
+            .hero-avatar { width: 80px; height: 80px; font-size: 2rem; border-radius: 22px; }
+            .container { padding: 0 16px; }
+            .btn { padding: 11px 22px; font-size: 0.9rem; }
         }
     </style>
 </head>
 <body>
 
-<!-- 动态背景 -->
-<div class="bg-canvas">
-    <div class="bg-orb"></div>
-    <div class="bg-orb"></div>
-    <div class="bg-orb"></div>
-    <div class="bg-orb"></div>
-</div>
-<div class="particles" id="particles"></div>
-
-<!-- 导航栏 -->
-<nav class="navbar glass">
-    <a href="#" class="brand">SEN</a>
-    <ul class="nav-links">
-        <li><a href="#blog" class="active">Blog</a></li>
-        <li><a href="#about">About</a></li>
-        <li><a href="#apps">Apps</a></li>
-        <li><a href="#contact">Contact</a></li>
-    </ul>
+<!-- Navbar -->
+<nav class="navbar" id="navbar">
+    <div class="nav-inner">
+        <a href="#" class="nav-brand">SEN</a>
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#home" class="active">Home</a></li>
+            <li><a href="#blog">Blog</a></li>
+            <li><a href="#apps">Apps</a></li>
+            <li><a href="#tags">Tags</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </div>
 </nav>
 
 <!-- Hero -->
-<section class="hero">
-    <div class="hero-content">
-        <div class="hero-avatar">S</div>
-        <h1 class="hero-title">Hello, I'm SEN</h1>
-        <p class="hero-desc">记录生活的碎片，捕捉平凡中的光。<br>这里是我的生活剧场，欢迎走进来坐坐。</p>
-        <div class="hero-actions">
-            <a href="#blog" class="btn-liquid btn-primary">开始阅读</a>
-            <a href="#about" class="btn-liquid btn-glass">了解更多</a>
+<section class="hero" id="home">
+    <div class="container">
+        <div class="hero-avatar reveal">S</div>
+        <h1 class="hero-title reveal">Hello, I'm SEN</h1>
+        <p class="hero-subtitle reveal">记录生活的碎片，捕捉平凡中的光。</p>
+        <div class="hero-buttons reveal">
+            <a href="#blog" class="btn btn-primary">开始阅读</a>
+            <a href="#apps" class="btn btn-outline">探索工具</a>
         </div>
     </div>
 </section>
 
-<!-- 博客文章 -->
-<div class="content-wrap">
-    <section class="section" id="blog">
+<!-- Latest Blog Posts -->
+<section class="section section-alt" id="blog">
+    <div class="container">
         <div class="section-header reveal">
-            <div class="section-icon">&#x270D;&#xFE0F;</div>
-            <h2 class="section-label">Life Blog</h2>
+            <span class="section-badge">Blog</span>
+            <h2>最新文章</h2>
+            <p>记录每一个值得记住的瞬间</p>
         </div>
-        <div class="blog-grid" id="blogGrid">
-            <!-- JS 动态渲染 -->
-        </div>
-    </section>
+        <div class="blog-grid" id="blogGrid"></div>
+    </div>
+</section>
 
-    <!-- 标签墙 -->
-    <section class="section reveal">
-        <div class="section-header">
-            <div class="section-icon">&#x1F3F7;&#xFE0F;</div>
-            <h2 class="section-label">Tags</h2>
-        </div>
-        <div class="tag-wall">
-            <span class="tag-pill">&#x2615; 日常</span>
-            <span class="tag-pill">&#x2708;&#xFE0F; 旅行</span>
-            <span class="tag-pill">&#x1F372; 美食</span>
-            <span class="tag-pill">&#x1F4AD; 随想</span>
-            <span class="tag-pill">&#x1F4BB; 技术</span>
-            <span class="tag-pill">&#x1F4DA; 阅读</span>
-            <span class="tag-pill">&#x1F3B5; 音乐</span>
-            <span class="tag-pill">&#x1F3AC; 电影</span>
-            <span class="tag-pill">&#x1F4F8; 摄影</span>
-            <span class="tag-pill">&#x1F331; 成长</span>
-        </div>
-    </section>
-
-    <!-- 关于我 -->
-    <section class="section" id="about">
+<!-- Featured Apps -->
+<section class="section" id="apps">
+    <div class="container">
         <div class="section-header reveal">
-            <div class="section-icon">&#x1F9D1;&#x200D;&#x1F4BB;</div>
-            <h2 class="section-label">About Me</h2>
+            <span class="section-badge">Apps</span>
+            <h2>我的工具</h2>
+            <p>为生活打造的实用小工具</p>
         </div>
-        <div class="about-card glass reveal">
-            <p>嗨，我是 SEN。一个喜欢记录生活的人。</p>
-            <p>我相信每一天都值得被记住。无论是清晨的第一杯咖啡，路边偶遇的花开，还是深夜的一段灵感——这些看似微小的瞬间，构成了生活真正的模样。</p>
-            <p>这个博客是我的生活剧场。在这里，你会看到我的旅途见闻、厨房实验、深夜随想，以及那些不经意间触动我的故事。希望这些文字也能给你带来一点温暖。</p>
-        </div>
-    </section>
-
-    <!-- 我的工具 -->
-    <section class="section" id="apps">
-        <div class="section-header reveal">
-            <div class="section-icon">&#x1F4E6;</div>
-            <h2 class="section-label">My Apps</h2>
-        </div>
-        <div class="app-grid reveal">
-            <a href="box.html" class="app-card glass-subtle">
-                <div class="app-icon">&#x1F4E6;</div>
-                <h4>储物柜</h4>
-                <p>物品收纳管理</p>
+        <div class="apps-grid reveal">
+            <a href="box.html" class="app-card">
+                <span class="app-icon">&#x1F4E6;</span>
+                <h3>储物柜</h3>
+                <p class="app-desc">管理你的物品存储</p>
+                <span class="app-link">打开 &rarr;</span>
             </a>
-            <a href="keep.html" class="app-card glass-subtle">
-                <div class="app-icon">&#x1F4DD;</div>
-                <h4>便签</h4>
-                <p>随手记录想法</p>
+            <a href="keep.html" class="app-card">
+                <span class="app-icon">&#x1F4DD;</span>
+                <h3>便签</h3>
+                <p class="app-desc">随手记录灵感</p>
+                <span class="app-link">打开 &rarr;</span>
             </a>
-            <a href="task.html" class="app-card glass-subtle">
-                <div class="app-icon">&#x1F3AF;</div>
-                <h4>目标</h4>
-                <p>追踪我的计划</p>
+            <a href="task.html" class="app-card">
+                <span class="app-icon">&#x1F3AF;</span>
+                <h3>目标</h3>
+                <p class="app-desc">追踪你的长期计划</p>
+                <span class="app-link">打开 &rarr;</span>
             </a>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- 联系 -->
-    <section class="section" id="contact">
+<!-- Topics / Tags -->
+<section class="section section-alt" id="tags">
+    <div class="container">
         <div class="section-header reveal">
-            <div class="section-icon">&#x1F4AC;</div>
-            <h2 class="section-label">Contact</h2>
+            <span class="section-badge">Topics</span>
+            <h2>探索话题</h2>
+            <p>点击标签浏览相关内容</p>
         </div>
-        <div class="contact-row reveal">
-            <a href="mailto:ys1991427360@gmail.com" class="contact-pill glass-subtle">&#x2709;&#xFE0F; ys1991427360@gmail.com</a>
+        <div class="tags-wall reveal" id="tagsWall"></div>
+    </div>
+</section>
+
+<!-- About Me -->
+<section class="section" id="about">
+    <div class="container">
+        <div class="section-header reveal">
+            <span class="section-badge">About</span>
+            <h2>关于我</h2>
         </div>
-    </section>
-</div>
+        <div class="about-content reveal">
+            <div class="about-card">
+                <p>嗨，我是 <strong>SEN</strong>。</p>
+                <p>电气工程专业，喜欢记录生活和技术探索。</p>
+                <p>我会在这里分享：</p>
+                <ul>
+                    <li>技术学习</li>
+                    <li>旅行记录</li>
+                    <li>阅读笔记</li>
+                    <li>有趣的小工具</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
 
-<!-- 页脚 -->
-<div class="footer">
-    <p>&copy; 2025 SEN &middot; Built with &#x2764;&#xFE0F;</p>
-</div>
+<!-- Recent Activity -->
+<section class="section section-alt" id="activity">
+    <div class="container">
+        <div class="section-header reveal">
+            <span class="section-badge">Activity</span>
+            <h2>最近动态</h2>
+        </div>
+        <div class="timeline reveal">
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-body">
+                    <div class="timeline-date">2025-03-15</div>
+                    <div class="timeline-text">发布文章：搬进新房子的第一天</div>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-body">
+                    <div class="timeline-date">2025-03-08</div>
+                    <div class="timeline-text">发布文章：周末的菜市场才是人间真实</div>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-body">
+                    <div class="timeline-date">2025-03-01</div>
+                    <div class="timeline-text">更新应用：储物柜云同步功能</div>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-body">
+                    <div class="timeline-date">2025-02-20</div>
+                    <div class="timeline-text">发布文章：第一次独自旅行去了厦门</div>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-body">
+                    <div class="timeline-date">2025-02-10</div>
+                    <div class="timeline-text">新项目：个人生活博客上线</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
-<!-- 文章弹窗 -->
+<!-- Contact -->
+<section class="section" id="contact">
+    <div class="container">
+        <div class="section-header reveal">
+            <span class="section-badge">Contact</span>
+            <h2>联系我</h2>
+            <p>有任何想法或问题，欢迎来信</p>
+        </div>
+        <div class="contact-content reveal">
+            <a href="mailto:ys1991427360@gmail.com" class="contact-card">
+                <div class="contact-icon">&#x2709;&#xFE0F;</div>
+                <div class="contact-info">
+                    <span class="contact-label">Email</span>
+                    <span class="contact-value">ys1991427360@gmail.com</span>
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-nav">
+            <a href="#home">Home</a>
+            <a href="#blog">Blog</a>
+            <a href="#apps">Apps</a>
+            <a href="#tags">Tags</a>
+            <a href="#about">About</a>
+            <a href="#contact">Contact</a>
+        </div>
+        <p>&copy; 2025 SEN &middot; Powered by GitHub Pages</p>
+    </div>
+</footer>
+
+<!-- Modal -->
 <div class="modal-overlay" id="modal">
-    <div class="modal-content glass">
+    <div class="modal-content">
         <button class="modal-close" onclick="closeModal()">&#x2715;</button>
         <div class="modal-tag" id="modalTag"></div>
         <h2 class="modal-title" id="modalTitle"></h2>
@@ -914,7 +1003,7 @@
 </div>
 
 <script>
-    // ====================== 博客数据 ======================
+    // ===== Blog Data =====
     const posts = [
         {
             id: 1,
@@ -923,11 +1012,7 @@
             tag: "life",
             tagLabel: "日常",
             excerpt: "终于有了属于自己的小窝。纸箱还没拆完，但已经迫不及待地在阳台上坐了一会儿，看着远处的天际线发了好久的呆。",
-            content: `<p>今天是搬进新房子的第一天。</p>
-<p>其实东西还没有完全归位，客厅里堆满了纸箱。但当我推开阳台的门，感受到那阵风的时候，突然觉得一切都值得了。</p>
-<p>傍晚的时候，一个人坐在阳台上，看着远处的建筑渐渐亮起灯光。没有电视的声音，没有手机的打扰，只有风和城市远处隐隐约约的声响。</p>
-<p>这种安静的感觉，好像已经很久没有过了。</p>
-<p>新的空间，新的开始。慢慢来，把这里变成自己最喜欢的样子。</p>`
+            content: `<p>今天是搬进新房子的第一天。</p><p>其实东西还没有完全归位，客厅里堆满了纸箱。但当我推开阳台的门，感受到那阵风的时候，突然觉得一切都值得了。</p><p>傍晚的时候，一个人坐在阳台上，看着远处的建筑渐渐亮起灯光。没有电视的声音，没有手机的打扰，只有风和城市远处隐隐约约的声响。</p><p>这种安静的感觉，好像已经很久没有过了。</p><p>新的空间，新的开始。慢慢来，把这里变成自己最喜欢的样子。</p>`
         },
         {
             id: 2,
@@ -936,11 +1021,7 @@
             tag: "food",
             tagLabel: "美食",
             excerpt: "清晨的菜市场带着露水的潮湿味道，混合着葱姜蒜的浓烈气息。今天买了新鲜的基围虾和嫩豆腐，准备试试酸辣虾汤。",
-            content: `<p>每到周末，我都喜欢早起去逛菜市场。</p>
-<p>没有什么地方比菜市场更有人间烟火气了。卖鱼的大叔会热情地推荐今天最新鲜的货，卖菜的阿姨总会多塞给你几根葱。</p>
-<p>今天收获满满：一斤基围虾、一块嫩豆腐、几个番茄和一把小葱。计划做一道酸辣虾汤，配上热腾腾的米饭，想想就开心。</p>
-<p>在厨房忙活了一个小时，汤的味道竟然出奇的好。酸酸辣辣的，虾肉弹牙，豆腐入口即化。给自己打了个 9 分（毕竟盐稍微多了一点点）。</p>
-<p>生活的幸福感，有时候真的就藏在一顿自己做的饭里。</p>`
+            content: `<p>每到周末，我都喜欢早起去逛菜市场。</p><p>没有什么地方比菜市场更有人间烟火气了。卖鱼的大叔会热情地推荐今天最新鲜的货，卖菜的阿姨总会多塞给你几根葱。</p><p>今天收获满满：一斤基围虾、一块嫩豆腐、几个番茄和一把小葱。计划做一道酸辣虾汤，配上热腾腾的米饭，想想就开心。</p><p>在厨房忙活了一个小时，汤的味道竟然出奇的好。酸酸辣辣的，虾肉弹牙，豆腐入口即化。给自己打了个 9 分（毕竟盐稍微多了一点点）。</p><p>生活的幸福感，有时候真的就藏在一顿自己做的饭里。</p>`
         },
         {
             id: 3,
@@ -949,11 +1030,7 @@
             tag: "thought",
             tagLabel: "随想",
             excerpt: "三月的风不一样了。吹过来的时候，会有一种「好像什么事情正在悄悄发生」的感觉。也许该清理一下房间和心情了。",
-            content: `<p>三月一号，什么都没做，只是出门走了走。</p>
-<p>路边的樱花树还没完全开放，但枝头已经冒出了粉色的小苞。空气里多了一点潮润的味道，阳光也比冬天温柔了许多。</p>
-<p>最近一直在想，人为什么会在某些时刻突然有"要重新开始"的冲动？也许是季节的暗示，也许是身体比大脑更早感知到了变化。</p>
-<p>总之，今天回家后清理了书桌，扔掉了三袋旧东西，然后泡了一杯茶，坐在窗边写了这篇日记。</p>
-<p>三月，请多多关照。</p>`
+            content: `<p>三月一号，什么都没做，只是出门走了走。</p><p>路边的樱花树还没完全开放，但枝头已经冒出了粉色的小苞。空气里多了一点潮润的味道，阳光也比冬天温柔了许多。</p><p>最近一直在想，人为什么会在某些时刻突然有"要重新开始"的冲动？也许是季节的暗示，也许是身体比大脑更早感知到了变化。</p><p>总之，今天回家后清理了书桌，扔掉了三袋旧东西，然后泡了一杯茶，坐在窗边写了这篇日记。</p><p>三月，请多多关照。</p>`
         },
         {
             id: 4,
@@ -962,11 +1039,7 @@
             tag: "travel",
             tagLabel: "旅行",
             excerpt: "一个人背着包去了厦门。没有详细计划，也没有赶行程，只是沿着海边慢慢走，吹了一整天的海风。",
-            content: `<p>说走就走的旅行，终于不只是一句口号了。</p>
-<p>周五下班后直接去了火车站，买了张去厦门的票。抵达的时候已经是深夜，海风带着咸味扑面而来。</p>
-<p>第二天睡到自然醒，没有闹钟，没有行程表。随便找了一家街边小店吃了沙茶面，然后沿着环岛路一直走。</p>
-<p>海很蓝，天很高，路上遇到了一只很亲人的橘猫，蹲下来和它玩了好一会儿。</p>
-<p>晚上在海边坐着听浪声，想起一句话："一个人的旅行不是孤独，是自由。" 现在我终于真正理解了这句话的意思。</p>`
+            content: `<p>说走就走的旅行，终于不只是一句口号了。</p><p>周五下班后直接去了火车站，买了张去厦门的票。抵达的时候已经是深夜，海风带着咸味扑面而来。</p><p>第二天睡到自然醒，没有闹钟，没有行程表。随便找了一家街边小店吃了沙茶面，然后沿着环岛路一直走。</p><p>海很蓝，天很高，路上遇到了一只很亲人的橘猫，蹲下来和它玩了好一会儿。</p><p>晚上在海边坐着听浪声，想起一句话："一个人的旅行不是孤独，是自由。" 现在我终于真正理解了这句话的意思。</p>`
         },
         {
             id: 5,
@@ -975,10 +1048,7 @@
             tag: "tech",
             tagLabel: "技术",
             excerpt: "折腾了一整天的笔记系统，终于从散乱的备忘录迁移到了 Obsidian。双链笔记的感觉确实不一样。",
-            content: `<p>一直以来，我的笔记都散落在各种地方：手机备忘录、微信收藏、浏览器书签、各种 App……想找点东西的时候，翻遍全世界都找不到。</p>
-<p>今天下定决心，把所有东西迁移到 Obsidian。花了大半天整理，但过程中也重新发现了很多之前记下来却忘掉的好东西。</p>
-<p>双链的魅力在于，它让你看到知识之间的联系。一条读书笔记链接到一个项目想法，一个技术思路链接到一篇随笔。慢慢地，这些零散的点连成了一张网。</p>
-<p>虽然还在不断调整结构，但已经有了一种"大脑被整理过"的清爽感。</p>`
+            content: `<p>一直以来，我的笔记都散落在各种地方：手机备忘录、微信收藏、浏览器书签、各种 App……想找点东西的时候，翻遍全世界都找不到。</p><p>今天下定决心，把所有东西迁移到 Obsidian。花了大半天整理，但过程中也重新发现了很多之前记下来却忘掉的好东西。</p><p>双链的魅力在于，它让你看到知识之间的联系。一条读书笔记链接到一个项目想法，一个技术思路链接到一篇随笔。慢慢地，这些零散的点连成了一张网。</p><p>虽然还在不断调整结构，但已经有了一种"大脑被整理过"的清爽感。</p>`
         },
         {
             id: 6,
@@ -987,44 +1057,77 @@
             tag: "life",
             tagLabel: "日常",
             excerpt: "加班到凌晨一点，回到家煮了一碗泡面。加了一个蛋和两片火腿，在安静的厨房里，这大概是世界上最好吃的东西了。",
-            content: `<p>今晚加班到很晚。回家的路上，街道已经安静了，只有便利店的灯还亮着。</p>
-<p>到家之后不想点外卖，翻出了一包泡面。烧水的时候打了一个鸡蛋，切了两片火腿。</p>
-<p>面煮好的时候，热气腾起来，厨房里充满了熟悉的香味。端着碗坐在桌前，窗外是深蓝色的夜空和几点零星的灯光。</p>
-<p>一口汤下去，整个人都暖了。</p>
-<p>有时候觉得，生活的温柔就藏在这些不起眼的时刻里。不需要多隆重，一碗热气腾腾的泡面就够了。</p>`
+            content: `<p>今晚加班到很晚。回家的路上，街道已经安静了，只有便利店的灯还亮着。</p><p>到家之后不想点外卖，翻出了一包泡面。烧水的时候打了一个鸡蛋，切了两片火腿。</p><p>面煮好的时候，热气腾起来，厨房里充满了熟悉的香味。端着碗坐在桌前，窗外是深蓝色的夜空和几点零星的灯光。</p><p>一口汤下去，整个人都暖了。</p><p>有时候觉得，生活的温柔就藏在这些不起眼的时刻里。不需要多隆重，一碗热气腾腾的泡面就够了。</p>`
         }
     ];
 
-    // ====================== 渲染博客列表 ======================
     const tagClassMap = {
         life: 'tag-life', travel: 'tag-travel', food: 'tag-food',
         thought: 'tag-thought', tech: 'tag-tech'
     };
 
-    function renderPosts() {
+    const tagConfig = [
+        { key: 'life', label: '日常', icon: '&#x2615;' },
+        { key: 'travel', label: '旅行', icon: '&#x2708;&#xFE0F;' },
+        { key: 'food', label: '美食', icon: '&#x1F372;' },
+        { key: 'thought', label: '随想', icon: '&#x1F4AD;' },
+        { key: 'tech', label: '技术', icon: '&#x1F4BB;' },
+        { key: 'reading', label: '阅读', icon: '&#x1F4DA;' },
+        { key: 'photo', label: '摄影', icon: '&#x1F4F8;' }
+    ];
+
+    let activeTag = null;
+
+    // ===== Render Blog Cards =====
+    function renderPosts(filter) {
         const grid = document.getElementById('blogGrid');
-        grid.innerHTML = posts.map((post, i) => `
-            <div class="blog-card glass reveal" style="transition-delay:${i * 0.08}s" onclick="openModal(${post.id})">
-                <div class="card-top">
+        const filtered = filter ? posts.filter(p => p.tag === filter) : posts;
+
+        grid.innerHTML = filtered.map((post, i) => `
+            <div class="blog-card reveal" data-tag="${post.tag}" style="transition-delay:${i * 0.06}s" onclick="openModal(${post.id})">
+                <div class="card-meta">
                     <span class="card-date">${post.date}</span>
                     <span class="card-tag ${tagClassMap[post.tag]}">${post.tagLabel}</span>
                 </div>
                 <h3>${post.title}</h3>
                 <p class="card-excerpt">${post.excerpt}</p>
-                <div class="card-footer">
-                    <span>&#x1F4D6; 阅读全文</span>
-                </div>
+                <span class="card-link">阅读全文 &rarr;</span>
             </div>
         `).join('');
 
         observeReveal();
     }
 
-    // ====================== 文章弹窗 ======================
+    // ===== Render Tags =====
+    function renderTags() {
+        const wall = document.getElementById('tagsWall');
+        wall.innerHTML = tagConfig.map(t =>
+            `<span class="tag-pill" data-tag="${t.key}" onclick="filterByTag('${t.key}')">${t.icon} ${t.label}</span>`
+        ).join('');
+    }
+
+    function filterByTag(tag) {
+        const pills = document.querySelectorAll('.tag-pill');
+        if (activeTag === tag) {
+            activeTag = null;
+            pills.forEach(p => p.classList.remove('active'));
+            renderPosts();
+        } else {
+            activeTag = tag;
+            pills.forEach(p => {
+                p.classList.toggle('active', p.dataset.tag === tag);
+            });
+            renderPosts(tag);
+            document.getElementById('blog').scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    // ===== Modal =====
     function openModal(id) {
         const post = posts.find(p => p.id === id);
         if (!post) return;
-        document.getElementById('modalTag').innerHTML = `<span class="card-tag ${tagClassMap[post.tag]}">${post.tagLabel}</span>`;
+        document.getElementById('modalTag').innerHTML =
+            `<span class="card-tag ${tagClassMap[post.tag]}">${post.tagLabel}</span>`;
         document.getElementById('modalTitle').textContent = post.title;
         document.getElementById('modalDate').textContent = post.date;
         document.getElementById('modalBody').innerHTML = post.content;
@@ -1041,69 +1144,75 @@
         setTimeout(() => {
             modal.style.display = 'none';
             document.body.style.overflow = '';
-        }, 350);
+        }, 300);
     }
 
-    document.getElementById('modal').addEventListener('click', (e) => {
+    document.getElementById('modal').addEventListener('click', e => {
         if (e.target === e.currentTarget) closeModal();
     });
 
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener('keydown', e => {
         if (e.key === 'Escape') closeModal();
     });
 
-    // ====================== 滚动显现动画 ======================
+    // ===== Mobile Menu =====
+    const navToggle = document.getElementById('navToggle');
+    const navLinksEl = document.getElementById('navLinks');
+
+    navToggle.addEventListener('click', () => {
+        navToggle.classList.toggle('open');
+        navLinksEl.classList.toggle('open');
+    });
+
+    navLinksEl.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            navToggle.classList.remove('open');
+            navLinksEl.classList.remove('open');
+        });
+    });
+
+    // ===== Navbar Scroll Shadow =====
+    window.addEventListener('scroll', () => {
+        document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
+    }, { passive: true });
+
+    // ===== Scroll Spy =====
+    const spySections = document.querySelectorAll('section[id]');
+    const spyLinks = document.querySelectorAll('.nav-links a');
+
+    function updateSpy() {
+        const scrollY = window.scrollY + 100;
+        let currentId = 'home';
+        spySections.forEach(sec => {
+            if (scrollY >= sec.offsetTop) {
+                currentId = sec.id;
+            }
+        });
+        spyLinks.forEach(link => {
+            link.classList.toggle('active', link.getAttribute('href') === '#' + currentId);
+        });
+    }
+
+    window.addEventListener('scroll', updateSpy, { passive: true });
+
+    // ===== Reveal on Scroll =====
     function observeReveal() {
-        const observer = new IntersectionObserver((entries) => {
+        const observer = new IntersectionObserver(entries => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('visible');
                 }
             });
-        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+        }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
 
-        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+        document.querySelectorAll('.reveal:not(.visible)').forEach(el => observer.observe(el));
     }
 
-    // ====================== 导航高亮 ======================
-    const navLinks = document.querySelectorAll('.nav-links a');
-    const sections = document.querySelectorAll('.section[id], .hero');
-
-    window.addEventListener('scroll', () => {
-        const scrollY = window.scrollY + 100;
-        let current = '';
-        sections.forEach(sec => {
-            if (scrollY >= sec.offsetTop) {
-                current = sec.getAttribute('id') || '';
-            }
-        });
-
-        navLinks.forEach(link => {
-            link.classList.remove('active');
-            if (link.getAttribute('href') === '#' + current) {
-                link.classList.add('active');
-            }
-        });
-    });
-
-    // ====================== 粒子效果 ======================
-    function createParticles() {
-        const container = document.getElementById('particles');
-        for (let i = 0; i < 30; i++) {
-            const p = document.createElement('div');
-            p.className = 'particle';
-            p.style.left = Math.random() * 100 + '%';
-            p.style.animationDuration = (8 + Math.random() * 12) + 's';
-            p.style.animationDelay = Math.random() * 10 + 's';
-            p.style.width = p.style.height = (2 + Math.random() * 3) + 'px';
-            p.style.opacity = 0.2 + Math.random() * 0.4;
-            container.appendChild(p);
-        }
-    }
-
-    // ====================== 初始化 ======================
+    // ===== Init =====
     renderPosts();
-    createParticles();
+    renderTags();
+    observeReveal();
+    updateSpy();
 </script>
 
 </body>
