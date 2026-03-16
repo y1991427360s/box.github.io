@@ -556,7 +556,8 @@ createParticles();
     draw();
 })();
 
-// ===== Mouse Sparkle + Trail Effect =====
+// ===== Mouse Sparkle + Trail Effect (desktop only) =====
+if (window.matchMedia('(pointer: fine)').matches) {
 (function() {
     const cv = document.getElementById('cursorCanvas');
     const c = cv.getContext('2d');
@@ -676,6 +677,7 @@ createParticles();
     }
     animate();
 })();
+} // end desktop-only cursor effect
 </script>
 
 </body>
