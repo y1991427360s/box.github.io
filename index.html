@@ -164,6 +164,20 @@
 
 </div><!-- /content-layer -->
 
+<!-- BGM -->
+<audio id="bgm" loop preload="auto">
+    <source src="assets/老街.mp3" type="audio/mpeg">
+</audio>
+<button class="bgm-btn" id="bgmBtn" aria-label="Toggle music">
+    <span class="bgm-disc" id="bgmDisc">&#x266B;</span>
+</button>
+
+<!-- Snow Canvas -->
+<canvas id="snowCanvas"></canvas>
+
+<!-- Cursor Effect Canvas -->
+<canvas id="cursorCanvas"></canvas>
+
 <!-- Lightbox -->
 <div class="lightbox" id="lightbox">
     <button class="lightbox-close" onclick="closeLightbox()">&#x2715;</button>
@@ -450,6 +464,215 @@ renderYearNav();
 renderDiary();
 observeReveal();
 createParticles();
+
+// ===== BGM Control =====
+(function() {
+    const bgm = document.getElementById('bgm');
+    const btn = document.getElementById('bgmBtn');
+    let playing = false;
+    bgm.volume = 0.35;
+
+    const interactEvents = ['click','touchstart','pointerdown','keydown'];
+
+    function tryAutoPlay() {
+        if (playing) return;
+        bgm.play().then(() => {
+            playing = true;
+            btn.classList.add('playing');
+            // Only remove listeners after play actually succeeds
+            interactEvents.forEach(e => document.removeEventListener(e, tryAutoPlay, true));
+        }).catch(() => {});
+    }
+
+    // Try autoplay immediately (works if browser policy allows)
+    tryAutoPlay();
+
+    // Otherwise, keep retrying on every user activation until it succeeds
+    interactEvents.forEach(e => document.addEventListener(e, tryAutoPlay, { capture: true }));
+
+    // Toggle button
+    btn.addEventListener('click', () => {
+        if (playing) {
+            bgm.pause();
+            playing = false;
+            btn.classList.remove('playing');
+            interactEvents.forEach(e => document.removeEventListener(e, tryAutoPlay, true));
+        } else {
+            bgm.play().then(() => {
+                playing = true;
+                btn.classList.add('playing');
+            }).catch(() => {});
+        }
+    });
+})();
+
+// ===== Snowfall Effect =====
+(function() {
+    const cv = document.getElementById('snowCanvas');
+    const c = cv.getContext('2d');
+    function resize() { cv.width = window.innerWidth; cv.height = window.innerHeight; }
+    resize();
+    window.addEventListener('resize', resize);
+
+    const COUNT = 90;
+    const flakes = [];
+    for (let i = 0; i < COUNT; i++) {
+        flakes.push({
+            x: Math.random() * cv.width,
+            y: Math.random() * cv.height,
+            r: 1 + Math.random() * 3.5,
+            speed: 0.25 + Math.random() * 1.2,
+            wind: (Math.random() - 0.5) * 0.4,
+            swing: Math.random() * Math.PI * 2,
+            swingSpeed: 0.003 + Math.random() * 0.006,
+            opacity: 0.3 + Math.random() * 0.55
+        });
+    }
+
+    function draw() {
+        c.clearRect(0, 0, cv.width, cv.height);
+        for (const f of flakes) {
+            f.swing += f.swingSpeed;
+            f.y += f.speed;
+            f.x += f.wind + Math.sin(f.swing) * 0.5;
+
+            if (f.y > cv.height + 10) { f.y = -10; f.x = Math.random() * cv.width; }
+            if (f.x > cv.width + 10) f.x = -10;
+            if (f.x < -10) f.x = cv.width + 10;
+
+            c.beginPath();
+            c.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(255,255,255,' + f.opacity + ')';
+            c.shadowBlur = f.r * 2;
+            c.shadowColor = 'rgba(255,255,255,0.5)';
+            c.fill();
+        }
+        c.shadowBlur = 0;
+        requestAnimationFrame(draw);
+    }
+    draw();
+})();
+
+// ===== Mouse Sparkle + Trail Effect =====
+(function() {
+    const cv = document.getElementById('cursorCanvas');
+    const c = cv.getContext('2d');
+    function resize() { cv.width = window.innerWidth; cv.height = window.innerHeight; }
+    resize();
+    window.addEventListener('resize', resize);
+
+    const trail = [];
+    const TRAIL_MAX = 35;
+    const sparkles = [];
+    const palette = ['#007AFF','#AF52DE','#5AC8FA','#FF2D55','#34C759','#FFD60A'];
+    let mx = -100, my = -100, lx = -100, ly = -100;
+
+    document.addEventListener('mousemove', function(e) {
+        mx = e.clientX; my = e.clientY;
+        trail.push({ x: mx, y: my });
+        if (trail.length > TRAIL_MAX) trail.shift();
+
+        const dx = mx - lx, dy = my - ly;
+        const spd = Math.sqrt(dx * dx + dy * dy);
+        if (spd > 3) {
+            const n = Math.min(Math.floor(spd / 6), 5);
+            for (let i = 0; i < n; i++) {
+                sparkles.push({
+                    x: mx + (Math.random() - 0.5) * 12,
+                    y: my + (Math.random() - 0.5) * 12,
+                    vx: (Math.random() - 0.5) * 4,
+                    vy: (Math.random() - 0.5) * 4 - 1,
+                    life: 1,
+                    decay: 0.018 + Math.random() * 0.018,
+                    size: 1.5 + Math.random() * 3.5,
+                    color: palette[Math.floor(Math.random() * palette.length)],
+                    star: Math.random() > 0.4
+                });
+            }
+        }
+        lx = mx; ly = my;
+    });
+
+    function drawStar(x, y, r) {
+        c.beginPath();
+        for (let i = 0; i < 8; i++) {
+            const a = i * Math.PI / 4 - Math.PI / 2;
+            const rad = i % 2 === 0 ? r : r * 0.38;
+            c.lineTo(x + Math.cos(a) * rad, y + Math.sin(a) * rad);
+        }
+        c.closePath();
+        c.fill();
+    }
+
+    function animate() {
+        c.clearRect(0, 0, cv.width, cv.height);
+
+        // --- Glowing trail line ---
+        if (trail.length > 1) {
+            for (let i = 1; i < trail.length; i++) {
+                const p = trail[i - 1], q = trail[i];
+                const ratio = i / trail.length;
+                c.beginPath();
+                c.moveTo(p.x, p.y);
+                c.lineTo(q.x, q.y);
+                c.strokeStyle = 'rgba(0,122,255,' + (ratio * 0.5) + ')';
+                c.lineWidth = ratio * 2.5;
+                c.lineCap = 'round';
+                c.stroke();
+            }
+            // Glow dots
+            for (let i = 0; i < trail.length; i++) {
+                const t = trail[i], ratio = (i + 1) / trail.length;
+                const g = c.createRadialGradient(t.x, t.y, 0, t.x, t.y, 10 * ratio);
+                g.addColorStop(0, 'rgba(175,82,222,' + (ratio * 0.35) + ')');
+                g.addColorStop(1, 'rgba(0,122,255,0)');
+                c.fillStyle = g;
+                c.beginPath();
+                c.arc(t.x, t.y, 10 * ratio, 0, Math.PI * 2);
+                c.fill();
+            }
+        }
+
+        // --- Cursor glow ---
+        if (mx > 0) {
+            const glow = c.createRadialGradient(mx, my, 0, mx, my, 35);
+            glow.addColorStop(0, 'rgba(0,122,255,0.18)');
+            glow.addColorStop(0.5, 'rgba(175,82,222,0.06)');
+            glow.addColorStop(1, 'rgba(0,0,0,0)');
+            c.fillStyle = glow;
+            c.beginPath();
+            c.arc(mx, my, 35, 0, Math.PI * 2);
+            c.fill();
+        }
+
+        // --- Sparkle particles ---
+        for (let i = sparkles.length - 1; i >= 0; i--) {
+            const s = sparkles[i];
+            s.x += s.vx; s.y += s.vy;
+            s.vy += 0.03; s.vx *= 0.99;
+            s.life -= s.decay;
+            if (s.life <= 0) { sparkles.splice(i, 1); continue; }
+
+            c.globalAlpha = s.life;
+            c.fillStyle = s.color;
+            c.shadowBlur = 8;
+            c.shadowColor = s.color;
+
+            if (s.star) {
+                drawStar(s.x, s.y, s.size * (0.4 + s.life * 0.6));
+            } else {
+                c.beginPath();
+                c.arc(s.x, s.y, s.size * s.life, 0, Math.PI * 2);
+                c.fill();
+            }
+        }
+        c.globalAlpha = 1;
+        c.shadowBlur = 0;
+
+        requestAnimationFrame(animate);
+    }
+    animate();
+})();
 </script>
 
 </body>
