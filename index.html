@@ -557,30 +557,39 @@ createParticles();
 })();
 
 // ===== Mouse Sparkle + Trail Effect (desktop only) =====
-if (window.matchMedia('(pointer: fine)').matches) {
+// Detect mobile/touch devices — completely skip on phones & tablets
 (function() {
-    const cv = document.getElementById('cursorCanvas');
-    const c = cv.getContext('2d');
+    var isMobile = 'ontouchstart' in window
+        || navigator.maxTouchPoints > 0
+        || window.innerWidth <= 1024;
+    var cv = document.getElementById('cursorCanvas');
+    if (isMobile) {
+        // Remove canvas from DOM entirely so it can never render
+        if (cv) cv.parentNode.removeChild(cv);
+        return;
+    }
+
+    var c = cv.getContext('2d');
     function resize() { cv.width = window.innerWidth; cv.height = window.innerHeight; }
     resize();
     window.addEventListener('resize', resize);
 
-    const trail = [];
-    const TRAIL_MAX = 35;
-    const sparkles = [];
-    const palette = ['#007AFF','#AF52DE','#5AC8FA','#FF2D55','#34C759','#FFD60A'];
-    let mx = -100, my = -100, lx = -100, ly = -100;
+    var trail = [];
+    var TRAIL_MAX = 35;
+    var sparkles = [];
+    var palette = ['#007AFF','#AF52DE','#5AC8FA','#FF2D55','#34C759','#FFD60A'];
+    var mx = -100, my = -100, lx = -100, ly = -100;
 
     document.addEventListener('mousemove', function(e) {
         mx = e.clientX; my = e.clientY;
         trail.push({ x: mx, y: my });
         if (trail.length > TRAIL_MAX) trail.shift();
 
-        const dx = mx - lx, dy = my - ly;
-        const spd = Math.sqrt(dx * dx + dy * dy);
+        var dx = mx - lx, dy = my - ly;
+        var spd = Math.sqrt(dx * dx + dy * dy);
         if (spd > 3) {
-            const n = Math.min(Math.floor(spd / 6), 5);
-            for (let i = 0; i < n; i++) {
+            var n = Math.min(Math.floor(spd / 6), 5);
+            for (var i = 0; i < n; i++) {
                 sparkles.push({
                     x: mx + (Math.random() - 0.5) * 12,
                     y: my + (Math.random() - 0.5) * 12,
@@ -599,9 +608,9 @@ if (window.matchMedia('(pointer: fine)').matches) {
 
     function drawStar(x, y, r) {
         c.beginPath();
-        for (let i = 0; i < 8; i++) {
-            const a = i * Math.PI / 4 - Math.PI / 2;
-            const rad = i % 2 === 0 ? r : r * 0.38;
+        for (var i = 0; i < 8; i++) {
+            var a = i * Math.PI / 4 - Math.PI / 2;
+            var rad = i % 2 === 0 ? r : r * 0.38;
             c.lineTo(x + Math.cos(a) * rad, y + Math.sin(a) * rad);
         }
         c.closePath();
@@ -613,9 +622,9 @@ if (window.matchMedia('(pointer: fine)').matches) {
 
         // --- Glowing trail line ---
         if (trail.length > 1) {
-            for (let i = 1; i < trail.length; i++) {
-                const p = trail[i - 1], q = trail[i];
-                const ratio = i / trail.length;
+            for (var i = 1; i < trail.length; i++) {
+                var p = trail[i - 1], q = trail[i];
+                var ratio = i / trail.length;
                 c.beginPath();
                 c.moveTo(p.x, p.y);
                 c.lineTo(q.x, q.y);
@@ -625,9 +634,9 @@ if (window.matchMedia('(pointer: fine)').matches) {
                 c.stroke();
             }
             // Glow dots
-            for (let i = 0; i < trail.length; i++) {
-                const t = trail[i], ratio = (i + 1) / trail.length;
-                const g = c.createRadialGradient(t.x, t.y, 0, t.x, t.y, 10 * ratio);
+            for (var i = 0; i < trail.length; i++) {
+                var t = trail[i], ratio = (i + 1) / trail.length;
+                var g = c.createRadialGradient(t.x, t.y, 0, t.x, t.y, 10 * ratio);
                 g.addColorStop(0, 'rgba(175,82,222,' + (ratio * 0.35) + ')');
                 g.addColorStop(1, 'rgba(0,122,255,0)');
                 c.fillStyle = g;
@@ -639,7 +648,7 @@ if (window.matchMedia('(pointer: fine)').matches) {
 
         // --- Cursor glow ---
         if (mx > 0) {
-            const glow = c.createRadialGradient(mx, my, 0, mx, my, 35);
+            var glow = c.createRadialGradient(mx, my, 0, mx, my, 35);
             glow.addColorStop(0, 'rgba(0,122,255,0.18)');
             glow.addColorStop(0.5, 'rgba(175,82,222,0.06)');
             glow.addColorStop(1, 'rgba(0,0,0,0)');
@@ -650,8 +659,8 @@ if (window.matchMedia('(pointer: fine)').matches) {
         }
 
         // --- Sparkle particles ---
-        for (let i = sparkles.length - 1; i >= 0; i--) {
-            const s = sparkles[i];
+        for (var i = sparkles.length - 1; i >= 0; i--) {
+            var s = sparkles[i];
             s.x += s.vx; s.y += s.vy;
             s.vy += 0.03; s.vx *= 0.99;
             s.life -= s.decay;
@@ -677,7 +686,6 @@ if (window.matchMedia('(pointer: fine)').matches) {
     }
     animate();
 })();
-} // end desktop-only cursor effect
 </script>
 
 </body>
