@@ -296,9 +296,268 @@
         .toast.success { background: #27ae60; }
         .toast.error { background: #e74c3c; }
 
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #14213d;
+            --background-color: #eef3fb;
+            --container-bg: rgba(255, 255, 255, 0.78);
+            --box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+            --border-radius: 24px;
+            --highlight-bg: #fff8dc;
+            --highlight-border: #f6c453;
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 32px 20px 48px;
+            background:
+                radial-gradient(circle at top left, rgba(37, 99, 235, 0.14), transparent 28%),
+                radial-gradient(circle at top right, rgba(14, 165, 233, 0.12), transparent 24%),
+                linear-gradient(180deg, #f8fbff 0%, #eef3fb 52%, #e8eef9 100%);
+            color: var(--secondary-color);
+        }
+
+        .app-container { max-width: 1120px; }
+
+        .app-header,
+        #main-view,
+        #detail-view {
+            background: var(--container-bg);
+            backdrop-filter: blur(26px) saturate(1.2);
+            -webkit-backdrop-filter: blur(26px) saturate(1.2);
+            border: 1px solid rgba(255,255,255,0.72);
+            box-shadow: var(--box-shadow);
+        }
+
+        .app-header {
+            position: sticky;
+            top: 18px;
+            z-index: 20;
+            padding: 22px 24px;
+            margin-bottom: 24px;
+            border-radius: 30px;
+            gap: 18px 24px;
+        }
+
+        .app-header h1 {
+            margin: 0;
+            font-size: 1.75rem;
+            letter-spacing: -0.04em;
+            color: #0f172a;
+        }
+
+        .app-header h1 small {
+            display: block;
+            margin-top: 6px;
+            font-size: 0.88rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(20, 33, 61, 0.48);
+            font-weight: 600;
+        }
+
+        .search-bar { min-width: 280px; }
+
+        #global-search-input,
+        #item-name-input {
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            border-radius: 16px;
+            background: rgba(255,255,255,0.68);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.62);
+            transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+        }
+
+        #global-search-input:focus,
+        #item-name-input:focus,
+        .rename-input:focus {
+            outline: none;
+            border-color: rgba(37, 99, 235, 0.45);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+            background: rgba(255,255,255,0.92);
+        }
+
+        .search-icon { color: rgba(15, 23, 42, 0.36); }
+
+        .sync-status {
+            margin-left: auto;
+            padding: 10px 14px;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.56);
+            border: 1px solid rgba(255,255,255,0.72);
+        }
+
+        .sync-button,
+        .btn {
+            border-radius: 14px;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+        }
+
+        .sync-button {
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            background: rgba(255,255,255,0.72);
+            color: var(--secondary-color);
+        }
+
+        .sync-button:hover,
+        .btn:hover { transform: translateY(-1px); }
+
+        .btn {
+            padding: 12px 18px;
+            font-weight: 600;
+            box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+        }
+
+        .btn-primary { background: linear-gradient(135deg, #2563eb, #4f46e5); }
+        .btn-secondary { background: linear-gradient(135deg, #475569, #334155); }
+
+        #main-view,
+        #detail-view {
+            padding: 26px;
+            border-radius: 32px;
+        }
+
+        .cabinet-grid {
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 22px;
+        }
+
+        .storage-box {
+            padding: 22px 20px 20px;
+            text-align: left;
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            border-radius: 24px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(246,249,255,0.82));
+            box-shadow: 0 18px 34px rgba(15, 23, 42, 0.06);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+
+        .storage-box::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            border: 1px solid rgba(255,255,255,0.7);
+        }
+
+        .storage-box:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 26px 44px rgba(15, 23, 42, 0.11);
+            border-color: rgba(37, 99, 235, 0.22);
+        }
+
+        .box-icon {
+            width: 56px;
+            height: 56px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 18px;
+            margin-bottom: 18px;
+            background: linear-gradient(135deg, rgba(37,99,235,0.14), rgba(14,165,233,0.1));
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+        }
+
+        .box-id {
+            margin-top: 0;
+            font-size: 1.08rem;
+            line-height: 1.4;
+            color: #0f172a;
+        }
+
+        .box-meta {
+            margin-top: 8px;
+            font-size: 0.88rem;
+            color: rgba(20, 33, 61, 0.58);
+        }
+
+        .box-count {
+            display: inline-flex;
+            align-items: center;
+            margin-top: 14px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #1d4ed8;
+            background: rgba(37,99,235,0.08);
+        }
+
+        .delete-box-btn {
+            top: 14px;
+            right: 14px;
+            width: 28px;
+            height: 28px;
+            background: rgba(239, 68, 68, 0.92);
+            box-shadow: 0 8px 18px rgba(239, 68, 68, 0.2);
+        }
+
+        #detail-view .detail-header {
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+        }
+
+        #detail-title {
+            font-size: 1.5rem;
+            letter-spacing: -0.03em;
+            color: #0f172a;
+        }
+
+        .items-list { max-height: 52vh; }
+
+        .items-list li {
+            padding: 15px 16px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.84);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+        }
+
+        .item-content { gap: 14px; }
+
+        .item-content span:first-child {
+            width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: rgba(37,99,235,0.08);
+        }
+
+        .delete-item-btn {
+            width: 36px;
+            height: 36px;
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        .delete-item-btn:hover { background: rgba(239, 68, 68, 0.14); }
+
+        .item-controls { padding-top: 10px; }
+
+        .rename-input {
+            border-radius: 12px;
+            background: rgba(255,255,255,0.88);
+        }
+
+        .fireworks-layer {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
         @media (max-width: 768px) {
-            body { padding: 10px; }
-            .app-header { flex-direction: column; align-items: stretch; }
+            body { padding: 12px; }
+            .app-header { flex-direction: column; align-items: stretch; position: static; padding: 18px; }
+            .app-header h1 { font-size: 1.45rem; }
+            #main-view, #detail-view { padding: 18px; border-radius: 24px; }
+            .cabinet-grid { grid-template-columns: 1fr; gap: 16px; }
             .storage-box:hover .delete-box-btn { opacity: 1; }
         }
     </style>
@@ -306,7 +565,7 @@
 <body>
     <div class="app-container">
         <header class="app-header">
-            <h1>📦 储物系统</h1>
+            <h1>📦 储物系统<small>Storage Cabinet</small></h1>
             <div class="search-bar">
                 <span class="search-icon">🔍</span>
                 <input type="search" id="global-search-input" placeholder="搜索储物柜或物品...">
@@ -337,6 +596,7 @@
             </div>
         </section>
     </div>
+    <canvas class="fireworks-layer" id="fireworksCanvas"></canvas>
 
     <script>
         // 确保文档字符编码正确
@@ -1255,10 +1515,13 @@ ${repoData.private ? '• 私有仓库需要token有完整repo权限' : '• 公
                     if (isMatch) boxElement.classList.add('highlight');
                     boxElement.dataset.id = box.id;
 
+                    const itemCount = box.items.length;
                     boxElement.innerHTML = `
                         <button class="delete-box-btn">×</button>
                         <div class="box-icon">🗄️</div>
                         <div class="box-id">${boxName}</div>
+                        <div class="box-meta">把常用物品整理到固定位置，查找会更高效。</div>
+                        <div class="box-count">${itemCount} 个物品</div>
                     `;
                     
                     // 事件处理
@@ -1337,7 +1600,7 @@ ${repoData.private ? '• 私有仓库需要token有完整repo权限' : '• 公
                 const query = searchQuery.trim().toLowerCase();
 
                 if (box.items.length === 0) {
-                    itemsList.innerHTML = '<li style="text-align: center; color: #999;">这个柜子是空的...</li>';
+                    itemsList.innerHTML = '<li style="text-align: center; color: #64748b; justify-content: center;">这个柜子还是空的，先放进第一件物品吧。</li>';
                 } else {
                     box.items.forEach((item, index) => {
                         const li = document.createElement('li');
@@ -1480,10 +1743,83 @@ ${repoData.private ? '• 私有仓库需要token有完整repo权限' : '• 公
                 document.body.removeChild(testElement);
             }
 
+            function initDesktopFireworks() {
+                const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth <= 768;
+                const canvas = document.getElementById('fireworksCanvas');
+                if (!canvas) return;
+                if (isTouchDevice) {
+                    canvas.remove();
+                    return;
+                }
+
+                const ctx = canvas.getContext('2d');
+                const bursts = [];
+                const colors = ['#2563eb', '#38bdf8', '#f59e0b', '#a855f7', '#ef4444', '#22c55e'];
+
+                function resizeCanvas() {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                }
+
+                function createBurst(x, y) {
+                    const count = 26 + Math.floor(Math.random() * 12);
+                    for (let i = 0; i < count; i++) {
+                        const angle = (Math.PI * 2 * i) / count;
+                        const speed = 1.2 + Math.random() * 4.4;
+                        bursts.push({
+                            x,
+                            y,
+                            vx: Math.cos(angle) * speed,
+                            vy: Math.sin(angle) * speed,
+                            life: 1,
+                            decay: 0.015 + Math.random() * 0.02,
+                            size: 1.8 + Math.random() * 3.4,
+                            color: colors[Math.floor(Math.random() * colors.length)]
+                        });
+                    }
+                }
+
+                document.addEventListener('click', function(e) {
+                    if (e.target.closest('input, textarea, button')) return;
+                    createBurst(e.clientX, e.clientY);
+                }, true);
+
+                function animate() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    for (let i = bursts.length - 1; i >= 0; i--) {
+                        const p = bursts[i];
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        p.vx *= 0.986;
+                        p.vy = p.vy * 0.986 + 0.02;
+                        p.life -= p.decay;
+                        if (p.life <= 0) {
+                            bursts.splice(i, 1);
+                            continue;
+                        }
+                        ctx.globalAlpha = p.life;
+                        ctx.beginPath();
+                        ctx.fillStyle = p.color;
+                        ctx.shadowBlur = 12;
+                        ctx.shadowColor = p.color;
+                        ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    ctx.globalAlpha = 1;
+                    ctx.shadowBlur = 0;
+                    requestAnimationFrame(animate);
+                }
+
+                resizeCanvas();
+                window.addEventListener('resize', resizeCanvas);
+                animate();
+            }
+
             // 初始化
             initSync();
             loadDataLocally();
             checkAndFixEncoding();
+            initDesktopFireworks();
             
             if (syncConfig) {
                 setTimeout(() => syncData('download'), 1000);

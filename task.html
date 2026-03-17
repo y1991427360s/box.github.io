@@ -422,6 +422,159 @@
             font-size: 0.9rem;
         }
 
+        body {
+            align-items: flex-start;
+            background:
+                radial-gradient(circle at top left, rgba(14,165,233,0.18), transparent 28%),
+                radial-gradient(circle at top right, rgba(99,102,241,0.18), transparent 24%),
+                linear-gradient(180deg, #eef4ff 0%, #f6f8fd 48%, #eef2ff 100%);
+            padding: 28px 18px 48px;
+            color: #0f172a;
+        }
+
+        .container {
+            max-width: 720px;
+            padding: 34px;
+            border-radius: 32px;
+            background: rgba(255,255,255,0.78);
+            backdrop-filter: blur(24px) saturate(1.16);
+            -webkit-backdrop-filter: blur(24px) saturate(1.16);
+            border: 1px solid rgba(255,255,255,0.72);
+            box-shadow: 0 28px 64px rgba(15, 23, 42, 0.08);
+        }
+
+        .header {
+            margin-bottom: 34px;
+            padding: 14px 14px 20px;
+            border-radius: 26px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.52), rgba(248,250,252,0.34));
+            border: 1px solid rgba(255,255,255,0.72);
+        }
+
+        .title {
+            background: linear-gradient(135deg, #2563eb, #4f46e5 52%, #0ea5e9);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: rgba(15, 23, 42, 0.56);
+            margin-bottom: 24px;
+        }
+
+        .progress-ring {
+            width: 94px;
+            height: 94px;
+            margin-bottom: 18px;
+        }
+
+        .progress-ring circle { stroke-width: 7; }
+        .progress-ring .progress { stroke: url(#progressGradient); }
+
+        .goal-input,
+        .sync-input {
+            border-radius: 18px;
+            border-color: rgba(148, 163, 184, 0.18);
+            background: rgba(248,250,252,0.9);
+        }
+
+        .goal-input:focus,
+        .sync-input:focus {
+            box-shadow: 0 0 0 4px rgba(37,99,235,0.08);
+            border-color: rgba(37,99,235,0.38);
+        }
+
+        .add-btn,
+        .sync-btn.primary {
+            border-radius: 18px;
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            box-shadow: 0 16px 30px rgba(79, 70, 229, 0.18);
+        }
+
+        .sync-btn.secondary,
+        .sync-button {
+            border-radius: 16px;
+            background: rgba(255,255,255,0.72);
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            color: #334155;
+        }
+
+        .goals-list {
+            min-height: 220px;
+            padding: 6px;
+            border-radius: 24px;
+            background: rgba(255,255,255,0.34);
+        }
+
+        .goal-item {
+            padding: 16px 18px;
+            border-radius: 20px;
+            border-left: none;
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            box-shadow: 0 12px 26px rgba(15, 23, 42, 0.05);
+        }
+
+        .goal-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 36px rgba(15, 23, 42, 0.08);
+        }
+
+        .goal-item.completed {
+            background: rgba(240, 253, 244, 0.82);
+            border-color: rgba(34, 197, 94, 0.24);
+        }
+
+        .checkbox {
+            width: 26px;
+            height: 26px;
+            border-width: 2px;
+            border-color: rgba(148, 163, 184, 0.48);
+        }
+
+        .goal-text {
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .stats {
+            gap: 12px;
+            padding: 0;
+            background: transparent;
+        }
+
+        .stat-item {
+            flex: 1;
+            padding: 18px 12px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.68);
+            border: 1px solid rgba(255,255,255,0.76);
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.04);
+        }
+
+        .stat-number {
+            font-size: 26px;
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .empty-state {
+            padding: 68px 20px;
+            border-radius: 22px;
+            background: rgba(255,255,255,0.56);
+            border: 1px solid rgba(255,255,255,0.72);
+        }
+
+        .fireworks-layer {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2000;
+        }
+
         /* 隐藏旧的 GitHub 同步面板 */
         .sync-section { display: none !important; }
     </style>
@@ -434,6 +587,13 @@
             <div class="progress-ring">
                 <svg>
                     <circle class="bg" cx="40" cy="40" r="30"></circle>
+                    <defs>
+                        <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#2563eb"></stop>
+                            <stop offset="55%" stop-color="#4f46e5"></stop>
+                            <stop offset="100%" stop-color="#0ea5e9"></stop>
+                        </linearGradient>
+                    </defs>
                     <circle class="progress" cx="40" cy="40" r="30"></circle>
                 </svg>
             </div>
@@ -497,6 +657,7 @@
             <div class="sync-status" id="syncStatus"></div>
         </div>
     </div>
+    <canvas class="fireworks-layer" id="fireworksCanvas"></canvas>
 
     <script>
         let goals = [];
@@ -853,6 +1014,78 @@
             progressCircle.style.strokeDashoffset = offset;
         }
 
+        function initDesktopFireworks() {
+            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth <= 768;
+            const canvas = document.getElementById('fireworksCanvas');
+            if (!canvas) return;
+            if (isTouchDevice) {
+                canvas.remove();
+                return;
+            }
+
+            const ctx = canvas.getContext('2d');
+            const bursts = [];
+            const colors = ['#2563eb', '#4f46e5', '#0ea5e9', '#22c55e', '#f59e0b', '#ec4899'];
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+
+            function createBurst(x, y) {
+                const count = 24 + Math.floor(Math.random() * 12);
+                for (let i = 0; i < count; i++) {
+                    const angle = (Math.PI * 2 * i) / count;
+                    const speed = 1.2 + Math.random() * 4.4;
+                    bursts.push({
+                        x,
+                        y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        life: 1,
+                        decay: 0.015 + Math.random() * 0.02,
+                        size: 1.8 + Math.random() * 3.2,
+                        color: colors[Math.floor(Math.random() * colors.length)]
+                    });
+                }
+            }
+
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('input, textarea, button')) return;
+                createBurst(e.clientX, e.clientY);
+            }, true);
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let i = bursts.length - 1; i >= 0; i--) {
+                    const p = bursts[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vx *= 0.986;
+                    p.vy = p.vy * 0.986 + 0.02;
+                    p.life -= p.decay;
+                    if (p.life <= 0) {
+                        bursts.splice(i, 1);
+                        continue;
+                    }
+                    ctx.globalAlpha = p.life;
+                    ctx.beginPath();
+                    ctx.fillStyle = p.color;
+                    ctx.shadowBlur = 14;
+                    ctx.shadowColor = p.color;
+                    ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1;
+                ctx.shadowBlur = 0;
+                requestAnimationFrame(animate);
+            }
+
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            animate();
+        }
+
         // Initialize when DOM is fully loaded
         document.addEventListener('DOMContentLoaded', function() {
             // Allow Enter key to add goal
@@ -867,6 +1100,7 @@
             loadDataLocally();
             initSync();
             renderGoals();
+            initDesktopFireworks();
             document.getElementById('sync-button').addEventListener('click', () => {
                 if (syncConfig) {
                     showSyncMenu();

@@ -78,32 +78,26 @@
 </section>
 
 <!-- Apps -->
-<section class="section section-alt" id="apps">
+<section class="section section-alt apps-section" id="apps">
     <div class="container">
-        <div class="section-header reveal">
-            <span class="section-badge">Apps</span>
-            <h2>我的工具</h2>
-            <p>为生活打造的实用小工具</p>
-        </div>
-        <div class="apps-grid reveal">
-            <a href="box.html" class="app-card">
-                <span class="app-icon">&#x1F4E6;</span>
-                <h3>储物柜</h3>
-                <p class="app-desc">管理你的物品存储</p>
-                <span class="app-link">打开 &rarr;</span>
-            </a>
-            <a href="keep.html" class="app-card">
-                <span class="app-icon">&#x1F4DD;</span>
-                <h3>便签</h3>
-                <p class="app-desc">随手记录灵感</p>
-                <span class="app-link">打开 &rarr;</span>
-            </a>
-            <a href="task.html" class="app-card">
-                <span class="app-icon">&#x1F3AF;</span>
-                <h3>目标</h3>
-                <p class="app-desc">追踪你的长期计划</p>
-                <span class="app-link">打开 &rarr;</span>
-            </a>
+        <div class="apps-showcase reveal">
+            <div class="apps-showcase-head">
+                <div class="apps-copy">
+                    <div class="apps-heading-line">
+                        <span class="section-badge">Apps</span>
+                        <span class="apps-kicker">Digital Products</span>
+                    </div>
+                    <h2>数字工具箱</h2>
+                    <p>我把自己真正会用到的需求，做成了可以长期使用的工具。</p>
+                </div>
+                <a href="apps.html" class="apps-overview-btn">查看全部</a>
+            </div>
+            <div class="apps-subnote">
+                <span class="apps-subnote-label">持续建设中</span>
+                <p>记录、整理、规划，把零散的生活变得更有秩序。</p>
+            </div>
+            <div class="apps-grid" id="appsGrid"></div>
+            <p class="apps-footer-note">更多工具正在整理与开发中。</p>
         </div>
     </div>
 </section>
@@ -180,6 +174,7 @@
 
 <!-- Cursor Effect Canvas -->
 <canvas id="cursorCanvas"></canvas>
+<canvas id="fireworksCanvas"></canvas>
 
 <!-- Lightbox -->
 <div class="lightbox" id="lightbox">
@@ -292,6 +287,69 @@ const entries = [
 // ===== Render =====
 const years = [...new Set(entries.map(e => e.date.slice(0,4)))];
 
+const appProducts = [
+    {
+        name: '储物柜',
+        code: 'BX',
+        description: '把分散的物品信息整理成清晰的存储系统，查找与记录都更省心。',
+        status: '已上线',
+        tone: 'live',
+        href: 'box.html',
+        cta: '立即打开',
+        tags: ['Storage', '整理', '存储']
+    },
+    {
+        name: '便签',
+        code: 'NT',
+        description: '随手记下灵感、待办和片段想法，让零散信息有地方沉淀。',
+        status: '持续迭代',
+        tone: 'live',
+        href: 'keep.html',
+        cta: '立即打开',
+        tags: ['Notes', '记录', '灵感']
+    },
+    {
+        name: '目标',
+        code: 'GO',
+        description: '把长期计划拆解为可执行的阶段任务，持续追踪每一次推进。',
+        status: '已上线',
+        tone: 'live',
+        href: 'task.html',
+        cta: '立即打开',
+        tags: ['Goals', '规划', '成长']
+    },
+    {
+        name: '习惯',
+        code: 'HB',
+        description: '用更轻量的方式记录每天的小坚持，让长期变化被温和看见。',
+        status: '即将推出',
+        tone: 'soon',
+        href: '',
+        cta: '即将上线',
+        tags: ['Habits', '自律', '日常']
+    },
+    {
+        name: '清单',
+        code: 'LS',
+        description: '把反复出现的任务整理成稳定流程，减少遗忘、拖延与混乱。',
+        status: '即将推出',
+        tone: 'soon',
+        href: '',
+        cta: 'Coming Soon',
+        tags: ['Lists', '流程', '效率']
+    },
+    {
+        name: '记账',
+        code: 'AC',
+        description: '记录日常支出与消费节奏，慢慢建立自己的生活账本与判断。',
+        status: '即将推出',
+        tone: 'soon',
+        href: '',
+        cta: '即将上线',
+        tags: ['Accounting', '消费', '生活']
+    }
+];
+
 function isVideo(src) { return src.endsWith('.mp4'); }
 
 function formatDate(d) {
@@ -346,6 +404,39 @@ function renderDiary() {
     }
     wrap.innerHTML = html;
     observeReveal();
+}
+
+function renderApps() {
+    const grid = document.getElementById('appsGrid');
+    if (!grid) return;
+
+    grid.innerHTML = appProducts.map((app, index) => {
+        const tags = app.tags.map(tag => `<span class="app-tag">${tag}</span>`).join('');
+        const cta = app.tone === 'live'
+            ? `<a href="${app.href}" class="app-cta">${app.cta}<span class="app-cta-arrow" aria-hidden="true">&rarr;</span></a>`
+            : `<span class="app-cta is-disabled" aria-disabled="true">${app.cta}</span>`;
+
+        return `
+            <article class="app-card app-card-${app.tone} reveal" style="transition-delay:${(index % 3) * 0.08}s">
+                <div class="app-card-top">
+                    <span class="app-status-badge">${app.status}</span>
+                    <span class="app-code">${app.code}</span>
+                </div>
+                <div class="app-icon-wrap" aria-hidden="true">
+                    <span class="app-icon">${app.code}</span>
+                </div>
+                <div class="app-content">
+                    <h3>${app.name}</h3>
+                    <p class="app-desc">${app.description}</p>
+                </div>
+                <div class="app-tags">${tags}</div>
+                <div class="app-card-footer">
+                    <span class="app-meta">${app.tone === 'live' ? '生活管理 / 效率工具' : 'Concept / In Progress'}</span>
+                    ${cta}
+                </div>
+            </article>
+        `;
+    }).join('');
 }
 
 // ===== Lightbox =====
@@ -466,6 +557,7 @@ function createParticles() {
 // ===== Init =====
 renderYearNav();
 renderDiary();
+renderApps();
 observeReveal();
 createParticles();
 
@@ -683,6 +775,77 @@ createParticles();
         c.globalAlpha = 1;
         c.shadowBlur = 0;
 
+        requestAnimationFrame(animate);
+    }
+    animate();
+})();
+
+// ===== Click Fireworks (desktop only) =====
+(function() {
+    var isMobile = 'ontouchstart' in window
+        || navigator.maxTouchPoints > 0
+        || window.innerWidth <= 1024;
+    var cv = document.getElementById('fireworksCanvas');
+    if (isMobile) {
+        if (cv) cv.parentNode.removeChild(cv);
+        return;
+    }
+
+    var c = cv.getContext('2d');
+    var particles = [];
+    var palette = ['#007AFF', '#5AC8FA', '#AF52DE', '#34C759', '#FFD60A', '#FF6B6B'];
+
+    function resize() { cv.width = window.innerWidth; cv.height = window.innerHeight; }
+    resize();
+    window.addEventListener('resize', resize);
+
+    function burst(x, y) {
+        var count = 26 + Math.floor(Math.random() * 12);
+        for (var i = 0; i < count; i++) {
+            var angle = Math.PI * 2 * i / count;
+            var speed = 1.2 + Math.random() * 4.4;
+            particles.push({
+                x: x,
+                y: y,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                life: 1,
+                decay: 0.014 + Math.random() * 0.02,
+                size: 1.8 + Math.random() * 3.4,
+                color: palette[Math.floor(Math.random() * palette.length)]
+            });
+        }
+    }
+
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('input, textarea, button')) return;
+        burst(e.clientX, e.clientY);
+    }, true);
+
+    function animate() {
+        c.clearRect(0, 0, cv.width, cv.height);
+        for (var i = particles.length - 1; i >= 0; i--) {
+            var p = particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vx *= 0.986;
+            p.vy = p.vy * 0.986 + 0.02;
+            p.life -= p.decay;
+            if (p.life <= 0) {
+                particles.splice(i, 1);
+                continue;
+            }
+
+            c.globalAlpha = p.life;
+            c.beginPath();
+            c.fillStyle = p.color;
+            c.shadowBlur = 14;
+            c.shadowColor = p.color;
+            c.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+            c.fill();
+        }
+        c.globalAlpha = 1;
+        c.shadowBlur = 0;
         requestAnimationFrame(animate);
     }
     animate();
