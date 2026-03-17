@@ -429,6 +429,7 @@
             background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(246,249,255,0.82));
             box-shadow: 0 18px 34px rgba(15, 23, 42, 0.06);
             transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            cursor: grab;
         }
 
         .storage-box::after {
@@ -444,6 +445,43 @@
             transform: translateY(-8px);
             box-shadow: 0 26px 44px rgba(15, 23, 42, 0.11);
             border-color: rgba(37, 99, 235, 0.22);
+        }
+
+        .storage-box.dragging {
+            opacity: 0.45;
+            transform: scale(0.98);
+            cursor: grabbing;
+        }
+
+        .storage-box.drag-over-before {
+            box-shadow: inset 4px 0 0 #2563eb, 0 24px 40px rgba(15, 23, 42, 0.1);
+        }
+
+        .storage-box.drag-over-after {
+            box-shadow: inset -4px 0 0 #2563eb, 0 24px 40px rgba(15, 23, 42, 0.1);
+        }
+
+        .box-drop-slot {
+            min-height: 188px;
+            border-radius: 24px;
+            border: 2px dashed rgba(37, 99, 235, 0.42);
+            background:
+                linear-gradient(180deg, rgba(37,99,235,0.07), rgba(37,99,235,0.03)),
+                rgba(255,255,255,0.42);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.72);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(37, 99, 235, 0.86);
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            animation: dropSlotPulse 1.1s ease-in-out infinite;
+        }
+
+        @keyframes dropSlotPulse {
+            0%, 100% { transform: scale(1); opacity: 0.86; }
+            50% { transform: scale(1.01); opacity: 1; }
         }
 
         .box-icon {
@@ -552,6 +590,38 @@
             z-index: 9999;
         }
 
+        .bgm-btn {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.72);
+            background: rgba(255,255,255,0.74);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            color: #0f172a;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.12);
+            z-index: 10000;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .bgm-btn:hover {
+            transform: translateY(-2px) scale(1.04);
+            box-shadow: 0 22px 38px rgba(15, 23, 42, 0.16);
+        }
+
+        .bgm-disc { display: inline-block; }
+        .bgm-btn.playing .bgm-disc { animation: bgmSpin 2.6s linear infinite; }
+
+        @keyframes bgmSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         @media (max-width: 768px) {
             body { padding: 12px; }
             .app-header { flex-direction: column; align-items: stretch; position: static; padding: 18px; }
@@ -559,6 +629,7 @@
             #main-view, #detail-view { padding: 18px; border-radius: 24px; }
             .cabinet-grid { grid-template-columns: 1fr; gap: 16px; }
             .storage-box:hover .delete-box-btn { opacity: 1; }
+            .bgm-btn { right: 16px; bottom: 16px; width: 48px; height: 48px; }
         }
     </style>
 </head>
@@ -596,6 +667,12 @@
             </div>
         </section>
     </div>
+    <audio id="bgm" loop preload="auto">
+        <source src="assets/老街.mp3" type="audio/mpeg">
+    </audio>
+    <button class="bgm-btn" id="bgmBtn" aria-label="Toggle music">
+        <span class="bgm-disc" id="bgmDisc">&#9835;</span>
+    </button>
     <canvas class="fireworks-layer" id="fireworksCanvas"></canvas>
 
     <script>
@@ -617,6 +694,8 @@
             const syncIndicator = document.getElementById('sync-indicator');
             const syncStatusText = document.getElementById('sync-status-text');
             const syncButton = document.getElementById('sync-button');
+            const bgm = document.getElementById('bgm');
+            const bgmBtn = document.getElementById('bgmBtn');
 
             // 状态管理
             let boxes = [];
@@ -627,13 +706,34 @@
             let longPressTimer = null;
             let isRenaming = false;
             let isSyncing = false;
+            let draggedBoxId = null;
+            let isDraggingBox = false;
+            let dragPlaceholder = null;
             
             const STORAGE_KEY = 'storageSystemData';
+            const BGM_STATE_KEY = 'senGlobalBgmState';
             let syncConfig = null;
 
             // 设备检测
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+            function readBgmState() {
+                try {
+                    return JSON.parse(localStorage.getItem(BGM_STATE_KEY) || '{}');
+                } catch (e) {
+                    return {};
+                }
+            }
+
+            function writeBgmState(partial) {
+                const prev = readBgmState();
+                localStorage.setItem(BGM_STATE_KEY, JSON.stringify({
+                    ...prev,
+                    ...partial,
+                    updatedAt: Date.now()
+                }));
+            }
 
             // 提示消息
             function showToast(message, type = 'info') {
@@ -648,6 +748,99 @@
                 setTimeout(() => {
                     if (toast.parentNode) toast.remove();
                 }, 3000);
+            }
+
+            function initPersistentBgm() {
+                if (!bgm || !bgmBtn) return;
+                const interactEvents = ['click','touchstart','pointerdown','keydown'];
+                let saveTimer = null;
+                const savedState = readBgmState();
+                bgm.volume = typeof savedState.volume === 'number' ? savedState.volume : 0.35;
+
+                function syncButtonState() {
+                    bgmBtn.classList.toggle('playing', !bgm.paused);
+                }
+
+                function persistPlaybackState() {
+                    writeBgmState({
+                        currentTime: bgm.currentTime || 0,
+                        paused: bgm.paused,
+                        volume: bgm.volume
+                    });
+                }
+
+                function startProgressSync() {
+                    if (saveTimer) clearInterval(saveTimer);
+                    saveTimer = setInterval(() => {
+                        if (!bgm.paused) persistPlaybackState();
+                    }, 1000);
+                }
+
+                function stopProgressSync() {
+                    if (saveTimer) {
+                        clearInterval(saveTimer);
+                        saveTimer = null;
+                    }
+                }
+
+                function restoreTime() {
+                    const state = readBgmState();
+                    if (typeof state.currentTime === 'number' && !Number.isNaN(state.currentTime)) {
+                        try { bgm.currentTime = state.currentTime; } catch (e) {}
+                    }
+                }
+
+                function tryAutoPlay() {
+                    const state = readBgmState();
+                    if (state.paused === true) return;
+                    bgm.play().then(() => {
+                        syncButtonState();
+                        persistPlaybackState();
+                        startProgressSync();
+                        interactEvents.forEach(e => document.removeEventListener(e, tryAutoPlay, true));
+                    }).catch(() => {});
+                }
+
+                if (bgm.readyState >= 1) restoreTime();
+                else bgm.addEventListener('loadedmetadata', restoreTime, { once: true });
+
+                tryAutoPlay();
+                interactEvents.forEach(e => document.addEventListener(e, tryAutoPlay, { capture: true }));
+
+                bgmBtn.addEventListener('click', () => {
+                    if (!bgm.paused) {
+                        bgm.pause();
+                        syncButtonState();
+                        persistPlaybackState();
+                        stopProgressSync();
+                    } else {
+                        bgm.play().then(() => {
+                            syncButtonState();
+                            persistPlaybackState();
+                            startProgressSync();
+                            interactEvents.forEach(e => document.removeEventListener(e, tryAutoPlay, true));
+                        }).catch(() => {});
+                    }
+                });
+
+                bgm.addEventListener('pause', () => {
+                    syncButtonState();
+                    persistPlaybackState();
+                    stopProgressSync();
+                });
+                bgm.addEventListener('play', () => {
+                    syncButtonState();
+                    persistPlaybackState();
+                    startProgressSync();
+                });
+                bgm.addEventListener('ended', () => {
+                    writeBgmState({ currentTime: 0, paused: false, volume: bgm.volume });
+                });
+                window.addEventListener('beforeunload', persistPlaybackState);
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) persistPlaybackState();
+                });
+                syncButtonState();
             }
 
             // 云同步初始化
@@ -1496,8 +1689,77 @@ ${repoData.private ? '• 私有仓库需要token有完整repo权限' : '• 公
                 }
             }
 
+            function reorderBoxes(dragId, targetId, placeAfter = false) {
+                const fromIndex = boxes.findIndex(b => b.id === dragId);
+                const toIndex = boxes.findIndex(b => b.id === targetId);
+                if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) return;
+
+                const [movedBox] = boxes.splice(fromIndex, 1);
+                let insertIndex = toIndex + (placeAfter ? 1 : 0);
+                if (fromIndex < insertIndex) insertIndex -= 1;
+                boxes.splice(insertIndex, 0, movedBox);
+                saveData();
+                render();
+            }
+
+            function reorderBoxesToEnd(dragId) {
+                const fromIndex = boxes.findIndex(b => b.id === dragId);
+                if (fromIndex === -1 || fromIndex === boxes.length - 1) return;
+                const [movedBox] = boxes.splice(fromIndex, 1);
+                boxes.push(movedBox);
+                saveData();
+                render();
+            }
+
+            function ensureDragPlaceholder() {
+                if (!dragPlaceholder) {
+                    dragPlaceholder = document.createElement('div');
+                    dragPlaceholder.className = 'box-drop-slot';
+                    dragPlaceholder.textContent = '释放以放置到这里';
+                }
+                return dragPlaceholder;
+            }
+
+            function clearDragPlaceholder() {
+                if (dragPlaceholder && dragPlaceholder.parentNode) {
+                    dragPlaceholder.parentNode.removeChild(dragPlaceholder);
+                }
+            }
+
+            function placeDragPlaceholder(targetElement, placeAfter) {
+                const placeholder = ensureDragPlaceholder();
+                if (!targetElement || !targetElement.parentNode) return;
+                const referenceNode = placeAfter ? targetElement.nextSibling : targetElement;
+                if (referenceNode === placeholder) return;
+                targetElement.parentNode.insertBefore(placeholder, referenceNode);
+            }
+
+            function handleGridDragOver(e) {
+                if (draggedBoxId === null) return;
+                e.preventDefault();
+                if (e.target === cabinetGrid) {
+                    const placeholder = ensureDragPlaceholder();
+                    if (cabinetGrid.lastElementChild !== placeholder) {
+                        cabinetGrid.appendChild(placeholder);
+                    }
+                }
+            }
+
+            function handleGridDrop(e) {
+                if (draggedBoxId === null) return;
+                if (e.target === cabinetGrid || e.target === dragPlaceholder) {
+                    e.preventDefault();
+                    clearDragPlaceholder();
+                    reorderBoxesToEnd(draggedBoxId);
+                }
+            }
+
             function renderMainView() {
                 cabinetGrid.innerHTML = '';
+                if (!isMobile) {
+                    cabinetGrid.ondragover = handleGridDragOver;
+                    cabinetGrid.ondrop = handleGridDrop;
+                }
                 const query = searchQuery.trim().toLowerCase();
                 
                 boxes.forEach(box => {
@@ -1514,6 +1776,7 @@ ${repoData.private ? '• 私有仓库需要token有完整repo权限' : '• 公
                     boxElement.className = 'storage-box';
                     if (isMatch) boxElement.classList.add('highlight');
                     boxElement.dataset.id = box.id;
+                    if (!isMobile) boxElement.draggable = true;
 
                     const itemCount = box.items.length;
                     boxElement.innerHTML = `
@@ -1530,7 +1793,7 @@ ${repoData.private ? '• 私有仓库需要token有完整repo权限' : '• 公
                     let touchStartTime = 0;
                     
                     function handleClick(e) {
-                        if (e.target.classList.contains('delete-box-btn') || isRenaming || touchMoved) return;
+                        if (e.target.classList.contains('delete-box-btn') || isRenaming || touchMoved || isDraggingBox) return;
                         switchView('detail', box.id);
                     }
                     
@@ -1547,6 +1810,49 @@ ${repoData.private ? '• 私有仓库需要token有完整repo权限' : '• 公
                         });
                         boxElement.addEventListener('mouseup', () => cancelLongPress(boxElement));
                         boxElement.addEventListener('mouseleave', () => cancelLongPress(boxElement));
+                        boxElement.addEventListener('dragstart', (e) => {
+                            draggedBoxId = box.id;
+                            isDraggingBox = true;
+                            cancelLongPress(boxElement);
+                            boxElement.classList.add('dragging');
+                            placeDragPlaceholder(boxElement, false);
+                            if (e.dataTransfer) {
+                                e.dataTransfer.effectAllowed = 'move';
+                                e.dataTransfer.setData('text/plain', String(box.id));
+                            }
+                        });
+                        boxElement.addEventListener('dragover', (e) => {
+                            if (draggedBoxId === null || draggedBoxId === box.id) return;
+                            e.preventDefault();
+                            const rect = boxElement.getBoundingClientRect();
+                            const placeAfter = e.clientY > rect.top + rect.height / 2 ||
+                                (Math.abs(e.clientY - (rect.top + rect.height / 2)) < rect.height / 4 && e.clientX > rect.left + rect.width / 2);
+                            boxElement.classList.toggle('drag-over-after', placeAfter);
+                            boxElement.classList.toggle('drag-over-before', !placeAfter);
+                            placeDragPlaceholder(boxElement, placeAfter);
+                        });
+                        boxElement.addEventListener('dragleave', () => {
+                            boxElement.classList.remove('drag-over-before', 'drag-over-after');
+                        });
+                        boxElement.addEventListener('drop', (e) => {
+                            e.preventDefault();
+                            const rect = boxElement.getBoundingClientRect();
+                            const placeAfter = e.clientY > rect.top + rect.height / 2 ||
+                                (Math.abs(e.clientY - (rect.top + rect.height / 2)) < rect.height / 4 && e.clientX > rect.left + rect.width / 2);
+                            boxElement.classList.remove('drag-over-before', 'drag-over-after');
+                            if (draggedBoxId !== null && draggedBoxId !== box.id) {
+                                reorderBoxes(draggedBoxId, box.id, placeAfter);
+                            }
+                        });
+                        boxElement.addEventListener('dragend', () => {
+                            draggedBoxId = null;
+                            clearDragPlaceholder();
+                            boxElement.classList.remove('dragging', 'drag-over-before', 'drag-over-after');
+                            setTimeout(() => { isDraggingBox = false; }, 60);
+                            cabinetGrid.querySelectorAll('.storage-box').forEach(el => {
+                                el.classList.remove('drag-over-before', 'drag-over-after', 'dragging');
+                            });
+                        });
                     } else {
                         boxElement.addEventListener('touchstart', (e) => {
                             if (!e.target.classList.contains('delete-box-btn') && !isRenaming) {
@@ -1586,6 +1892,7 @@ ${repoData.private ? '• 私有仓库需要token有完整repo权限' : '• 公
 
                     cabinetGrid.appendChild(boxElement);
                 });
+
             }
 
             function renderDetailView() {
@@ -1820,6 +2127,7 @@ ${repoData.private ? '• 私有仓库需要token有完整repo权限' : '• 公
             loadDataLocally();
             checkAndFixEncoding();
             initDesktopFireworks();
+            initPersistentBgm();
             
             if (syncConfig) {
                 setTimeout(() => syncData('download'), 1000);

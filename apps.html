@@ -43,6 +43,12 @@
         </div>
     </section>
 </div>
+<audio id="bgm" loop preload="auto">
+    <source src="assets/老街.mp3" type="audio/mpeg">
+</audio>
+<button class="bgm-btn" id="bgmBtn" aria-label="Toggle music">
+    <span class="bgm-disc" id="bgmDisc">&#x266B;</span>
+</button>
 <canvas id="fireworksCanvas"></canvas>
 
 <script>
@@ -136,6 +142,95 @@ document.getElementById('appsGrid').innerHTML = appProducts.map(app => {
         </article>
     `;
 }).join('');
+
+(function() {
+    const bgm = document.getElementById('bgm');
+    const btn = document.getElementById('bgmBtn');
+    const STATE_KEY = 'senGlobalBgmState';
+    const interactEvents = ['click','touchstart','pointerdown','keydown'];
+    let saveTimer = null;
+
+    function readState() {
+        try { return JSON.parse(localStorage.getItem(STATE_KEY) || '{}'); }
+        catch (e) { return {}; }
+    }
+
+    function writeState(partial) {
+        const prev = readState();
+        localStorage.setItem(STATE_KEY, JSON.stringify({ ...prev, ...partial, updatedAt: Date.now() }));
+    }
+
+    const savedState = readState();
+    bgm.volume = typeof savedState.volume === 'number' ? savedState.volume : 0.35;
+
+    function syncButtonState() { btn.classList.toggle('playing', !bgm.paused); }
+    function persistPlaybackState() {
+        writeState({ currentTime: bgm.currentTime || 0, paused: bgm.paused, volume: bgm.volume });
+    }
+    function startProgressSync() {
+        if (saveTimer) clearInterval(saveTimer);
+        saveTimer = setInterval(() => { if (!bgm.paused) persistPlaybackState(); }, 1000);
+    }
+    function stopProgressSync() {
+        if (saveTimer) { clearInterval(saveTimer); saveTimer = null; }
+    }
+    function restoreTime() {
+        const state = readState();
+        if (typeof state.currentTime === 'number' && !Number.isNaN(state.currentTime)) {
+            try { bgm.currentTime = state.currentTime; } catch (e) {}
+        }
+    }
+    function tryAutoPlay() {
+        const state = readState();
+        if (state.paused === true) return;
+        bgm.play().then(() => {
+            syncButtonState();
+            persistPlaybackState();
+            startProgressSync();
+            interactEvents.forEach(e => document.removeEventListener(e, tryAutoPlay, true));
+        }).catch(() => {});
+    }
+
+    if (bgm.readyState >= 1) restoreTime();
+    else bgm.addEventListener('loadedmetadata', restoreTime, { once: true });
+    tryAutoPlay();
+    interactEvents.forEach(e => document.addEventListener(e, tryAutoPlay, { capture: true }));
+
+    btn.addEventListener('click', () => {
+        if (!bgm.paused) {
+            bgm.pause();
+            syncButtonState();
+            persistPlaybackState();
+            stopProgressSync();
+        } else {
+            bgm.play().then(() => {
+                syncButtonState();
+                persistPlaybackState();
+                startProgressSync();
+                interactEvents.forEach(e => document.removeEventListener(e, tryAutoPlay, true));
+            }).catch(() => {});
+        }
+    });
+
+    bgm.addEventListener('pause', () => {
+        syncButtonState();
+        persistPlaybackState();
+        stopProgressSync();
+    });
+    bgm.addEventListener('play', () => {
+        syncButtonState();
+        persistPlaybackState();
+        startProgressSync();
+    });
+    bgm.addEventListener('ended', () => {
+        writeState({ currentTime: 0, paused: false, volume: bgm.volume });
+    });
+    window.addEventListener('beforeunload', persistPlaybackState);
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) persistPlaybackState();
+    });
+    syncButtonState();
+})();
 
 (function() {
     var isMobile = 'ontouchstart' in window

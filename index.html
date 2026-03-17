@@ -565,41 +565,117 @@ createParticles();
 (function() {
     const bgm = document.getElementById('bgm');
     const btn = document.getElementById('bgmBtn');
-    let playing = false;
-    bgm.volume = 0.35;
-
+    const STATE_KEY = 'senGlobalBgmState';
     const interactEvents = ['click','touchstart','pointerdown','keydown'];
+    let saveTimer = null;
+
+    function readState() {
+        try {
+            return JSON.parse(localStorage.getItem(STATE_KEY) || '{}');
+        } catch (e) {
+            return {};
+        }
+    }
+
+    function writeState(partial) {
+        const prev = readState();
+        localStorage.setItem(STATE_KEY, JSON.stringify({
+            ...prev,
+            ...partial,
+            updatedAt: Date.now()
+        }));
+    }
+
+    const savedState = readState();
+    bgm.volume = typeof savedState.volume === 'number' ? savedState.volume : 0.35;
+
+    function syncButtonState() {
+        btn.classList.toggle('playing', !bgm.paused);
+    }
+
+    function persistPlaybackState() {
+        writeState({
+            currentTime: bgm.currentTime || 0,
+            paused: bgm.paused,
+            volume: bgm.volume
+        });
+    }
+
+    function startProgressSync() {
+        if (saveTimer) clearInterval(saveTimer);
+        saveTimer = setInterval(() => {
+            if (!bgm.paused) persistPlaybackState();
+        }, 1000);
+    }
+
+    function stopProgressSync() {
+        if (saveTimer) {
+            clearInterval(saveTimer);
+            saveTimer = null;
+        }
+    }
+
+    function restoreTime() {
+        const state = readState();
+        if (typeof state.currentTime === 'number' && !Number.isNaN(state.currentTime)) {
+            try {
+                bgm.currentTime = state.currentTime;
+            } catch (e) {}
+        }
+    }
 
     function tryAutoPlay() {
-        if (playing) return;
+        const state = readState();
+        if (state.paused === true) return;
+
         bgm.play().then(() => {
-            playing = true;
-            btn.classList.add('playing');
-            // Only remove listeners after play actually succeeds
+            syncButtonState();
+            persistPlaybackState();
+            startProgressSync();
             interactEvents.forEach(e => document.removeEventListener(e, tryAutoPlay, true));
         }).catch(() => {});
     }
 
-    // Try autoplay immediately (works if browser policy allows)
-    tryAutoPlay();
+    if (bgm.readyState >= 1) restoreTime();
+    else bgm.addEventListener('loadedmetadata', restoreTime, { once: true });
 
-    // Otherwise, keep retrying on every user activation until it succeeds
+    tryAutoPlay();
     interactEvents.forEach(e => document.addEventListener(e, tryAutoPlay, { capture: true }));
 
-    // Toggle button
     btn.addEventListener('click', () => {
-        if (playing) {
+        if (!bgm.paused) {
             bgm.pause();
-            playing = false;
-            btn.classList.remove('playing');
-            interactEvents.forEach(e => document.removeEventListener(e, tryAutoPlay, true));
+            syncButtonState();
+            persistPlaybackState();
+            stopProgressSync();
         } else {
             bgm.play().then(() => {
-                playing = true;
-                btn.classList.add('playing');
+                syncButtonState();
+                persistPlaybackState();
+                startProgressSync();
+                interactEvents.forEach(e => document.removeEventListener(e, tryAutoPlay, true));
             }).catch(() => {});
         }
     });
+
+    bgm.addEventListener('pause', () => {
+        syncButtonState();
+        persistPlaybackState();
+        stopProgressSync();
+    });
+    bgm.addEventListener('play', () => {
+        syncButtonState();
+        persistPlaybackState();
+        startProgressSync();
+    });
+    bgm.addEventListener('ended', () => {
+        writeState({ currentTime: 0, paused: false, volume: bgm.volume });
+    });
+    window.addEventListener('beforeunload', persistPlaybackState);
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) persistPlaybackState();
+    });
+    syncButtonState();
 })();
 
 // ===== Snowfall Effect =====

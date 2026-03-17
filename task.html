@@ -575,6 +575,47 @@
             z-index: 2000;
         }
 
+        .bgm-btn {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.78);
+            background: rgba(255,255,255,0.78);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            color: #0f172a;
+            font-size: 1.18rem;
+            cursor: pointer;
+            box-shadow: 0 16px 34px rgba(15, 23, 42, 0.14);
+            z-index: 2100;
+        }
+
+        .bgm-disc { display: inline-block; }
+        .bgm-btn.playing .bgm-disc { animation: bgmSpin 2.6s linear infinite; }
+
+        @keyframes bgmSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 18px;
+            border-radius: 14px;
+            color: #fff;
+            background: rgba(17, 24, 39, 0.92);
+            box-shadow: 0 18px 34px rgba(15, 23, 42, 0.18);
+            z-index: 2200;
+        }
+
+        .toast.success { background: rgba(34, 197, 94, 0.95); }
+        .toast.error { background: rgba(239, 68, 68, 0.95); }
+
         /* 隐藏旧的 GitHub 同步面板 */
         .sync-section { display: none !important; }
     </style>
@@ -657,6 +698,12 @@
             <div class="sync-status" id="syncStatus"></div>
         </div>
     </div>
+    <audio id="bgm" loop preload="auto">
+        <source src="assets/老街.mp3" type="audio/mpeg">
+    </audio>
+    <button class="bgm-btn" id="bgmBtn" aria-label="Toggle music">
+        <span class="bgm-disc" id="bgmDisc">&#9835;</span>
+    </button>
     <canvas class="fireworks-layer" id="fireworksCanvas"></canvas>
 
     <script>
@@ -664,6 +711,9 @@
         let syncConfig = null;
         let isSyncing   = false;
         const STORAGE_KEY = 'taskGoalsData';
+        const BGM_STATE_KEY = 'senGlobalBgmState';
+        const bgm = document.getElementById('bgm');
+        const bgmBtn = document.getElementById('bgmBtn');
 
         /* ---------- Base64 安全编码/解码（截取自 index.html） ---------- */
         function safeBase64Encode(str) {
@@ -753,10 +803,11 @@
                 }
                 dot.className = 'sync-indicator synced';
                 text.textContent = '云端同步';
+                showToast(action === 'upload' ? '上传成功' : '同步成功', 'success');
             } catch (e) {
                 console.error('同步失败:', e);
                 dot.className = 'sync-indicator error';
-                alert(`同步失败: ${e.message}`);
+                showToast(`同步失败: ${e.message}`, 'error');
             } finally {
                 isSyncing = false;
             }
@@ -1014,6 +1065,104 @@
             progressCircle.style.strokeDashoffset = offset;
         }
 
+        function readBgmState() {
+            try { return JSON.parse(localStorage.getItem(BGM_STATE_KEY) || '{}'); }
+            catch (e) { return {}; }
+        }
+
+        function writeBgmState(partial) {
+            const prev = readBgmState();
+            localStorage.setItem(BGM_STATE_KEY, JSON.stringify({ ...prev, ...partial, updatedAt: Date.now() }));
+        }
+
+        function initPersistentBgm() {
+            if (!bgm || !bgmBtn) return;
+            const interactEvents = ['click','touchstart','pointerdown','keydown'];
+            let saveTimer = null;
+            const savedState = readBgmState();
+            bgm.volume = typeof savedState.volume === 'number' ? savedState.volume : 0.35;
+
+            function syncButtonState() { bgmBtn.classList.toggle('playing', !bgm.paused); }
+            function persistPlaybackState() {
+                writeBgmState({ currentTime: bgm.currentTime || 0, paused: bgm.paused, volume: bgm.volume });
+            }
+            function startProgressSync() {
+                if (saveTimer) clearInterval(saveTimer);
+                saveTimer = setInterval(() => { if (!bgm.paused) persistPlaybackState(); }, 1000);
+            }
+            function stopProgressSync() {
+                if (saveTimer) { clearInterval(saveTimer); saveTimer = null; }
+            }
+            function restoreTime() {
+                const state = readBgmState();
+                if (typeof state.currentTime === 'number' && !Number.isNaN(state.currentTime)) {
+                    try { bgm.currentTime = state.currentTime; } catch (e) {}
+                }
+            }
+            function tryAutoPlay() {
+                const state = readBgmState();
+                if (state.paused === true) return;
+                bgm.play().then(() => {
+                    syncButtonState();
+                    persistPlaybackState();
+                    startProgressSync();
+                    interactEvents.forEach(e => document.removeEventListener(e, tryAutoPlay, true));
+                }).catch(() => {});
+            }
+
+            if (bgm.readyState >= 1) restoreTime();
+            else bgm.addEventListener('loadedmetadata', restoreTime, { once: true });
+            tryAutoPlay();
+            interactEvents.forEach(e => document.addEventListener(e, tryAutoPlay, { capture: true }));
+
+            bgmBtn.addEventListener('click', () => {
+                if (!bgm.paused) {
+                    bgm.pause();
+                    syncButtonState();
+                    persistPlaybackState();
+                    stopProgressSync();
+                } else {
+                    bgm.play().then(() => {
+                        syncButtonState();
+                        persistPlaybackState();
+                        startProgressSync();
+                        interactEvents.forEach(e => document.removeEventListener(e, tryAutoPlay, true));
+                    }).catch(() => {});
+                }
+            });
+
+            bgm.addEventListener('pause', () => {
+                syncButtonState();
+                persistPlaybackState();
+                stopProgressSync();
+            });
+            bgm.addEventListener('play', () => {
+                syncButtonState();
+                persistPlaybackState();
+                startProgressSync();
+            });
+            bgm.addEventListener('ended', () => {
+                writeBgmState({ currentTime: 0, paused: false, volume: bgm.volume });
+            });
+            window.addEventListener('beforeunload', persistPlaybackState);
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) persistPlaybackState();
+            });
+            syncButtonState();
+        }
+
+        function showToast(message, type = 'success') {
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) existingToast.remove();
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                if (toast.parentNode) toast.remove();
+            }, 2600);
+        }
+
         function initDesktopFireworks() {
             const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth <= 768;
             const canvas = document.getElementById('fireworksCanvas');
@@ -1100,6 +1249,7 @@
             loadDataLocally();
             initSync();
             renderGoals();
+            initPersistentBgm();
             initDesktopFireworks();
             document.getElementById('sync-button').addEventListener('click', () => {
                 if (syncConfig) {
