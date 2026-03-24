@@ -1,0 +1,7 @@
+name = "sen-mianbao-chat"
+main = "worker.js"
+compatibility_date = "2026-03-24"
+
+[vars]
+ARK_MODEL = "doubao-seed-1-6-lite-251015"
+ARK_ENDPOINT = "https://ark.cn-beijing.volces.com/api/v3/chat/completions"

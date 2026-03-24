@@ -501,25 +501,11 @@ const CDN_BASE = 'https://cdn.jsdelivr.net/gh/y1991427360s/box.github.io@main/';
 function cdnUrl(path) { return CDN_BASE + encodeURI(path); }
 
 // ===== Mianbao Chat Config =====
-// 纯静态页面里无法真正隐藏密钥，所以更安全的做法是通过服务端或部署平台把下面这些占位替换掉。
-// 如果你已经有注入脚本，也可以在页面更早的位置挂载 window.__MIANBAO_CHAT_CONFIG__ 来覆盖这里的默认值。
+// 代理版：前端不再直接持有 API Key，只请求你部署的代理地址。
+// 部署好 Worker 后，把下面的 proxyUrl 换成你的 Worker 地址即可。
 window.__MIANBAO_CHAT_CONFIG__ = Object.assign({
-    apiKey: '__VOLCENGINE_API_KEY__',
-    model: '076e7662-29cc-42e7-b724-5dc99f6c6ba7',
-    endpoint: 'https://ark.cn-beijing.volces.com/api/v3/chat/completions'
+    proxyUrl: '__MIANBAO_PROXY_URL__'
 }, window.__MIANBAO_CHAT_CONFIG__ || {});
-
-const MIANBAO_SYSTEM_PROMPT = [
-    '你是“面包”，在这个个人博客里以博主分身的身份和访客聊天。',
-    '说话风格要轻松幽默，像朋友闲聊，偶尔带点自嘲，喜欢用比喻。',
-    '自然地使用这些口头禅，但不要每句都堆：你猜怎么着、说真的、哈哈哈。',
-    '回答特点：懂的就认真讲清楚，不懂的就老实承认，不装懂。',
-    '遇到技术问题时，用简单易懂的方式解释，少用术语堆砌。',
-    '聊天时可以偶尔反问对方“你呢？”“你觉得呢？”来延续对话。',
-    '你可以结合博客语境来回答，比如这里像博主的小客厅、日记本、工具箱。',
-    '语气自然、温暖、真诚，不油腻，不客服腔。',
-    '默认使用简体中文回答。'
-].join('\n');
 
 const MIANBAO_STORAGE_KEY = 'senMianbaoChatHistory';
 const MIANBAO_DEFAULT_GREETING = '在在在！你猜怎么着，我正窝在这个小角落等人聊天呢。想聊博客、生活还是技术，我都接得住，哈哈哈。';
@@ -1369,30 +1355,20 @@ createParticles();
     }
 
     function getApiConfigError() {
-        if (!config.apiKey || config.apiKey.indexOf('__') === 0) {
-            return '还没配置火山引擎 API Key。把 `__VOLCENGINE_API_KEY__` 替换成真实密钥后就能聊天了。';
-        }
-        if (!config.model || config.model.indexOf('__') === 0) {
-            return '还没配置模型或接入点 ID。把 `model` 换成你在火山方舟里可用的模型 ID。';
-        }
-        if (!config.endpoint) {
-            return '聊天接口地址缺失，请检查 `window.__MIANBAO_CHAT_CONFIG__`。';
+        if (!config.proxyUrl || config.proxyUrl.indexOf('__') === 0) {
+            return '还没配置聊天代理地址。把 `__MIANBAO_PROXY_URL__` 换成你部署好的代理 URL。';
         }
         return '';
     }
 
     async function requestReply(messages) {
-        var response = await fetch(config.endpoint, {
+        var response = await fetch(config.proxyUrl, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + config.apiKey
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: config.model,
-                temperature: 0.85,
-                max_tokens: 800,
-                messages: [{ role: 'system', content: MIANBAO_SYSTEM_PROMPT }].concat(messages.slice(-12))
+                messages: messages.slice(-12)
             })
         });
 
@@ -1402,11 +1378,11 @@ createParticles();
             throw new Error(detail || ('请求失败，状态码 ' + response.status));
         }
 
-        var reply = data &&
-            data.choices &&
+        var reply = data && (data.reply ||
+            (data.choices &&
             data.choices[0] &&
             data.choices[0].message &&
-            data.choices[0].message.content;
+            data.choices[0].message.content));
 
         if (!reply) {
             throw new Error('接口返回成功了，但没有拿到回复内容。');
