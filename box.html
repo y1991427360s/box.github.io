@@ -718,6 +718,8 @@
             let draggedBoxId = null;
             let isDraggingBox = false;
             let dragPlaceholder = null;
+            let touchDragTargetId = null;
+            let touchDragPlaceAfter = false;
             
             const STORAGE_KEY = 'storageSystemData';
             const BGM_STATE_KEY = 'senGlobalBgmState';
@@ -1897,6 +1899,59 @@ ${repoData.private ? '• 私有仓库需要token有完整repo权限' : '• 公
                 }
             }
 
+            function resetTouchBoxDragState() {
+                touchDragTargetId = null;
+                touchDragPlaceAfter = false;
+                draggedBoxId = null;
+                isDraggingBox = false;
+                clearDragPlaceholder();
+                cabinetGrid.querySelectorAll('.storage-box').forEach(el => {
+                    el.classList.remove('drag-over-before', 'drag-over-after', 'dragging');
+                });
+            }
+
+            function updateTouchDragTarget(clientX, clientY) {
+                const elements = document.elementsFromPoint(clientX, clientY);
+                const targetBox = elements.find(el =>
+                    el.classList &&
+                    el.classList.contains('storage-box') &&
+                    Number(el.dataset.id) !== draggedBoxId
+                );
+
+                cabinetGrid.querySelectorAll('.storage-box').forEach(el => {
+                    if (!targetBox || el !== targetBox) {
+                        el.classList.remove('drag-over-before', 'drag-over-after');
+                    }
+                });
+
+                if (!targetBox) {
+                    touchDragTargetId = null;
+                    touchDragPlaceAfter = false;
+                    const gridRect = cabinetGrid.getBoundingClientRect();
+                    const insideGrid = clientX >= gridRect.left && clientX <= gridRect.right &&
+                        clientY >= gridRect.top && clientY <= gridRect.bottom;
+                    if (insideGrid) {
+                        const placeholder = ensureDragPlaceholder();
+                        if (cabinetGrid.lastElementChild !== placeholder) {
+                            cabinetGrid.appendChild(placeholder);
+                        }
+                    } else {
+                        clearDragPlaceholder();
+                    }
+                    return;
+                }
+
+                const rect = targetBox.getBoundingClientRect();
+                const placeAfter = clientY > rect.top + rect.height / 2 ||
+                    (Math.abs(clientY - (rect.top + rect.height / 2)) < rect.height / 4 && clientX > rect.left + rect.width / 2);
+
+                touchDragTargetId = Number(targetBox.dataset.id);
+                touchDragPlaceAfter = placeAfter;
+                targetBox.classList.toggle('drag-over-after', placeAfter);
+                targetBox.classList.toggle('drag-over-before', !placeAfter);
+                placeDragPlaceholder(targetBox, placeAfter);
+            }
+
             function renderMainView() {
                 cabinetGrid.innerHTML = '';
                 if (!isMobile) {
@@ -1997,10 +2052,19 @@ ${repoData.private ? '• 私有仓库需要token有完整repo权限' : '• 公
                             });
                         });
                     } else {
+                        let touchDragStarted = false;
+                        let suppressTouchClick = false;
+                        let touchStartX = 0;
+                        let touchStartY = 0;
+
                         boxElement.addEventListener('touchstart', (e) => {
                             if (!e.target.classList.contains('delete-box-btn') && !isRenaming) {
                                 touchMoved = false;
                                 touchStartTime = Date.now();
+                                touchDragStarted = false;
+                                suppressTouchClick = false;
+                                touchStartX = e.touches[0].clientX;
+                                touchStartY = e.touches[0].clientY;
                                 touchTimer = setTimeout(() => {
                                     if (!touchMoved) handleLongPress();
                                 }, 800);
@@ -2008,20 +2072,73 @@ ${repoData.private ? '• 私有仓库需要token有完整repo权限' : '• 公
                             }
                         }, { passive: true });
                         
-                        boxElement.addEventListener('touchmove', () => {
-                            touchMoved = true;
+                        boxElement.addEventListener('touchmove', (e) => {
+                            const touch = e.touches[0];
+                            const deltaX = touch.clientX - touchStartX;
+                            const deltaY = touch.clientY - touchStartY;
+                            const movement = Math.hypot(deltaX, deltaY);
+
+                            touchMoved = movement > 6;
                             clearTimeout(touchTimer);
                             cancelLongPress(boxElement);
-                        }, { passive: true });
+
+                            if (movement > 10 && !touchDragStarted) {
+                                touchDragStarted = true;
+                                suppressTouchClick = true;
+                                draggedBoxId = box.id;
+                                isDraggingBox = true;
+                                boxElement.classList.add('dragging');
+                            }
+
+                            if (!touchDragStarted) return;
+
+                            e.preventDefault();
+                            updateTouchDragTarget(touch.clientX, touch.clientY);
+                        }, { passive: false });
                         
                         boxElement.addEventListener('touchend', (e) => {
                             clearTimeout(touchTimer);
                             cancelLongPress(boxElement);
+
+                            if (touchDragStarted) {
+                                const droppedBoxId = draggedBoxId;
+                                const droppedTargetId = touchDragTargetId;
+                                const droppedPlaceAfter = touchDragPlaceAfter;
+                                const changed = droppedBoxId !== null && droppedBoxId !== boxes[boxes.length - 1]?.id;
+                                resetTouchBoxDragState();
+                                touchDragStarted = false;
+
+                                if (droppedTargetId !== null && droppedBoxId !== droppedTargetId) {
+                                    reorderBoxes(droppedBoxId, droppedTargetId, droppedPlaceAfter);
+                                } else {
+                                    if (changed) {
+                                        reorderBoxesToEnd(box.id);
+                                    } else {
+                                        render();
+                                    }
+                                }
+                                return;
+                            }
+
                             const touchDuration = Date.now() - touchStartTime;
                             if (!touchMoved && touchDuration < 800 && !isRenaming) {
                                 setTimeout(() => handleClick(e), 50);
                             }
                         }, { passive: true });
+
+                        boxElement.addEventListener('touchcancel', () => {
+                            clearTimeout(touchTimer);
+                            cancelLongPress(boxElement);
+                            touchDragStarted = false;
+                            resetTouchBoxDragState();
+                        }, { passive: true });
+
+                        boxElement.addEventListener('click', (e) => {
+                            if (!suppressTouchClick) return;
+                            e.preventDefault();
+                            e.stopPropagation();
+                            suppressTouchClick = false;
+                        }, true);
                     }
                     
                     boxElement.querySelector('.delete-box-btn').addEventListener('click', (e) => {
