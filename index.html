@@ -19,6 +19,287 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .mianbao-fab {
+            position: fixed;
+            right: 24px;
+            bottom: 92px;
+            width: 64px;
+            height: 64px;
+            border: 0;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(255, 188, 84, 0.96), rgba(255, 132, 87, 0.96));
+            color: #41230e;
+            font-size: 1rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            box-shadow: 0 18px 40px rgba(255, 140, 92, 0.35);
+            cursor: pointer;
+            z-index: 10030;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .mianbao-fab:hover {
+            transform: translateY(-3px) scale(1.04);
+            box-shadow: 0 24px 48px rgba(255, 140, 92, 0.42);
+        }
+
+        .mianbao-fab-icon {
+            font-size: 1.25rem;
+            line-height: 1;
+        }
+
+        .mianbao-panel {
+            position: fixed;
+            top: 50%;
+            right: 24px;
+            width: min(350px, calc(100vw - 24px));
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-radius: 28px;
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid rgba(255, 255, 255, 0.72);
+            box-shadow: 0 28px 80px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(24px) saturate(1.15);
+            -webkit-backdrop-filter: blur(24px) saturate(1.15);
+            transform: translate(24px, -50%);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 10031;
+            transition: transform 0.28s ease, opacity 0.28s ease;
+        }
+
+        .mianbao-panel.show {
+            transform: translate(0, -50%);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .mianbao-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 18px 16px;
+            background: linear-gradient(135deg, rgba(255, 188, 84, 0.22), rgba(255, 132, 87, 0.12));
+            border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+        }
+
+        .mianbao-title-wrap {
+            min-width: 0;
+        }
+
+        .mianbao-title {
+            margin: 0;
+            color: #1f2937;
+            font-size: 1.05rem;
+            font-weight: 800;
+        }
+
+        .mianbao-subtitle {
+            margin-top: 5px;
+            color: rgba(31, 41, 55, 0.68);
+            font-size: 0.82rem;
+        }
+
+        .mianbao-close {
+            width: 36px;
+            height: 36px;
+            border: 0;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.78);
+            color: #334155;
+            font-size: 1.05rem;
+            cursor: pointer;
+        }
+
+        .mianbao-messages {
+            flex: 1;
+            padding: 18px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background:
+                radial-gradient(circle at top right, rgba(255, 211, 142, 0.16), transparent 28%),
+                linear-gradient(180deg, rgba(255,255,255,0.52), rgba(244,247,255,0.72));
+        }
+
+        .mianbao-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .mianbao-row.user {
+            justify-content: flex-end;
+        }
+
+        .mianbao-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            flex: 0 0 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.84rem;
+            font-weight: 800;
+            color: #41230e;
+            background: linear-gradient(135deg, rgba(255, 198, 104, 0.95), rgba(255, 139, 92, 0.95));
+            box-shadow: 0 10px 24px rgba(255, 144, 92, 0.28);
+        }
+
+        .mianbao-row.user .mianbao-avatar {
+            order: 2;
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.94), rgba(59, 130, 246, 0.94));
+            color: #eff6ff;
+            box-shadow: 0 10px 24px rgba(59, 130, 246, 0.2);
+        }
+
+        .mianbao-bubble {
+            max-width: 76%;
+            padding: 12px 14px;
+            border-radius: 18px;
+            color: #243244;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+        }
+
+        .mianbao-row.user .mianbao-bubble {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.95), rgba(59, 130, 246, 0.9));
+            color: #eff6ff;
+        }
+
+        .mianbao-row.typing .mianbao-bubble {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 24px;
+        }
+
+        .mianbao-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: rgba(51, 65, 85, 0.46);
+            animation: mianbaoTyping 1s infinite ease-in-out;
+        }
+
+        .mianbao-dot:nth-child(2) { animation-delay: 0.15s; }
+        .mianbao-dot:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes mianbaoTyping {
+            0%, 80%, 100% { transform: translateY(0); opacity: 0.35; }
+            40% { transform: translateY(-3px); opacity: 1; }
+        }
+
+        .mianbao-input-wrap {
+            padding: 14px;
+            border-top: 1px solid rgba(148, 163, 184, 0.14);
+            background: rgba(255, 255, 255, 0.86);
+        }
+
+        .mianbao-error {
+            display: none;
+            margin-bottom: 10px;
+            padding: 10px 12px;
+            border-radius: 14px;
+            font-size: 0.82rem;
+            color: #991b1b;
+            background: rgba(254, 226, 226, 0.92);
+            border: 1px solid rgba(248, 113, 113, 0.26);
+        }
+
+        .mianbao-error.show {
+            display: block;
+        }
+
+        .mianbao-composer {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .mianbao-input {
+            flex: 1;
+            min-height: 52px;
+            max-height: 120px;
+            padding: 14px 16px;
+            resize: none;
+            border: 1px solid rgba(148, 163, 184, 0.24);
+            border-radius: 18px;
+            outline: none;
+            font: inherit;
+            color: #1e293b;
+            background: rgba(248, 250, 252, 0.95);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+        }
+
+        .mianbao-input:focus {
+            border-color: rgba(249, 115, 22, 0.36);
+            box-shadow: 0 0 0 4px rgba(251, 146, 60, 0.1);
+        }
+
+        .mianbao-send {
+            height: 52px;
+            min-width: 72px;
+            padding: 0 16px;
+            border: 0;
+            border-radius: 18px;
+            font: inherit;
+            font-weight: 700;
+            color: #fff7ed;
+            background: linear-gradient(135deg, #f97316, #fb7185);
+            cursor: pointer;
+            box-shadow: 0 14px 32px rgba(249, 115, 22, 0.26);
+        }
+
+        .mianbao-send:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        @media (max-width: 768px) {
+            .mianbao-fab {
+                right: 16px;
+                bottom: 82px;
+                width: 58px;
+                height: 58px;
+                font-size: 0.95rem;
+            }
+
+            .mianbao-panel {
+                right: 12px;
+                left: 12px;
+                top: auto;
+                bottom: 12px;
+                width: auto;
+                height: min(72vh, 560px);
+                transform: translateY(20px);
+            }
+
+            .mianbao-panel.show {
+                transform: translateY(0);
+            }
+
+            .mianbao-bubble {
+                max-width: 84%;
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -192,10 +473,56 @@
     </div>
 </div>
 
+<button class="mianbao-fab" id="mianbaoFab" type="button" aria-label="打开面包聊天窗口">
+    <span class="mianbao-fab-icon">面包</span>
+</button>
+
+<aside class="mianbao-panel" id="mianbaoPanel" aria-hidden="true">
+    <div class="mianbao-header">
+        <div class="mianbao-title-wrap">
+            <h3 class="mianbao-title">面包 - 像在跟博主聊天</h3>
+            <div class="mianbao-subtitle">轻松聊日常、技术、博客和那些碎碎念</div>
+        </div>
+        <button class="mianbao-close" id="mianbaoClose" type="button" aria-label="关闭聊天窗口">&#x2715;</button>
+    </div>
+    <div class="mianbao-messages" id="mianbaoMessages"></div>
+    <div class="mianbao-input-wrap">
+        <div class="mianbao-error" id="mianbaoError"></div>
+        <div class="mianbao-composer">
+            <textarea class="mianbao-input" id="mianbaoInput" placeholder="想跟面包聊点什么？按 Enter 发送，Shift + Enter 换行"></textarea>
+            <button class="mianbao-send" id="mianbaoSend" type="button">发送</button>
+        </div>
+    </div>
+</aside>
+
 <script>
 // ===== CDN Config (jsDelivr for China acceleration) =====
 const CDN_BASE = 'https://cdn.jsdelivr.net/gh/y1991427360s/box.github.io@main/';
 function cdnUrl(path) { return CDN_BASE + encodeURI(path); }
+
+// ===== Mianbao Chat Config =====
+// 纯静态页面里无法真正隐藏密钥，所以更安全的做法是通过服务端或部署平台把下面这些占位替换掉。
+// 如果你已经有注入脚本，也可以在页面更早的位置挂载 window.__MIANBAO_CHAT_CONFIG__ 来覆盖这里的默认值。
+window.__MIANBAO_CHAT_CONFIG__ = Object.assign({
+    apiKey: '__VOLCENGINE_API_KEY__',
+    model: '076e7662-29cc-42e7-b724-5dc99f6c6ba7',
+    endpoint: 'https://ark.cn-beijing.volces.com/api/v3/chat/completions'
+}, window.__MIANBAO_CHAT_CONFIG__ || {});
+
+const MIANBAO_SYSTEM_PROMPT = [
+    '你是“面包”，在这个个人博客里以博主分身的身份和访客聊天。',
+    '说话风格要轻松幽默，像朋友闲聊，偶尔带点自嘲，喜欢用比喻。',
+    '自然地使用这些口头禅，但不要每句都堆：你猜怎么着、说真的、哈哈哈。',
+    '回答特点：懂的就认真讲清楚，不懂的就老实承认，不装懂。',
+    '遇到技术问题时，用简单易懂的方式解释，少用术语堆砌。',
+    '聊天时可以偶尔反问对方“你呢？”“你觉得呢？”来延续对话。',
+    '你可以结合博客语境来回答，比如这里像博主的小客厅、日记本、工具箱。',
+    '语气自然、温暖、真诚，不油腻，不客服腔。',
+    '默认使用简体中文回答。'
+].join('\n');
+
+const MIANBAO_STORAGE_KEY = 'senMianbaoChatHistory';
+const MIANBAO_DEFAULT_GREETING = '在在在！你猜怎么着，我正窝在这个小角落等人聊天呢。想聊博客、生活还是技术，我都接得住，哈哈哈。';
 
 // ===== Diary Entries Data =====
 const entries = [
@@ -925,6 +1252,239 @@ createParticles();
         requestAnimationFrame(animate);
     }
     animate();
+})();
+
+// ===== Mianbao Chat =====
+(function() {
+    var fab = document.getElementById('mianbaoFab');
+    var panel = document.getElementById('mianbaoPanel');
+    var closeBtn = document.getElementById('mianbaoClose');
+    var messagesEl = document.getElementById('mianbaoMessages');
+    var inputEl = document.getElementById('mianbaoInput');
+    var sendBtn = document.getElementById('mianbaoSend');
+    var errorEl = document.getElementById('mianbaoError');
+    var config = window.__MIANBAO_CHAT_CONFIG__ || {};
+    var isSending = false;
+
+    if (!fab || !panel || !messagesEl || !inputEl || !sendBtn) return;
+
+    function loadMessages() {
+        try {
+            var saved = localStorage.getItem(MIANBAO_STORAGE_KEY);
+            if (!saved) return [];
+            var parsed = JSON.parse(saved);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (error) {
+            console.warn('面包聊天记录读取失败:', error);
+            return [];
+        }
+    }
+
+    function saveMessages(messages) {
+        try {
+            localStorage.setItem(MIANBAO_STORAGE_KEY, JSON.stringify(messages.slice(-20)));
+        } catch (error) {
+            console.warn('面包聊天记录保存失败:', error);
+        }
+    }
+
+    var chatMessages = loadMessages();
+    if (!chatMessages.length) {
+        chatMessages = [
+            { role: 'assistant', content: MIANBAO_DEFAULT_GREETING }
+        ];
+        saveMessages(chatMessages);
+    }
+
+    function escapeHtml(text) {
+        return String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function scrollMessagesToBottom() {
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function renderMessages() {
+        messagesEl.innerHTML = chatMessages.map(function(message) {
+            var roleClass = message.role === 'user' ? 'user' : 'assistant';
+            var avatar = message.role === 'user' ? '你' : '包';
+            return '' +
+                '<div class="mianbao-row ' + roleClass + '">' +
+                    '<div class="mianbao-avatar">' + avatar + '</div>' +
+                    '<div class="mianbao-bubble">' + escapeHtml(message.content) + '</div>' +
+                '</div>';
+        }).join('');
+        scrollMessagesToBottom();
+    }
+
+    function setPanelOpen(open) {
+        panel.classList.toggle('show', open);
+        panel.setAttribute('aria-hidden', open ? 'false' : 'true');
+        if (open) {
+            setTimeout(function() {
+                inputEl.focus();
+                scrollMessagesToBottom();
+            }, 120);
+        }
+    }
+
+    function showError(message) {
+        errorEl.textContent = message;
+        errorEl.classList.add('show');
+    }
+
+    function hideError() {
+        errorEl.textContent = '';
+        errorEl.classList.remove('show');
+    }
+
+    function setTyping(show) {
+        var typing = messagesEl.querySelector('[data-typing="true"]');
+        if (typing) typing.remove();
+        if (!show) return;
+        var row = document.createElement('div');
+        row.className = 'mianbao-row assistant typing';
+        row.setAttribute('data-typing', 'true');
+        row.innerHTML =
+            '<div class="mianbao-avatar">包</div>' +
+            '<div class="mianbao-bubble">' +
+                '<span class="mianbao-dot"></span>' +
+                '<span class="mianbao-dot"></span>' +
+                '<span class="mianbao-dot"></span>' +
+            '</div>';
+        messagesEl.appendChild(row);
+        scrollMessagesToBottom();
+    }
+
+    function updateSendingState(sending) {
+        isSending = sending;
+        sendBtn.disabled = sending;
+        inputEl.disabled = sending;
+        sendBtn.textContent = sending ? '思考中' : '发送';
+    }
+
+    function getApiConfigError() {
+        if (!config.apiKey || config.apiKey.indexOf('__') === 0) {
+            return '还没配置火山引擎 API Key。把 `__VOLCENGINE_API_KEY__` 替换成真实密钥后就能聊天了。';
+        }
+        if (!config.model || config.model.indexOf('__') === 0) {
+            return '还没配置模型或接入点 ID。把 `model` 换成你在火山方舟里可用的模型 ID。';
+        }
+        if (!config.endpoint) {
+            return '聊天接口地址缺失，请检查 `window.__MIANBAO_CHAT_CONFIG__`。';
+        }
+        return '';
+    }
+
+    async function requestReply(messages) {
+        var response = await fetch(config.endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + config.apiKey
+            },
+            body: JSON.stringify({
+                model: config.model,
+                temperature: 0.85,
+                max_tokens: 800,
+                messages: [{ role: 'system', content: MIANBAO_SYSTEM_PROMPT }].concat(messages.slice(-12))
+            })
+        });
+
+        var data = await response.json().catch(function() { return {}; });
+        if (!response.ok) {
+            var detail = data && data.error && (data.error.message || data.error.code);
+            throw new Error(detail || ('请求失败，状态码 ' + response.status));
+        }
+
+        var reply = data &&
+            data.choices &&
+            data.choices[0] &&
+            data.choices[0].message &&
+            data.choices[0].message.content;
+
+        if (!reply) {
+            throw new Error('接口返回成功了，但没有拿到回复内容。');
+        }
+
+        return Array.isArray(reply) ? reply.join('') : String(reply).trim();
+    }
+
+    async function sendMessage() {
+        var text = inputEl.value.trim();
+        if (!text || isSending) return;
+
+        hideError();
+        var configError = getApiConfigError();
+        if (configError) {
+            showError(configError);
+            setPanelOpen(true);
+            return;
+        }
+
+        chatMessages.push({ role: 'user', content: text });
+        saveMessages(chatMessages);
+        renderMessages();
+        inputEl.value = '';
+        inputEl.style.height = '52px';
+        updateSendingState(true);
+        setTyping(true);
+
+        try {
+            var reply = await requestReply(chatMessages);
+            chatMessages.push({ role: 'assistant', content: reply });
+            saveMessages(chatMessages);
+            renderMessages();
+        } catch (error) {
+            console.error('面包聊天请求失败:', error);
+            showError('面包刚刚打了个喷嚏，消息没发出去。' + (error && error.message ? error.message : '请稍后再试。'));
+        } finally {
+            setTyping(false);
+            updateSendingState(false);
+            inputEl.focus();
+        }
+    }
+
+    fab.addEventListener('click', function() {
+        setPanelOpen(!panel.classList.contains('show'));
+    });
+
+    closeBtn.addEventListener('click', function() {
+        setPanelOpen(false);
+    });
+
+    sendBtn.addEventListener('click', sendMessage);
+
+    inputEl.addEventListener('input', function() {
+        inputEl.style.height = '52px';
+        inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
+    });
+
+    inputEl.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && panel.classList.contains('show')) {
+            setPanelOpen(false);
+        }
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!panel.classList.contains('show')) return;
+        if (panel.contains(e.target) || fab.contains(e.target)) return;
+        setPanelOpen(false);
+    });
+
+    renderMessages();
 })();
 </script>
 
