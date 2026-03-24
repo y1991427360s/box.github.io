@@ -607,11 +607,20 @@
             box-shadow: 0 16px 30px rgba(15, 23, 42, 0.12);
             z-index: 10000;
             transition: transform 0.25s ease, box-shadow 0.25s ease;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         .bgm-btn:hover {
             transform: translateY(-2px) scale(1.04);
             box-shadow: 0 22px 38px rgba(15, 23, 42, 0.16);
+        }
+
+        .bgm-btn.dragging {
+            transform: scale(1.06);
+            box-shadow: 0 24px 42px rgba(15, 23, 42, 0.2);
+            transition: none;
         }
 
         .bgm-disc { display: inline-block; }
@@ -712,6 +721,7 @@
             
             const STORAGE_KEY = 'storageSystemData';
             const BGM_STATE_KEY = 'senGlobalBgmState';
+            const BGM_POSITION_KEY = 'senGlobalBgmPosition';
             let syncConfig = null;
 
             // 设备检测
@@ -841,6 +851,139 @@
                     if (document.hidden) persistPlaybackState();
                 });
                 syncButtonState();
+            }
+
+            function initDraggableBgmButton() {
+                if (!bgmBtn) return;
+
+                const defaultOffset = { right: 24, bottom: 24, mobile: 16 };
+                let activePointerId = null;
+                let startX = 0;
+                let startY = 0;
+                let startLeft = 0;
+                let startTop = 0;
+                let hasMoved = false;
+                let suppressClick = false;
+
+                function getButtonRect() {
+                    return bgmBtn.getBoundingClientRect();
+                }
+
+                function getBounds() {
+                    const rect = getButtonRect();
+                    return {
+                        maxLeft: Math.max(0, window.innerWidth - rect.width),
+                        maxTop: Math.max(0, window.innerHeight - rect.height)
+                    };
+                }
+
+                function clampPosition(left, top) {
+                    const bounds = getBounds();
+                    return {
+                        left: Math.min(Math.max(0, left), bounds.maxLeft),
+                        top: Math.min(Math.max(0, top), bounds.maxTop)
+                    };
+                }
+
+                function savePosition(left, top) {
+                    localStorage.setItem(BGM_POSITION_KEY, JSON.stringify({ left, top }));
+                }
+
+                function applyPosition(left, top, shouldSave = false) {
+                    const next = clampPosition(left, top);
+                    bgmBtn.style.left = `${next.left}px`;
+                    bgmBtn.style.top = `${next.top}px`;
+                    bgmBtn.style.right = 'auto';
+                    bgmBtn.style.bottom = 'auto';
+                    if (shouldSave) savePosition(next.left, next.top);
+                }
+
+                function applyDefaultPosition() {
+                    bgmBtn.style.left = 'auto';
+                    bgmBtn.style.top = 'auto';
+                    bgmBtn.style.right = `${window.innerWidth <= 768 ? defaultOffset.mobile : defaultOffset.right}px`;
+                    bgmBtn.style.bottom = `${window.innerWidth <= 768 ? defaultOffset.mobile : defaultOffset.bottom}px`;
+                }
+
+                function restorePosition() {
+                    const stored = localStorage.getItem(BGM_POSITION_KEY);
+                    if (!stored) {
+                        applyDefaultPosition();
+                        return;
+                    }
+
+                    try {
+                        const parsed = JSON.parse(stored);
+                        if (typeof parsed.left === 'number' && typeof parsed.top === 'number') {
+                            applyPosition(parsed.left, parsed.top, false);
+                            return;
+                        }
+                    } catch (error) {
+                        console.error('恢复工具按钮位置失败:', error);
+                    }
+
+                    applyDefaultPosition();
+                }
+
+                function finishDrag() {
+                    if (activePointerId === null) return;
+                    bgmBtn.classList.remove('dragging');
+                    activePointerId = null;
+                }
+
+                bgmBtn.addEventListener('pointerdown', (e) => {
+                    if (e.button !== undefined && e.button !== 0) return;
+                    if (isRenaming || isDraggingBox) return;
+
+                    const rect = getButtonRect();
+                    activePointerId = e.pointerId;
+                    startX = e.clientX;
+                    startY = e.clientY;
+                    startLeft = rect.left;
+                    startTop = rect.top;
+                    hasMoved = false;
+                    suppressClick = false;
+                    bgmBtn.classList.add('dragging');
+                    bgmBtn.setPointerCapture(e.pointerId);
+                });
+
+                bgmBtn.addEventListener('pointermove', (e) => {
+                    if (activePointerId !== e.pointerId) return;
+
+                    const deltaX = e.clientX - startX;
+                    const deltaY = e.clientY - startY;
+                    if (!hasMoved && Math.hypot(deltaX, deltaY) > 6) {
+                        hasMoved = true;
+                    }
+                    if (!hasMoved) return;
+
+                    e.preventDefault();
+                    applyPosition(startLeft + deltaX, startTop + deltaY, false);
+                });
+
+                bgmBtn.addEventListener('pointerup', (e) => {
+                    if (activePointerId !== e.pointerId) return;
+
+                    if (hasMoved) {
+                        const rect = getButtonRect();
+                        savePosition(rect.left, rect.top);
+                        suppressClick = true;
+                        e.preventDefault();
+                    }
+                    finishDrag();
+                });
+
+                bgmBtn.addEventListener('pointercancel', finishDrag);
+                bgmBtn.addEventListener('lostpointercapture', finishDrag);
+                bgmBtn.addEventListener('click', (e) => {
+                    if (!suppressClick) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    suppressClick = false;
+                }, true);
+
+                window.addEventListener('resize', restorePosition);
+                restorePosition();
             }
 
             // 云同步初始化
@@ -2128,6 +2271,7 @@ ${repoData.private ? '• 私有仓库需要token有完整repo权限' : '• 公
             checkAndFixEncoding();
             initDesktopFireworks();
             initPersistentBgm();
+            initDraggableBgmButton();
             
             if (syncConfig) {
                 setTimeout(() => syncData('download'), 1000);
