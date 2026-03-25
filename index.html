@@ -504,7 +504,7 @@ function cdnUrl(path) { return CDN_BASE + encodeURI(path); }
 // 代理版：前端不再直接持有 API Key，只请求你部署的代理地址。
 // 部署好 Worker 后，把下面的 proxyUrl 换成你的 Worker 地址即可。
 window.__MIANBAO_CHAT_CONFIG__ = Object.assign({
-    proxyUrl: '__MIANBAO_PROXY_URL__'
+    proxyUrl: 'https://sen-mianbao-chat.sen666.workers.dev'
 }, window.__MIANBAO_CHAT_CONFIG__ || {});
 
 const MIANBAO_STORAGE_KEY = 'senMianbaoChatHistory';
@@ -1356,7 +1356,7 @@ createParticles();
 
     function getApiConfigError() {
         if (!config.proxyUrl || config.proxyUrl.indexOf('__') === 0) {
-            return '还没配置聊天代理地址。把 `__MIANBAO_PROXY_URL__` 换成你部署好的代理 URL。';
+            return '还没配置聊天代理地址。当前默认地址应为 `https://sen-mianbao-chat.sen666.workers.dev`。';
         }
         return '';
     }
