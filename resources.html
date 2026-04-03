@@ -609,6 +609,15 @@
             color: var(--muted);
             font-size: 0.84rem;
             line-height: 1.7;
+            margin-bottom: 8px;
+        }
+        .resource-url {
+            position: relative;
+            z-index: 1;
+            color: var(--light);
+            font-size: 0.76rem;
+            line-height: 1.6;
+            word-break: break-all;
             margin-bottom: auto;
         }
         .resource-card-bottom {
@@ -783,8 +792,8 @@
 
         <div class="footer-note">SEN · Resource Library · 由导出的 Chrome 书签生成</div>
     </div>
+    <script src="resources-data.js"></script>
     <script>
-        const SOURCE_FILE = 'bookmarks_2026_4_3.html';
         const state = { items: [], folders: [], activeFolder: '全部', query: '' };
         const totalCountEl = document.getElementById('totalCount');
         const folderCountEl = document.getElementById('folderCount');
@@ -821,80 +830,9 @@
             return sum % 6;
         }
 
-        function normalizePath(path) {
-            if (!Array.isArray(path) || !path.length) return [];
-            return path.length > 1 ? path.slice(1) : path;
-        }
-
-        function parseBookmarks(html) {
-            const doc = new DOMParser().parseFromString(html, 'text/html');
-            const root = doc.querySelector('dl');
-            if (!root) throw new Error('未找到书签数据');
-            const items = [];
-
-            function walk(dl, path = []) {
-                const nodes = Array.from(dl.children);
-                for (const node of nodes) {
-                    if (node.tagName !== 'DT') continue;
-                    const firstEl = Array.from(node.children).find(el => el.nodeType === 1);
-                    if (!firstEl) continue;
-
-                    if (firstEl.tagName === 'A') {
-                        const cleanPath = normalizePath(path);
-                        const host = getHost(firstEl.getAttribute('href') || '');
-                        items.push({
-                            title: firstEl.textContent.trim(),
-                            url: firstEl.getAttribute('href') || '#',
-                            path: cleanPath,
-                            top: cleanPath[0] || '未分类',
-                            host
-                        });
-                    }
-
-                    if (firstEl.tagName === 'H3') {
-                        const next = node.nextElementSibling;
-                        if (next && next.tagName === 'DL') walk(next, [...path, firstEl.textContent.trim()]);
-                    }
-                }
-            }
-
-            walk(root, []);
-            return items;
-        }
-
-        async function readBookmarksText() {
-            try {
-                const response = await fetch(SOURCE_FILE, { cache: 'no-store' });
-                if (!response.ok) throw new Error('fetch failed');
-                return await response.text();
-            } catch {
-                return await new Promise((resolve, reject) => {
-                    const frame = document.createElement('iframe');
-                    frame.src = SOURCE_FILE;
-                    frame.style.display = 'none';
-                    frame.onload = () => {
-                        try {
-                            const frameDoc = frame.contentDocument || frame.contentWindow.document;
-                            const html = frameDoc.documentElement ? frameDoc.documentElement.outerHTML : frameDoc.body.innerHTML;
-                            frame.remove();
-                            resolve(html);
-                        } catch (error) {
-                            frame.remove();
-                            reject(error);
-                        }
-                    };
-                    frame.onerror = () => {
-                        frame.remove();
-                        reject(new Error('iframe failed'));
-                    };
-                    document.body.appendChild(frame);
-                });
-            }
-        }
-
         function buildFolderStats(items) {
             const map = new Map();
-            for (const item of items) map.set(item.top, (map.get(item.top) || 0) + 1);
+            for (const item of items) map.set(item.category, (map.get(item.category) || 0) + 1);
             return Array.from(map.entries())
                 .map(([name, count]) => ({ name, count }))
                 .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'zh-CN'));
@@ -939,7 +877,7 @@
 
         function renderShortcuts() {
             const rankedFolders = state.folders.slice(0, 2).map(folder => folder.name);
-            const shortcutItems = state.items.filter(item => rankedFolders.includes(item.top)).slice(0, 4);
+            const shortcutItems = state.items.filter(item => rankedFolders.includes(item.category)).slice(0, 4);
 
             shortcutMetaEl.textContent = shortcutItems.length
                 ? `来自 ${rankedFolders.filter(Boolean).join(' / ')}`
@@ -957,7 +895,7 @@
                     <a class="shortcut-card tone-${tone}" href="${escapeHtml(item.url)}" target="_blank" rel="noreferrer">
                         <div class="shortcut-card-top">
                             <span class="resource-icon">${escapeHtml(initials)}</span>
-                            <span class="shortcut-meta">${escapeHtml(item.top)}</span>
+                            <span class="shortcut-meta">${escapeHtml(item.category)}</span>
                         </div>
                         <h3>${escapeHtml(item.title)}</h3>
                         <div class="shortcut-card-bottom">
@@ -989,10 +927,10 @@
         function getFilteredItems() {
             const query = state.query.trim().toLowerCase();
             return state.items.filter(item => {
-                const matchFolder = state.activeFolder === '全部' || item.top === state.activeFolder;
+                const matchFolder = state.activeFolder === '全部' || item.category === state.activeFolder;
                 if (!matchFolder) return false;
                 if (!query) return true;
-                const haystack = `${item.title} ${item.host} ${item.path.join(' ')}`.toLowerCase();
+                const haystack = `${item.title} ${item.host} ${item.pathText || ''} ${item.url}`.toLowerCase();
                 return haystack.includes(query);
             });
         }
@@ -1013,7 +951,7 @@
             resourceGridEl.innerHTML = items.map(item => {
                 const tone = toneFor(item.host || item.title);
                 const initials = getInitials(item.title, item.host);
-                const pathLabel = item.path.length ? item.path.join(' / ') : '未分类';
+                const pathLabel = item.pathText || item.category || '未分类';
                 return `
                     <a class="resource-card tone-${tone}" href="${escapeHtml(item.url)}" target="_blank" rel="noreferrer">
                         <div class="resource-card-top">
@@ -1022,8 +960,9 @@
                         </div>
                         <h3>${escapeHtml(item.title)}</h3>
                         <div class="resource-path">${escapeHtml(pathLabel)}</div>
+                        <div class="resource-url">${escapeHtml(item.url)}</div>
                         <div class="resource-card-bottom">
-                            <span>${escapeHtml(item.top)}</span>
+                            <span>${escapeHtml(item.category)}</span>
                             <span>打开资源</span>
                         </div>
                     </a>
@@ -1033,8 +972,15 @@
 
         async function init() {
             try {
-                const html = await readBookmarksText();
-                state.items = parseBookmarks(html);
+                if (!Array.isArray(window.RESOURCE_DATA) || !window.RESOURCE_DATA.length) {
+                    throw new Error('RESOURCE_DATA missing');
+                }
+                state.items = window.RESOURCE_DATA.map(item => ({
+                    ...item,
+                    category: item.category || '未分类',
+                    pathText: item.pathText || item.category || '未分类',
+                    host: item.host || getHost(item.url || '')
+                }));
                 state.folders = buildFolderStats(state.items);
                 renderHero();
                 renderShortcuts();
@@ -1043,12 +989,12 @@
                 renderGrid();
             } catch (error) {
                 console.error(error);
-                heroSummaryEl.textContent = '书签文件读取失败，可能是本地浏览器阻止了访问，或者源文件路径不正确。';
-                shortcutGridEl.innerHTML = '<div class="empty-state"><strong>快捷入口生成失败</strong>需要先成功读取书签文件。</div>';
-                shortcutMetaEl.textContent = '书签读取失败';
-                folderOverviewEl.innerHTML = '<div class="empty-state"><strong>书签读取失败</strong>请确认根目录下存在 bookmarks_2026_4_3.html。</div>';
-                resourceGridEl.innerHTML = '<div class="empty-state"><strong>无法生成资源库</strong>当前页面依赖同目录下的书签导出文件。</div>';
-                resultMetaEl.textContent = '书签源文件读取失败';
+                heroSummaryEl.textContent = '资源数据读取失败，请检查 resources-data.js 是否已经成功发布。';
+                shortcutGridEl.innerHTML = '<div class="empty-state"><strong>快捷入口生成失败</strong>需要先成功加载资源数据文件。</div>';
+                shortcutMetaEl.textContent = '资源数据读取失败';
+                folderOverviewEl.innerHTML = '<div class="empty-state"><strong>分类读取失败</strong>请确认 resources-data.js 已存在并可访问。</div>';
+                resourceGridEl.innerHTML = '<div class="empty-state"><strong>无法生成资源库</strong>当前页面依赖同目录下的静态资源数据文件。</div>';
+                resultMetaEl.textContent = '资源数据读取失败';
             }
         }
 
