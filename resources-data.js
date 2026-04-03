@@ -286,8 +286,8 @@ window.RESOURCE_DATA = [
       "AI",
       "Study"
     ],
-    "category": "AI",
-    "pathText": "AI / Study",
+    "category": "Study",
+    "pathText": "Study",
     "host": "i.chaoxing.com"
   },
   {
@@ -297,8 +297,8 @@ window.RESOURCE_DATA = [
       "AI",
       "Study"
     ],
-    "category": "AI",
-    "pathText": "AI / Study",
+    "category": "Study",
+    "pathText": "Study",
     "host": "shutong.work"
   },
   {
@@ -308,8 +308,8 @@ window.RESOURCE_DATA = [
       "AI",
       "Study"
     ],
-    "category": "AI",
-    "pathText": "AI / Study",
+    "category": "Study",
+    "pathText": "Study",
     "host": "github.com"
   },
   {
@@ -319,8 +319,8 @@ window.RESOURCE_DATA = [
       "AI",
       "Study"
     ],
-    "category": "AI",
-    "pathText": "AI / Study",
+    "category": "Study",
+    "pathText": "Study",
     "host": "coursera.org"
   },
   {
@@ -330,8 +330,8 @@ window.RESOURCE_DATA = [
       "AI",
       "Study"
     ],
-    "category": "AI",
-    "pathText": "AI / Study",
+    "category": "Study",
+    "pathText": "Study",
     "host": "vgmsn1.fanyu.com"
   },
   {
@@ -341,8 +341,8 @@ window.RESOURCE_DATA = [
       "AI",
       "Study"
     ],
-    "category": "AI",
-    "pathText": "AI / Study",
+    "category": "Study",
+    "pathText": "Study",
     "host": "webvpn.neau.edu.cn"
   },
   {
@@ -352,8 +352,8 @@ window.RESOURCE_DATA = [
       "AI",
       "Study"
     ],
-    "category": "AI",
-    "pathText": "AI / Study",
+    "category": "Study",
+    "pathText": "Study",
     "host": "nshall.neau.edu.cn"
   },
   {
@@ -363,8 +363,8 @@ window.RESOURCE_DATA = [
       "AI",
       "Study"
     ],
-    "category": "AI",
-    "pathText": "AI / Study",
+    "category": "Study",
+    "pathText": "Study",
     "host": "simpletex.cn"
   },
   {
@@ -374,8 +374,8 @@ window.RESOURCE_DATA = [
       "AI",
       "Study"
     ],
-    "category": "AI",
-    "pathText": "AI / Study",
+    "category": "Study",
+    "pathText": "Study",
     "host": "deepl.com"
   },
   {
@@ -385,8 +385,8 @@ window.RESOURCE_DATA = [
       "AI",
       "Study"
     ],
-    "category": "AI",
-    "pathText": "AI / Study",
+    "category": "Study",
+    "pathText": "Study",
     "host": "huaweicloud.com"
   },
   {
@@ -396,8 +396,8 @@ window.RESOURCE_DATA = [
       "AI",
       "Study"
     ],
-    "category": "AI",
-    "pathText": "AI / Study",
+    "category": "Study",
+    "pathText": "Study",
     "host": "i.chaoxing.com"
   },
   {
@@ -407,8 +407,8 @@ window.RESOURCE_DATA = [
       "AI",
       "Netdisk"
     ],
-    "category": "AI",
-    "pathText": "AI / Netdisk",
+    "category": "NetDisk",
+    "pathText": "NetDisk",
     "host": "aliyundrive.com"
   },
   {
@@ -418,8 +418,8 @@ window.RESOURCE_DATA = [
       "AI",
       "Netdisk"
     ],
-    "category": "AI",
-    "pathText": "AI / Netdisk",
+    "category": "NetDisk",
+    "pathText": "NetDisk",
     "host": "pan.baidu.com"
   },
   {
@@ -429,8 +429,8 @@ window.RESOURCE_DATA = [
       "AI",
       "Netdisk"
     ],
-    "category": "AI",
-    "pathText": "AI / Netdisk",
+    "category": "NetDisk",
+    "pathText": "NetDisk",
     "host": "pan.xunlei.com"
   },
   {
@@ -957,24 +957,24 @@ window.RESOURCE_DATA = [
     "title": "哔哩哔哩 (゜-゜)つロ 干杯~-bilibili",
     "url": "https://www.bilibili.com/",
     "path": [],
-    "category": "???",
-    "pathText": "???",
+    "category": "Bookmarks",
+    "pathText": "Bookmarks",
     "host": "bilibili.com"
   },
   {
     "title": "收件箱 - ys1991427360@gmail.com - Gmail",
     "url": "https://mail.google.com/mail/u/0/#inbox",
     "path": [],
-    "category": "???",
-    "pathText": "???",
+    "category": "Bookmarks",
+    "pathText": "Bookmarks",
     "host": "mail.google.com"
   },
   {
     "title": "earth :: 风、气象、海洋状况的全球地图",
     "url": "https://earth.nullschool.net/zh-cn/#current/wind/surface/level/overlay=temp/orthographic=129.15,45.83,807/loc=116.717,34.109",
     "path": [],
-    "category": "???",
-    "pathText": "???",
+    "category": "Bookmarks",
+    "pathText": "Bookmarks",
     "host": "earth.nullschool.net"
   },
   {
@@ -1221,16 +1221,16 @@ window.RESOURCE_DATA = [
     "title": "LINUX DO - 新的理想型社区",
     "url": "https://linux.do/",
     "path": [],
-    "category": "???",
-    "pathText": "???",
+    "category": "Bookmarks",
+    "pathText": "Bookmarks",
     "host": "linux.do"
   },
   {
     "title": "YPT - YIELD·PAY·TRADE",
     "url": "https://ypt.com/en",
     "path": [],
-    "category": "???",
-    "pathText": "???",
+    "category": "Bookmarks",
+    "pathText": "Bookmarks",
     "host": "ypt.com"
   }
 ];
