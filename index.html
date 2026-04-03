@@ -327,6 +327,7 @@
             <li><a href="#home" class="active">Home</a></li>
             <li><a href="#blog">Blog</a></li>
             <li><a href="#apps">Apps</a></li>
+            <li><a href="#resources">Resources</a></li>
             <li><a href="#about">About</a></li>
             <li><a href="#contact">Contact</a></li>
         </ul>
@@ -384,6 +385,57 @@
     </div>
 </section>
 
+<!-- Resources -->
+<section class="section resources-home-section" id="resources">
+    <div class="container">
+        <div class="resource-spotlight reveal">
+            <div class="resource-spotlight-copy">
+                <div class="resource-heading-line">
+                    <span class="section-badge">Resources</span>
+                    <span class="resource-kicker">iOS 26 Style</span>
+                </div>
+                <h2>把 Chrome 书签做成真正能用的资源站</h2>
+                <p>把导出的 123 个常用链接整理成一个可搜索、可分类、可快速直达的资源入口，保留原始书签结构，同时换成更适合长期使用的界面。</p>
+                <div class="resource-actions">
+                    <a href="resources.html" class="btn btn-primary">打开资源站</a>
+                    <a href="bookmarks_2026_4_3.html" class="btn btn-outline">查看原始导出</a>
+                </div>
+            </div>
+            <div class="resource-spotlight-panel">
+                <div class="resource-mini-stats">
+                    <div class="resource-stat-card">
+                        <span class="resource-stat-value">123</span>
+                        <span class="resource-stat-label">资源链接</span>
+                    </div>
+                    <div class="resource-stat-card">
+                        <span class="resource-stat-value">9</span>
+                        <span class="resource-stat-label">核心分类</span>
+                    </div>
+                    <div class="resource-stat-card">
+                        <span class="resource-stat-value">AI</span>
+                        <span class="resource-stat-label">最高频目录</span>
+                    </div>
+                </div>
+                <div class="resource-preview-card">
+                    <div class="resource-preview-top">
+                        <span class="resource-preview-badge">Live</span>
+                        <span class="resource-preview-label">Bookmark Library</span>
+                    </div>
+                    <p>覆盖 AI、LLM、Source、Google、图片工具、视频工具等常用入口，首页只保留最轻的一跳，具体浏览交给独立资源页。</p>
+                    <div class="resource-chip-row">
+                        <span class="resource-chip">AI</span>
+                        <span class="resource-chip">LLM</span>
+                        <span class="resource-chip">Source</span>
+                        <span class="resource-chip">Google</span>
+                        <span class="resource-chip">pic</span>
+                        <span class="resource-chip">mov</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- About -->
 <section class="section" id="about">
     <div class="container">
@@ -434,6 +486,7 @@
             <a href="#home">Home</a>
             <a href="#blog">Blog</a>
             <a href="#apps">Apps</a>
+            <a href="#resources">Resources</a>
             <a href="#about">About</a>
             <a href="#contact">Contact</a>
         </div>
@@ -509,7 +562,7 @@ window.__MIANBAO_CHAT_CONFIG__ = Object.assign({
 }, window.__MIANBAO_CHAT_CONFIG__ || {});
 
 const MIANBAO_STORAGE_KEY = 'senMianbaoChatHistory';
-const MIANBAO_DEFAULT_GREETING = '在在在！你猜怎么着，我正窝在这个小角落等人聊天呢。想聊博客、生活还是技术，我都接得住，哈哈哈。';
+const MIANBAO_DEFAULT_GREETING = '在呢，确实等你半天了。把我当成站长的分身就行，想聊生活、博客、技术都可以，这是个好事儿啊。';
 
 // ===== Diary Entries Data =====
 const entries = [
@@ -631,6 +684,16 @@ const appProducts = [
         href: 'task.html',
         cta: '立即打开',
         tags: ['Goals', '规划', '成长']
+    },
+    {
+        name: '资源站',
+        code: 'RS',
+        description: '把导出的 Chrome 书签整理成一个更适合长期使用的导航页，支持分类浏览与快速搜索。',
+        status: '已上线',
+        tone: 'live',
+        href: 'resources.html',
+        cta: '打开资源库',
+        tags: ['Bookmarks', '资源', '导航']
     },
     {
         name: '习惯',

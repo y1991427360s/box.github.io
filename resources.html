@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>资源站 | SEN</title>
+    <meta name="description" content="基于 Chrome 书签整理的个人资源站，支持分类浏览与搜索直达。">
+    <meta name="theme-color" content="#dfeaf7">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-1: #edf5ff;
+            --bg-2: #dce9fb;
+            --bg-3: #dff4f0;
+            --bg-4: #f7ebe2;
+            --text: #172033;
+            --muted: rgba(23, 32, 51, 0.68);
+            --light: rgba(23, 32, 51, 0.44);
+            --glass-border: rgba(255, 255, 255, 0.62);
+            --shadow: 0 18px 60px rgba(46, 70, 105, 0.12);
+            --radius-xl: 34px;
+            --radius-lg: 26px;
+            --max-w: 1240px;
+        }
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text);
+            font-family: "Noto Sans SC", "PingFang SC", -apple-system, BlinkMacSystemFont, sans-serif;
+            background:
+                radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.12), transparent 28%),
+                radial-gradient(circle at 88% 16%, rgba(56, 189, 248, 0.18), transparent 24%),
+                radial-gradient(circle at 72% 82%, rgba(250, 204, 21, 0.12), transparent 20%),
+                linear-gradient(135deg, var(--bg-1), var(--bg-2) 34%, var(--bg-3) 70%, var(--bg-4));
+            background-attachment: fixed;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+        body::before,
+        body::after {
+            content: "";
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(90px);
+            pointer-events: none;
+            z-index: 0;
+        }
+        body::before {
+            width: 34rem;
+            height: 34rem;
+            top: -6rem;
+            left: -8rem;
+            background: rgba(125, 211, 252, 0.22);
+        }
+        body::after {
+            width: 30rem;
+            height: 30rem;
+            right: -8rem;
+            bottom: -8rem;
+            background: rgba(96, 165, 250, 0.18);
+        }
+        a { color: inherit; text-decoration: none; }
+        .page {
+            position: relative;
+            z-index: 1;
+            max-width: var(--max-w);
+            margin: 0 auto;
+            padding: 24px;
+        }
+        .glass {
+            background: linear-gradient(135deg, rgba(255,255,255,0.56), rgba(255,255,255,0.18));
+            backdrop-filter: blur(30px) saturate(1.3);
+            -webkit-backdrop-filter: blur(30px) saturate(1.3);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.84);
+        }
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 14px 18px;
+            border-radius: 999px;
+            position: sticky;
+            top: 16px;
+            z-index: 20;
+            margin-bottom: 22px;
+        }
+        .topbar::after {
+            content: "";
+            position: absolute;
+            inset: 1px;
+            border-radius: inherit;
+            background: linear-gradient(180deg, rgba(255,255,255,0.28), transparent 42%);
+            pointer-events: none;
+        }
+        .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+        .brand-mark {
+            width: 42px;
+            height: 42px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            font-family: "Outfit", sans-serif;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            color: #0f4c81;
+            background: linear-gradient(135deg, rgba(255,255,255,0.82), rgba(170, 216, 255, 0.54));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.96);
+        }
+        .brand-title {
+            font-family: "Outfit", sans-serif;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            font-size: 1.02rem;
+        }
+        .brand-subtitle {
+            color: var(--light);
+            font-size: 0.8rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .pill-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            padding: 0 16px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.48);
+            border: 1px solid rgba(255,255,255,0.68);
+            color: var(--muted);
+            font-size: 0.9rem;
+            font-weight: 700;
+            transition: transform 0.24s ease, background 0.24s ease;
+        }
+        .pill-link:hover { transform: translateY(-1px); background: rgba(255,255,255,0.7); }
+        .hero {
+            padding: 32px;
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            margin-bottom: 22px;
+            position: relative;
+        }
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 80% 18%, rgba(59, 130, 246, 0.22), transparent 18%),
+                radial-gradient(circle at 18% 80%, rgba(16, 185, 129, 0.15), transparent 18%),
+                linear-gradient(120deg, rgba(255,255,255,0.16), transparent 46%);
+            pointer-events: none;
+        }
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px),
+                linear-gradient(180deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+            background-size: 26px 26px;
+            opacity: 0.16;
+            mask-image: linear-gradient(180deg, rgba(0,0,0,0.86), transparent 88%);
+            pointer-events: none;
+        }
+        .hero-grid {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+            gap: 22px;
+        }
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.48);
+            border: 1px solid rgba(255,255,255,0.64);
+            color: var(--muted);
+            font-size: 0.82rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        h1 {
+            margin: 0;
+            max-width: 11ch;
+            font-family: "Outfit", sans-serif;
+            font-weight: 800;
+            letter-spacing: -0.06em;
+            line-height: 0.95;
+            font-size: clamp(2.8rem, 7vw, 5.2rem);
+        }
+        .hero-copy p {
+            margin: 18px 0 0;
+            max-width: 58ch;
+            font-size: 1rem;
+            line-height: 1.85;
+            color: var(--muted);
+        }
+        .hero-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+        }
+        .cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 48px;
+            padding: 0 18px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 0.94rem;
+            transition: transform 0.24s ease, box-shadow 0.24s ease;
+        }
+        .cta-primary {
+            color: #fff;
+            background: linear-gradient(135deg, #0b78ff, #5b5bd6);
+            box-shadow: 0 18px 30px rgba(11, 120, 255, 0.24);
+        }
+        .cta-secondary {
+            color: var(--text);
+            background: rgba(255,255,255,0.56);
+            border: 1px solid rgba(255,255,255,0.7);
+        }
+        .cta:hover { transform: translateY(-2px); }
+        .hero-side { display: flex; flex-direction: column; gap: 14px; }
+        .hero-panel-stack {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+        .stat-card,
+        .focus-card,
+        .section-shell,
+        .toolbar { border-radius: var(--radius-lg); }
+        .stat-card { padding: 18px; }
+        .stat-value {
+            display: block;
+            font-family: "Outfit", sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.06em;
+            line-height: 1;
+        }
+        .stat-label { display: block; margin-top: 10px; color: var(--light); font-size: 0.82rem; }
+        .focus-card { padding: 20px; }
+        .focus-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .focus-tag,
+        .resource-count,
+        .folder-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+        .focus-tag { padding: 7px 10px; background: rgba(255,255,255,0.7); color: #155e75; }
+        .focus-label {
+            color: var(--light);
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            font-weight: 800;
+        }
+        .focus-card p { margin: 0; color: var(--muted); line-height: 1.8; font-size: 0.94rem; }
+        .hero-dock {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+        .hero-dock-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 40px;
+            padding: 0 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.54);
+            border: 1px solid rgba(255,255,255,0.74);
+            color: var(--muted);
+            font-size: 0.84rem;
+            font-weight: 700;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.92);
+        }
+        .hero-dock-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #2dd4bf, #3b82f6);
+            box-shadow: 0 0 0 4px rgba(59,130,246,0.12);
+        }
+        .shortcut-section {
+            padding: 18px 24px 24px;
+        }
+        .shortcut-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+        }
+        .shortcut-card {
+            position: relative;
+            padding: 18px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.58), rgba(255,255,255,0.22));
+            border: 1px solid rgba(255,255,255,0.72);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.9);
+            overflow: hidden;
+            transition: transform 0.24s ease, box-shadow 0.24s ease;
+        }
+        .shortcut-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--tone-a), transparent 58%);
+            opacity: 0.78;
+            pointer-events: none;
+        }
+        .shortcut-card:hover {
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: 0 24px 42px rgba(46, 70, 105, 0.12), inset 0 1px 0 rgba(255,255,255,0.92);
+        }
+        .shortcut-card-top,
+        .shortcut-card-bottom {
+            position: relative;
+            z-index: 1;
+        }
+        .shortcut-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .shortcut-card h3 {
+            position: relative;
+            z-index: 1;
+            margin: 0 0 12px;
+            font-size: 1rem;
+            line-height: 1.55;
+            letter-spacing: -0.02em;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .shortcut-meta {
+            position: relative;
+            z-index: 1;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 10px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.58);
+            color: var(--muted);
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+        .shortcut-card-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255,255,255,0.66);
+            color: var(--light);
+            font-size: 0.8rem;
+        }
+        .section-shell { padding: 24px; margin-bottom: 22px; }
+        .section-head {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+        .section-title {
+            margin: 0;
+            font-family: "Outfit", sans-serif;
+            font-size: 1.7rem;
+            line-height: 1.05;
+            letter-spacing: -0.05em;
+        }
+        .section-note { margin: 8px 0 0; color: var(--muted); font-size: 0.94rem; }
+        .section-meta { color: var(--light); font-size: 0.86rem; white-space: nowrap; }
+        .folder-overview {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+        }
+        .folder-card {
+            display: block;
+            padding: 18px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.52), rgba(255,255,255,0.16));
+            border: 1px solid rgba(255,255,255,0.62);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.84);
+            transition: transform 0.22s ease, background 0.22s ease;
+        }
+        .folder-card:hover {
+            transform: translateY(-3px);
+            background: linear-gradient(135deg, rgba(255,255,255,0.7), rgba(255,255,255,0.22));
+        }
+        .folder-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .folder-name {
+            font-family: "Outfit", sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: -0.04em;
+        }
+        .resource-count {
+            min-width: 46px;
+            height: 30px;
+            padding: 0 10px;
+            background: rgba(255,255,255,0.75);
+            color: var(--muted);
+        }
+        .folder-card p { margin: 0; color: var(--muted); font-size: 0.9rem; line-height: 1.75; }
+        .toolbar { padding: 16px; margin-bottom: 14px; }
+        .toolbar-top {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+        .search-wrap { position: relative; }
+        .search-wrap input {
+            width: 100%;
+            height: 54px;
+            border: 0;
+            outline: 0;
+            border-radius: 18px;
+            padding: 0 18px 0 48px;
+            background: rgba(255,255,255,0.72);
+            color: var(--text);
+            font: inherit;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.9);
+        }
+        .search-wrap::before {
+            content: "⌕";
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--light);
+            font-size: 1.05rem;
+        }
+        .toolbar-hint { color: var(--light); font-size: 0.85rem; padding: 0 4px; }
+        .folder-filters { display: flex; flex-wrap: wrap; gap: 10px; }
+        .folder-pill {
+            min-height: 38px;
+            padding: 0 14px;
+            border: 1px solid rgba(255,255,255,0.7);
+            background: rgba(255,255,255,0.54);
+            color: var(--muted);
+            cursor: pointer;
+            transition: transform 0.22s ease, background 0.22s ease, color 0.22s ease;
+        }
+        .folder-pill:hover { transform: translateY(-1px); background: rgba(255,255,255,0.74); }
+        .folder-pill.active {
+            color: #fff;
+            background: linear-gradient(135deg, #0b78ff, #5b5bd6);
+            border-color: transparent;
+            box-shadow: 0 12px 22px rgba(11, 120, 255, 0.24);
+        }
+        .results-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+        .clear-btn {
+            border: 0;
+            background: transparent;
+            color: #0b78ff;
+            cursor: pointer;
+            font: inherit;
+            font-weight: 700;
+            padding: 0;
+        }
+        .resource-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+        }
+        .resource-card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-height: 220px;
+            padding: 18px;
+            border-radius: 26px;
+            overflow: hidden;
+            background: linear-gradient(135deg, rgba(255,255,255,0.58), rgba(255,255,255,0.2));
+            border: 1px solid rgba(255,255,255,0.66);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.86);
+            transition: transform 0.24s ease, box-shadow 0.24s ease;
+        }
+        .resource-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--tone-a), transparent 52%);
+            opacity: 0.75;
+            pointer-events: none;
+        }
+        .resource-card::after {
+            content: "";
+            position: absolute;
+            inset: auto 12px 10px;
+            height: 18px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.3);
+            filter: blur(16px);
+            opacity: 0;
+            transition: opacity 0.24s ease;
+            pointer-events: none;
+        }
+        .resource-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 24px 44px rgba(46, 70, 105, 0.14), inset 0 1px 0 rgba(255,255,255,0.86);
+        }
+        .resource-card:hover::after { opacity: 1; }
+        .tone-0 { --tone-a: rgba(59, 130, 246, 0.18); }
+        .tone-1 { --tone-a: rgba(16, 185, 129, 0.18); }
+        .tone-2 { --tone-a: rgba(168, 85, 247, 0.16); }
+        .tone-3 { --tone-a: rgba(249, 115, 22, 0.16); }
+        .tone-4 { --tone-a: rgba(20, 184, 166, 0.16); }
+        .tone-5 { --tone-a: rgba(236, 72, 153, 0.16); }
+        .resource-card-top,
+        .resource-card-bottom { position: relative; z-index: 1; }
+        .resource-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        .resource-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            background: rgba(255,255,255,0.76);
+            border: 1px solid rgba(255,255,255,0.88);
+            font-family: "Outfit", sans-serif;
+            font-weight: 800;
+            font-size: 0.98rem;
+            letter-spacing: -0.04em;
+        }
+        .resource-domain { color: var(--light); font-size: 0.82rem; text-align: right; line-height: 1.55; }
+        .resource-card h3 {
+            position: relative;
+            z-index: 1;
+            margin: 0 0 12px;
+            font-size: 1.02rem;
+            line-height: 1.55;
+            letter-spacing: -0.02em;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .resource-path {
+            position: relative;
+            z-index: 1;
+            color: var(--muted);
+            font-size: 0.84rem;
+            line-height: 1.7;
+            margin-bottom: auto;
+        }
+        .resource-card-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 18px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255,255,255,0.64);
+            color: var(--light);
+            font-size: 0.8rem;
+        }
+        .empty-state,
+        .loading-state {
+            padding: 40px 24px;
+            border-radius: 26px;
+            text-align: center;
+            color: var(--muted);
+            background: linear-gradient(135deg, rgba(255,255,255,0.58), rgba(255,255,255,0.18));
+            border: 1px solid rgba(255,255,255,0.66);
+        }
+        .empty-state strong,
+        .loading-state strong {
+            display: block;
+            font-size: 1.06rem;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+        .footer-note { text-align: center; color: var(--light); font-size: 0.82rem; padding: 4px 0 20px; }
+        @media (max-width: 1080px) {
+            .hero-grid { grid-template-columns: 1fr; }
+            .folder-overview,
+            .resource-grid,
+            .shortcut-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 720px) {
+            .page { padding: 16px; }
+            .topbar {
+                border-radius: 26px;
+                align-items: flex-start;
+                flex-direction: column;
+            }
+            .topbar-actions { width: 100%; justify-content: flex-start; }
+            .hero,
+            .section-shell { padding: 20px; border-radius: 28px; }
+            .stats-grid,
+            .folder-overview,
+            .resource-grid,
+            .shortcut-grid,
+            .toolbar-top { grid-template-columns: 1fr; }
+            h1 { max-width: none; }
+            .results-meta { align-items: flex-start; flex-direction: column; }
+            .shortcut-section { padding: 14px 20px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <header class="topbar glass">
+            <div class="brand">
+                <div class="brand-mark">RS</div>
+                <div>
+                    <div class="brand-title">资源站</div>
+                    <div class="brand-subtitle">来自 bookmarks_2026_4_3.html 的书签整理页</div>
+                </div>
+            </div>
+            <div class="topbar-actions">
+                <a class="pill-link" href="index.html">返回首页</a>
+                <a class="pill-link" href="bookmarks_2026_4_3.html" target="_blank" rel="noreferrer">原始书签</a>
+            </div>
+        </header>
+
+        <section class="hero glass">
+            <div class="hero-grid">
+                <div class="hero-copy">
+                    <span class="eyebrow">iOS 26 风格资源入口</span>
+                    <h1>把书签做成常用资源库</h1>
+                    <p>不是把导出的 Chrome 书签原样丢上来，而是把它整理成一个更轻、更快、更适合长期使用的入口页。保留原有层级，补上搜索、分类和直达能力。</p>
+                    <div class="hero-actions">
+                        <a class="cta cta-primary" href="#library">开始浏览</a>
+                        <a class="cta cta-secondary" href="bookmarks_2026_4_3.html" target="_blank" rel="noreferrer">查看原始导出</a>
+                    </div>
+                </div>
+                <div class="hero-side">
+                    <div class="hero-panel-stack">
+                        <div class="stats-grid">
+                            <div class="stat-card glass">
+                                <span class="stat-value" id="totalCount">--</span>
+                                <span class="stat-label">资源链接</span>
+                            </div>
+                            <div class="stat-card glass">
+                                <span class="stat-value" id="folderCount">--</span>
+                                <span class="stat-label">一级分类</span>
+                            </div>
+                            <div class="stat-card glass">
+                                <span class="stat-value" id="topFolderName">--</span>
+                                <span class="stat-label">最高频目录</span>
+                            </div>
+                        </div>
+                        <div class="focus-card glass">
+                            <div class="focus-top">
+                                <span class="focus-tag">Live</span>
+                                <span class="focus-label">Bookmark Library</span>
+                            </div>
+                            <p id="heroSummary">正在读取书签文件并生成资源概览。</p>
+                            <div class="hero-dock">
+                                <span class="hero-dock-pill"><span class="hero-dock-dot"></span>液态玻璃</span>
+                                <span class="hero-dock-pill"><span class="hero-dock-dot"></span>实时分类</span>
+                                <span class="hero-dock-pill"><span class="hero-dock-dot"></span>快速搜索</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-shell glass shortcut-section">
+            <div class="section-head">
+                <div>
+                    <h2 class="section-title">快捷入口</h2>
+                    <p class="section-note">优先给出最值得固定在桌面的几条入口，适合当作每天打开的第一屏。</p>
+                </div>
+                <div class="section-meta" id="shortcutMeta">正在生成</div>
+            </div>
+            <div class="shortcut-grid" id="shortcutGrid">
+                <div class="loading-state"><strong>正在生成快捷入口</strong>会从高频目录里挑出第一组资源放在这里。</div>
+            </div>
+        </section>
+
+        <section class="section-shell glass">
+            <div class="section-head">
+                <div>
+                    <h2 class="section-title">分类概览</h2>
+                    <p class="section-note">优先展示收藏量最高的目录，点一下就能直接切到对应分类。</p>
+                </div>
+                <div class="section-meta" id="overviewMeta">准备中</div>
+            </div>
+            <div class="folder-overview" id="folderOverview">
+                <div class="loading-state"><strong>正在整理分类</strong>书签文件解析完成后会显示这里。</div>
+            </div>
+        </section>
+
+        <section class="section-shell glass" id="library">
+            <div class="section-head">
+                <div>
+                    <h2 class="section-title">资源库</h2>
+                    <p class="section-note">支持按目录筛选，也支持直接搜标题或域名。</p>
+                </div>
+                <div class="section-meta">来源：bookmarks_2026_4_3.html</div>
+            </div>
+
+            <div class="toolbar glass">
+                <div class="toolbar-top">
+                    <label class="search-wrap" for="searchInput">
+                        <input id="searchInput" type="search" placeholder="搜索标题、域名或目录">
+                    </label>
+                    <div class="toolbar-hint">全部链接都保留原始跳转</div>
+                </div>
+                <div class="folder-filters" id="folderFilters"></div>
+            </div>
+
+            <div class="results-meta">
+                <div id="resultMeta">正在读取资源...</div>
+                <button class="clear-btn" id="clearBtn" type="button" hidden>清空筛选</button>
+            </div>
+
+            <div class="resource-grid" id="resourceGrid">
+                <div class="loading-state"><strong>正在载入书签</strong>会先尝试读取本地书签文件，再生成资源卡片。</div>
+            </div>
+        </section>
+
+        <div class="footer-note">SEN · Resource Library · 由导出的 Chrome 书签生成</div>
+    </div>
+    <script>
+        const SOURCE_FILE = 'bookmarks_2026_4_3.html';
+        const state = { items: [], folders: [], activeFolder: '全部', query: '' };
+        const totalCountEl = document.getElementById('totalCount');
+        const folderCountEl = document.getElementById('folderCount');
+        const topFolderNameEl = document.getElementById('topFolderName');
+        const heroSummaryEl = document.getElementById('heroSummary');
+        const overviewMetaEl = document.getElementById('overviewMeta');
+        const shortcutMetaEl = document.getElementById('shortcutMeta');
+        const shortcutGridEl = document.getElementById('shortcutGrid');
+        const folderOverviewEl = document.getElementById('folderOverview');
+        const folderFiltersEl = document.getElementById('folderFilters');
+        const resultMetaEl = document.getElementById('resultMeta');
+        const resourceGridEl = document.getElementById('resourceGrid');
+        const searchInputEl = document.getElementById('searchInput');
+        const clearBtnEl = document.getElementById('clearBtn');
+
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+        }
+
+        function getHost(url) {
+            try { return new URL(url).hostname.replace(/^www\./, ''); }
+            catch { return 'link'; }
+        }
+
+        function getInitials(title, host) {
+            const basis = (host || title || 'R').replace(/https?:\/\//g, '').trim();
+            const parts = basis.split(/[.\s/-]+/).filter(Boolean);
+            return parts.slice(0, 2).map(part => part[0]).join('').toUpperCase() || 'RS';
+        }
+
+        function toneFor(text) {
+            let sum = 0;
+            for (const char of text) sum += char.charCodeAt(0);
+            return sum % 6;
+        }
+
+        function normalizePath(path) {
+            if (!Array.isArray(path) || !path.length) return [];
+            return path.length > 1 ? path.slice(1) : path;
+        }
+
+        function parseBookmarks(html) {
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const root = doc.querySelector('dl');
+            if (!root) throw new Error('未找到书签数据');
+            const items = [];
+
+            function walk(dl, path = []) {
+                const nodes = Array.from(dl.children);
+                for (const node of nodes) {
+                    if (node.tagName !== 'DT') continue;
+                    const firstEl = Array.from(node.children).find(el => el.nodeType === 1);
+                    if (!firstEl) continue;
+
+                    if (firstEl.tagName === 'A') {
+                        const cleanPath = normalizePath(path);
+                        const host = getHost(firstEl.getAttribute('href') || '');
+                        items.push({
+                            title: firstEl.textContent.trim(),
+                            url: firstEl.getAttribute('href') || '#',
+                            path: cleanPath,
+                            top: cleanPath[0] || '未分类',
+                            host
+                        });
+                    }
+
+                    if (firstEl.tagName === 'H3') {
+                        const next = node.nextElementSibling;
+                        if (next && next.tagName === 'DL') walk(next, [...path, firstEl.textContent.trim()]);
+                    }
+                }
+            }
+
+            walk(root, []);
+            return items;
+        }
+
+        async function readBookmarksText() {
+            try {
+                const response = await fetch(SOURCE_FILE, { cache: 'no-store' });
+                if (!response.ok) throw new Error('fetch failed');
+                return await response.text();
+            } catch {
+                return await new Promise((resolve, reject) => {
+                    const frame = document.createElement('iframe');
+                    frame.src = SOURCE_FILE;
+                    frame.style.display = 'none';
+                    frame.onload = () => {
+                        try {
+                            const frameDoc = frame.contentDocument || frame.contentWindow.document;
+                            const html = frameDoc.documentElement ? frameDoc.documentElement.outerHTML : frameDoc.body.innerHTML;
+                            frame.remove();
+                            resolve(html);
+                        } catch (error) {
+                            frame.remove();
+                            reject(error);
+                        }
+                    };
+                    frame.onerror = () => {
+                        frame.remove();
+                        reject(new Error('iframe failed'));
+                    };
+                    document.body.appendChild(frame);
+                });
+            }
+        }
+
+        function buildFolderStats(items) {
+            const map = new Map();
+            for (const item of items) map.set(item.top, (map.get(item.top) || 0) + 1);
+            return Array.from(map.entries())
+                .map(([name, count]) => ({ name, count }))
+                .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'zh-CN'));
+        }
+
+        function renderHero() {
+            const topFolder = state.folders[0];
+            totalCountEl.textContent = state.items.length;
+            folderCountEl.textContent = state.folders.length;
+            topFolderNameEl.textContent = topFolder ? topFolder.name : '--';
+            heroSummaryEl.textContent = topFolder
+                ? `目前收录 ${state.items.length} 个资源，一级分类 ${state.folders.length} 个，其中 “${topFolder.name}” 收录最多，共 ${topFolder.count} 个链接。`
+                : '当前没有可展示的资源。';
+            overviewMetaEl.textContent = topFolder ? `最多的是 ${topFolder.name} · ${topFolder.count} 个` : '暂无分类';
+        }
+
+        function renderOverview() {
+            const topFolders = state.folders.slice(0, 6);
+            if (!topFolders.length) {
+                folderOverviewEl.innerHTML = '<div class="empty-state"><strong>没有读取到分类</strong>请检查书签源文件是否存在。</div>';
+                return;
+            }
+
+            folderOverviewEl.innerHTML = topFolders.map(folder => `
+                <a class="folder-card" href="#library" data-folder="${escapeHtml(folder.name)}">
+                    <div class="folder-card-top">
+                        <span class="folder-name">${escapeHtml(folder.name)}</span>
+                        <span class="resource-count">${folder.count}</span>
+                    </div>
+                    <p>点击后只看这个目录下的资源，适合把高频书签当成专属工作台来用。</p>
+                </a>
+            `).join('');
+
+            folderOverviewEl.querySelectorAll('[data-folder]').forEach(node => {
+                node.addEventListener('click', () => {
+                    state.activeFolder = node.getAttribute('data-folder');
+                    renderFilters();
+                    renderGrid();
+                });
+            });
+        }
+
+        function renderShortcuts() {
+            const rankedFolders = state.folders.slice(0, 2).map(folder => folder.name);
+            const shortcutItems = state.items.filter(item => rankedFolders.includes(item.top)).slice(0, 4);
+
+            shortcutMetaEl.textContent = shortcutItems.length
+                ? `来自 ${rankedFolders.filter(Boolean).join(' / ')}`
+                : '暂无快捷入口';
+
+            if (!shortcutItems.length) {
+                shortcutGridEl.innerHTML = '<div class="empty-state"><strong>没有可用快捷入口</strong>书签读取成功后会在这里优先展示高频入口。</div>';
+                return;
+            }
+
+            shortcutGridEl.innerHTML = shortcutItems.map(item => {
+                const tone = toneFor(item.host || item.title);
+                const initials = getInitials(item.title, item.host);
+                return `
+                    <a class="shortcut-card tone-${tone}" href="${escapeHtml(item.url)}" target="_blank" rel="noreferrer">
+                        <div class="shortcut-card-top">
+                            <span class="resource-icon">${escapeHtml(initials)}</span>
+                            <span class="shortcut-meta">${escapeHtml(item.top)}</span>
+                        </div>
+                        <h3>${escapeHtml(item.title)}</h3>
+                        <div class="shortcut-card-bottom">
+                            <span>${escapeHtml(item.host)}</span>
+                            <span>快速打开</span>
+                        </div>
+                    </a>
+                `;
+            }).join('');
+        }
+
+        function renderFilters() {
+            const folders = [{ name: '全部', count: state.items.length }, ...state.folders];
+            folderFiltersEl.innerHTML = folders.map(folder => `
+                <button class="folder-pill ${folder.name === state.activeFolder ? 'active' : ''}" type="button" data-folder="${escapeHtml(folder.name)}">
+                    ${escapeHtml(folder.name)} · ${folder.count}
+                </button>
+            `).join('');
+
+            folderFiltersEl.querySelectorAll('[data-folder]').forEach(button => {
+                button.addEventListener('click', () => {
+                    state.activeFolder = button.getAttribute('data-folder');
+                    renderFilters();
+                    renderGrid();
+                });
+            });
+        }
+
+        function getFilteredItems() {
+            const query = state.query.trim().toLowerCase();
+            return state.items.filter(item => {
+                const matchFolder = state.activeFolder === '全部' || item.top === state.activeFolder;
+                if (!matchFolder) return false;
+                if (!query) return true;
+                const haystack = `${item.title} ${item.host} ${item.path.join(' ')}`.toLowerCase();
+                return haystack.includes(query);
+            });
+        }
+
+        function renderGrid() {
+            const items = getFilteredItems();
+            const isFiltered = state.activeFolder !== '全部' || Boolean(state.query.trim());
+            clearBtnEl.hidden = !isFiltered;
+            resultMetaEl.textContent = state.query.trim()
+                ? `找到 ${items.length} 个结果 · 当前目录：${state.activeFolder}`
+                : `当前显示 ${items.length} 个资源 · 当前目录：${state.activeFolder}`;
+
+            if (!items.length) {
+                resourceGridEl.innerHTML = '<div class="empty-state"><strong>没有匹配结果</strong>换个关键词，或者切回“全部”目录再试一次。</div>';
+                return;
+            }
+
+            resourceGridEl.innerHTML = items.map(item => {
+                const tone = toneFor(item.host || item.title);
+                const initials = getInitials(item.title, item.host);
+                const pathLabel = item.path.length ? item.path.join(' / ') : '未分类';
+                return `
+                    <a class="resource-card tone-${tone}" href="${escapeHtml(item.url)}" target="_blank" rel="noreferrer">
+                        <div class="resource-card-top">
+                            <span class="resource-icon">${escapeHtml(initials)}</span>
+                            <span class="resource-domain">${escapeHtml(item.host)}</span>
+                        </div>
+                        <h3>${escapeHtml(item.title)}</h3>
+                        <div class="resource-path">${escapeHtml(pathLabel)}</div>
+                        <div class="resource-card-bottom">
+                            <span>${escapeHtml(item.top)}</span>
+                            <span>打开资源</span>
+                        </div>
+                    </a>
+                `;
+            }).join('');
+        }
+
+        async function init() {
+            try {
+                const html = await readBookmarksText();
+                state.items = parseBookmarks(html);
+                state.folders = buildFolderStats(state.items);
+                renderHero();
+                renderShortcuts();
+                renderOverview();
+                renderFilters();
+                renderGrid();
+            } catch (error) {
+                console.error(error);
+                heroSummaryEl.textContent = '书签文件读取失败，可能是本地浏览器阻止了访问，或者源文件路径不正确。';
+                shortcutGridEl.innerHTML = '<div class="empty-state"><strong>快捷入口生成失败</strong>需要先成功读取书签文件。</div>';
+                shortcutMetaEl.textContent = '书签读取失败';
+                folderOverviewEl.innerHTML = '<div class="empty-state"><strong>书签读取失败</strong>请确认根目录下存在 bookmarks_2026_4_3.html。</div>';
+                resourceGridEl.innerHTML = '<div class="empty-state"><strong>无法生成资源库</strong>当前页面依赖同目录下的书签导出文件。</div>';
+                resultMetaEl.textContent = '书签源文件读取失败';
+            }
+        }
+
+        searchInputEl.addEventListener('input', event => {
+            state.query = event.target.value || '';
+            renderGrid();
+        });
+
+        clearBtnEl.addEventListener('click', () => {
+            state.activeFolder = '全部';
+            state.query = '';
+            searchInputEl.value = '';
+            renderFilters();
+            renderGrid();
+        });
+
+        init();
+    </script>
+</body>
+</html>
