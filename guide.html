@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEN - 科学上网指南</title>
+    <meta name="description" content="一份简单的代理配置教程，帮助你顺利访问外网。">
+    <meta name="author" content="SEN">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #faf6f1;
+            --bg-warm: #f5efe8;
+            --surface: #ffffff;
+            --surface-warm: #fdf9f5;
+            --border: rgba(180, 160, 130, 0.15);
+            --border-strong: rgba(180, 160, 130, 0.3);
+            --text: #1a1a1a;
+            --text-secondary: #555;
+            --text-muted: #888;
+            --accent: #e8773a;
+            --accent-light: rgba(232, 119, 58, 0.1);
+            --accent-badge: #f0a060;
+            --radius: 16px;
+            --radius-sm: 10px;
+            --max-w: 820px;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Sans SC', sans-serif;
+            color: var(--text);
+            line-height: 1.8;
+            -webkit-font-smoothing: antialiased;
+            background: var(--bg);
+            min-height: 100vh;
+        }
+
+        /* ===== Top Navigation ===== */
+        .top-bar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(250, 246, 241, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            transition: box-shadow 0.3s;
+        }
+        .top-bar.scrolled {
+            box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+        }
+        .top-bar-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .top-bar-brand {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: var(--text);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+        }
+        .top-bar-back {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+        .top-bar-back:hover { color: var(--accent); }
+        .top-bar-back svg {
+            width: 16px; height: 16px;
+            stroke: currentColor; fill: none;
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+        }
+
+        /* ===== Article Container ===== */
+        .article-wrap {
+            max-width: var(--max-w);
+            margin: 0 auto;
+            padding: 48px 24px 80px;
+        }
+
+        /* ===== Hero / Title ===== */
+        .article-hero {
+            text-align: center;
+            margin-bottom: 56px;
+            padding-bottom: 48px;
+            border-bottom: 1px solid var(--border);
+        }
+        .article-hero h1 {
+            font-size: clamp(1.8rem, 4vw, 2.6rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.25;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+        .article-hero .subtitle {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            max-width: 500px;
+            margin: 0 auto 24px;
+            line-height: 1.7;
+        }
+        .article-tags {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .tag {
+            display: inline-block;
+            padding: 5px 14px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            border-radius: 20px;
+            letter-spacing: 0.02em;
+        }
+        .tag-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+        .tag-outline {
+            background: var(--accent-light);
+            color: var(--accent);
+            border: 1px solid rgba(232, 119, 58, 0.2);
+        }
+
+        /* ===== TOC (Table of Contents) ===== */
+        .toc-card {
+            background: var(--surface-warm);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px 32px;
+            margin-bottom: 48px;
+        }
+        .toc-card h3 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+        .toc-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .toc-list li a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 6px 0;
+            transition: color 0.2s;
+        }
+        .toc-list li a:hover { color: var(--accent); }
+        .toc-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px; height: 26px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            background: var(--accent-light);
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        /* ===== Content Sections ===== */
+        .content-section {
+            margin-bottom: 48px;
+        }
+        .content-section:last-child {
+            margin-bottom: 0;
+        }
+        .section-anchor {
+            display: block;
+            position: relative;
+            top: -72px;
+            visibility: hidden;
+        }
+        .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+        .section-label .dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+        .content-section h2 {
+            font-size: 1.45rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 20px;
+            color: var(--text);
+        }
+        .content-section p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 16px;
+        }
+
+        /* ===== Link Cards ===== */
+        .link-cards {
+            display: grid;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .link-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 18px 22px;
+            text-decoration: none;
+            transition: all 0.25s;
+            position: relative;
+            overflow: hidden;
+        }
+        .link-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 4px;
+            background: var(--accent);
+            border-radius: 0 4px 4px 0;
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+        .link-card:hover {
+            border-color: var(--border-strong);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+        }
+        .link-card:hover::before { opacity: 1; }
+        .link-card-icon {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .link-card-icon.orange { background: rgba(232, 119, 58, 0.12); }
+        .link-card-icon.blue { background: rgba(59, 130, 246, 0.1); }
+        .link-card-icon.green { background: rgba(34, 197, 94, 0.1); }
+        .link-card-info { flex: 1; min-width: 0; }
+        .link-card-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+        .link-card-desc {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+        .link-card-arrow {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            transition: transform 0.2s, color 0.2s;
+        }
+        .link-card:hover .link-card-arrow {
+            transform: translateX(3px);
+            color: var(--accent);
+        }
+
+        /* ===== Invite Code Badge ===== */
+        .invite-code {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--accent-light);
+            border: 1px solid rgba(232, 119, 58, 0.18);
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 0.82rem;
+            color: var(--accent);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: all;
+        }
+        .invite-code:hover {
+            background: rgba(232, 119, 58, 0.15);
+        }
+        .invite-label {
+            font-weight: 500;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+        }
+
+        /* ===== Step Cards ===== */
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .step-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px 28px;
+            position: relative;
+        }
+        .step-num {
+            position: absolute;
+            top: -12px;
+            left: 24px;
+            background: var(--accent);
+            color: #fff;
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+        .step-card h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 14px;
+            color: var(--text);
+            padding-top: 4px;
+        }
+        .step-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .step-list li {
+            display: flex;
+            gap: 10px;
+            font-size: 0.92rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+        .step-list li .step-letter {
+            flex-shrink: 0;
+            width: 22px; height: 22px;
+            border-radius: 6px;
+            background: var(--bg-warm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* ===== Tip / Callout Box ===== */
+        .callout {
+            display: flex;
+            gap: 14px;
+            background: var(--surface-warm);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--accent);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            padding: 20px 24px;
+            margin-top: 20px;
+        }
+        .callout-icon {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .callout-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+        .callout-text strong {
+            color: var(--text);
+        }
+
+        /* ===== Success Banner ===== */
+        .success-banner {
+            text-align: center;
+            background: linear-gradient(135deg, var(--surface-warm), var(--bg-warm));
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 40px 28px;
+            margin-top: 48px;
+        }
+        .success-icon {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            background: rgba(34, 197, 94, 0.12);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin-bottom: 16px;
+        }
+        .success-banner h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .success-banner p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* ===== Password Badge ===== */
+        .password-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.15);
+            border-radius: 8px;
+            padding: 5px 12px;
+            font-size: 0.82rem;
+            color: #3b82f6;
+            font-weight: 600;
+            margin-top: 6px;
+        }
+
+        /* ===== Footer ===== */
+        .article-footer {
+            text-align: center;
+            padding: 40px 24px;
+            border-top: 1px solid var(--border);
+            margin-top: 64px;
+        }
+        .article-footer p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+        .article-footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        .article-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* ===== Animations ===== */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 640px) {
+            .article-wrap { padding: 32px 16px 60px; }
+            .article-hero { margin-bottom: 40px; padding-bottom: 36px; }
+            .article-hero h1 { font-size: 1.6rem; }
+            .toc-card { padding: 20px; }
+            .step-card { padding: 20px; }
+            .link-card { padding: 14px 16px; }
+            .link-card-icon { width: 38px; height: 38px; }
+            .callout { padding: 16px; }
+            .success-banner { padding: 28px 20px; }
+        }
+
+        /* ===== Copy Toast ===== */
+        .copy-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--text);
+            color: #fff;
+            padding: 10px 22px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+        .copy-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<header class="top-bar" id="topBar">
+    <div class="top-bar-inner">
+        <a href="index.html" class="top-bar-brand">SEN</a>
+        <a href="index.html" class="top-bar-back">
+            <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Back to Home
+        </a>
+    </div>
+</header>
+
+<!-- Article -->
+<main class="article-wrap">
+
+    <!-- Hero -->
+    <div class="article-hero fade-in">
+        <h1>科学上网指南</h1>
+        <p class="subtitle">一份清晰简洁的代理配置教程，从零开始，帮助你顺利访问外面的世界。</p>
+        <div class="article-tags">
+            <span class="tag tag-primary">Tutorial</span>
+            <span class="tag tag-outline">Proxy</span>
+            <span class="tag tag-outline">Network</span>
+        </div>
+    </div>
+
+    <!-- Table of Contents -->
+    <div class="toc-card fade-in">
+        <h3>Contents</h3>
+        <ol class="toc-list">
+            <li><a href="#section-resources"><span class="toc-num">1</span> 推荐资源</a></li>
+            <li><a href="#section-buy"><span class="toc-num">2</span> 购买与复制链接</a></li>
+            <li><a href="#section-import"><span class="toc-num">3</span> 导入代理软件</a></li>
+            <li><a href="#section-node"><span class="toc-num">4</span> 选择节点与测试</a></li>
+            <li><a href="#section-start"><span class="toc-num">5</span> 开启代理</a></li>
+        </ol>
+    </div>
+
+    <!-- Section 1: Resources -->
+    <div class="content-section fade-in">
+        <span class="section-anchor" id="section-resources"></span>
+        <div class="section-label"><span class="dot"></span> STEP 01</div>
+        <h2>推荐资源</h2>
+        <p>以下是推荐使用的机场和代理软件，任选其一注册后购买订阅即可。</p>
+
+        <div class="link-cards">
+            <a href="https://66.66jc.top/#/login" target="_blank" rel="noopener" class="link-card">
+                <div class="link-card-icon orange">&#9889;</div>
+                <div class="link-card-info">
+                    <div class="link-card-name">牛逼机场</div>
+                    <div class="link-card-desc">高速稳定，推荐首选</div>
+                </div>
+                <span class="link-card-arrow">&rarr;</span>
+            </a>
+            <a href="https://wandayun.com/" target="_blank" rel="noopener" class="link-card">
+                <div class="link-card-icon blue">&#9729;</div>
+                <div class="link-card-info">
+                    <div class="link-card-name">万达云机场</div>
+                    <div class="link-card-desc">备选方案，同样好用</div>
+                </div>
+                <span class="link-card-arrow">&rarr;</span>
+            </a>
+            <a href="https://wwbxt.lanzoul.com/il6oy3na5ptg" target="_blank" rel="noopener" class="link-card">
+                <div class="link-card-icon green">&#11015;</div>
+                <div class="link-card-info">
+                    <div class="link-card-name">代理软件下载</div>
+                    <div class="link-card-desc">配套代理客户端，下载后安装即可</div>
+                </div>
+                <span class="link-card-arrow">&rarr;</span>
+            </a>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px;">
+            <div>
+                <span class="invite-label">牛逼机场邀请码</span>
+                <span class="invite-code" onclick="copyText('owXDr6N2', this)" title="Click to copy">owXDr6N2</span>
+            </div>
+            <div>
+                <span class="invite-label">万达云邀请码</span>
+                <span class="invite-code" onclick="copyText('6LQFVIjp', this)" title="Click to copy">6LQFVIjp</span>
+            </div>
+            <div>
+                <span class="invite-label">下载密码</span>
+                <span class="password-badge" onclick="copyText('fbpb', this)" title="Click to copy">fbpb</span>
+            </div>
+        </div>
+
+        <div class="callout" style="margin-top: 20px;">
+            <div class="callout-icon">&#128161;</div>
+            <div class="callout-text">
+                <strong>Tip:</strong> 点击邀请码或密码可以直接复制到剪贴板。"牛逼"是机场的名字，而非形容词。
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 2: Buy -->
+    <div class="content-section fade-in">
+        <span class="section-anchor" id="section-buy"></span>
+        <div class="section-label"><span class="dot"></span> STEP 02</div>
+        <h2>购买与复制链接</h2>
+        <div class="steps">
+            <div class="step-card">
+                <div class="step-num">1</div>
+                <h3>购买订阅</h3>
+                <ul class="step-list">
+                    <li>
+                        <span class="step-letter">a</span>
+                        <span>前往其中一个机场（如万达云机场），注册账号并购买订阅套餐。</span>
+                    </li>
+                    <li>
+                        <span class="step-letter">b</span>
+                        <span>购买完成后，在个人中心会获得一个<strong>订阅链接</strong>，将其复制备用。</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 3: Import -->
+    <div class="content-section fade-in">
+        <span class="section-anchor" id="section-import"></span>
+        <div class="section-label"><span class="dot"></span> STEP 03</div>
+        <h2>导入代理软件</h2>
+        <div class="steps">
+            <div class="step-card">
+                <div class="step-num">2</div>
+                <h3>配置订阅</h3>
+                <ul class="step-list">
+                    <li>
+                        <span class="step-letter">a</span>
+                        <span>打开代理软件，在左侧找到<strong>"订阅"</strong>选项卡并点击。</span>
+                    </li>
+                    <li>
+                        <span class="step-letter">b</span>
+                        <span>在上方的订阅文件链接方框内，粘贴刚才从机场复制的链接。</span>
+                    </li>
+                    <li>
+                        <span class="step-letter">c</span>
+                        <span>点击<strong>"导入"</strong>按钮，等待导入完成即可。</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 4: Select Node -->
+    <div class="content-section fade-in">
+        <span class="section-anchor" id="section-node"></span>
+        <div class="section-label"><span class="dot"></span> STEP 04</div>
+        <h2>选择节点与测试</h2>
+        <div class="steps">
+            <div class="step-card">
+                <div class="step-num">3</div>
+                <h3>测试延迟并选择节点</h3>
+                <ul class="step-list">
+                    <li>
+                        <span class="step-letter">a</span>
+                        <span>导入成功后，在软件中找到对应的机场节点列表。</span>
+                    </li>
+                    <li>
+                        <span class="step-letter">b</span>
+                        <span>点击进入<strong>代理</strong>选项，可以看到多个可用节点。</span>
+                    </li>
+                    <li>
+                        <span class="step-letter">c</span>
+                        <span>点击类似 WiFi 符号的图标，进行<strong>延迟测试</strong>。</span>
+                    </li>
+                    <li>
+                        <span class="step-letter">d</span>
+                        <span>选择一个延迟较低（数字越小越好）的节点。</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="callout">
+            <div class="callout-icon">&#128205;</div>
+            <div class="callout-text">
+                <strong>建议：</strong>一般选择延迟在 200ms 以内的节点效果较好。日本、香港、新加坡节点通常延迟最低。
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 5: Start -->
+    <div class="content-section fade-in">
+        <span class="section-anchor" id="section-start"></span>
+        <div class="section-label"><span class="dot"></span> STEP 05</div>
+        <h2>开启代理</h2>
+        <div class="steps">
+            <div class="step-card">
+                <div class="step-num">4</div>
+                <h3>启用系统代理</h3>
+                <ul class="step-list">
+                    <li>
+                        <span class="step-letter">a</span>
+                        <span>选择完节点后，点击左侧的<strong>"设置"</strong>。</span>
+                    </li>
+                    <li>
+                        <span class="step-letter">b</span>
+                        <span>在设置页面中找到并打开<strong>"系统代理"</strong>开关。</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Banner -->
+    <div class="success-banner fade-in">
+        <div class="success-icon">&#10003;</div>
+        <h3>验证是否成功</h3>
+        <p>打开浏览器，访问 <strong>google.com</strong>。如果能正常打开页面，说明配置已经成功。</p>
+    </div>
+
+</main>
+
+<!-- Footer -->
+<footer class="article-footer">
+    <p>Made with care by <a href="index.html">SEN</a> &middot; &copy; 2025</p>
+</footer>
+
+<!-- Copy Toast -->
+<div class="copy-toast" id="copyToast">Copied!</div>
+
+<script>
+// Fade-in on scroll
+const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+        if (e.isIntersecting) {
+            e.target.classList.add('visible');
+            obs.unobserve(e.target);
+        }
+    });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+
+// Top bar scroll shadow
+const topBar = document.getElementById('topBar');
+window.addEventListener('scroll', () => {
+    topBar.classList.toggle('scrolled', window.scrollY > 10);
+}, { passive: true });
+
+// Copy to clipboard
+function copyText(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        const toast = document.getElementById('copyToast');
+        toast.textContent = 'Copied: ' + text;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 1800);
+    });
+}
+</script>
+
+</body>
+</html>

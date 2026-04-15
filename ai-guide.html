@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEN - AI 工具指南</title>
+    <meta name="description" content="主流 AI 大模型工具汇总与使用指引，从注册到上手。">
+    <meta name="author" content="SEN">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #faf6f1;
+            --bg-warm: #f5efe8;
+            --surface: #ffffff;
+            --surface-warm: #fdf9f5;
+            --border: rgba(180, 160, 130, 0.15);
+            --border-strong: rgba(180, 160, 130, 0.3);
+            --text: #1a1a1a;
+            --text-secondary: #555;
+            --text-muted: #888;
+            --accent: #e8773a;
+            --accent-light: rgba(232, 119, 58, 0.1);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --max-w: 820px;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Sans SC', sans-serif;
+            color: var(--text);
+            line-height: 1.8;
+            -webkit-font-smoothing: antialiased;
+            background: var(--bg);
+            min-height: 100vh;
+        }
+
+        /* ===== Top Bar ===== */
+        .top-bar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(250, 246, 241, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            transition: box-shadow 0.3s;
+        }
+        .top-bar.scrolled { box-shadow: 0 2px 20px rgba(0,0,0,0.06); }
+        .top-bar-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .top-bar-brand {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: var(--text);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+        }
+        .top-bar-back {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+        .top-bar-back:hover { color: var(--accent); }
+        .top-bar-back svg {
+            width: 16px; height: 16px;
+            stroke: currentColor; fill: none;
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+        }
+
+        /* ===== Article ===== */
+        .article-wrap {
+            max-width: var(--max-w);
+            margin: 0 auto;
+            padding: 48px 24px 80px;
+        }
+
+        /* ===== Hero ===== */
+        .article-hero {
+            text-align: center;
+            margin-bottom: 56px;
+            padding-bottom: 48px;
+            border-bottom: 1px solid var(--border);
+        }
+        .article-hero h1 {
+            font-size: clamp(1.8rem, 4vw, 2.6rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.25;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+        .article-hero .subtitle {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            max-width: 520px;
+            margin: 0 auto 24px;
+            line-height: 1.7;
+        }
+        .article-tags {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .tag {
+            display: inline-block;
+            padding: 5px 14px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            border-radius: 20px;
+            letter-spacing: 0.02em;
+        }
+        .tag-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+        .tag-outline {
+            background: var(--accent-light);
+            color: var(--accent);
+            border: 1px solid rgba(232, 119, 58, 0.2);
+        }
+
+        /* ===== TOC ===== */
+        .toc-card {
+            background: var(--surface-warm);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px 32px;
+            margin-bottom: 48px;
+        }
+        .toc-card h3 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+        .toc-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .toc-list li a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 6px 0;
+            transition: color 0.2s;
+        }
+        .toc-list li a:hover { color: var(--accent); }
+        .toc-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px; height: 26px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            background: var(--accent-light);
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        /* ===== Content Sections ===== */
+        .content-section {
+            margin-bottom: 48px;
+        }
+        .section-anchor {
+            display: block;
+            position: relative;
+            top: -72px;
+            visibility: hidden;
+        }
+        .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+        .section-label .dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+        .content-section h2 {
+            font-size: 1.45rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 20px;
+            color: var(--text);
+        }
+        .content-section p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 16px;
+        }
+
+        /* ===== Link Cards ===== */
+        .link-cards {
+            display: grid;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .link-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 18px 22px;
+            text-decoration: none;
+            transition: all 0.25s;
+            position: relative;
+            overflow: hidden;
+        }
+        .link-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 4px;
+            background: var(--accent);
+            border-radius: 0 4px 4px 0;
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+        .link-card:hover {
+            border-color: var(--border-strong);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+        }
+        .link-card:hover::before { opacity: 1; }
+        .link-card-icon {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .link-card-icon.purple { background: rgba(139, 92, 246, 0.1); }
+        .link-card-icon.blue { background: rgba(59, 130, 246, 0.1); }
+        .link-card-icon.green { background: rgba(34, 197, 94, 0.1); }
+        .link-card-icon.orange { background: rgba(232, 119, 58, 0.12); }
+        .link-card-icon.red { background: rgba(239, 68, 68, 0.1); }
+        .link-card-info { flex: 1; min-width: 0; }
+        .link-card-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+        .link-card-desc {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+        .link-card-arrow {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            transition: transform 0.2s, color 0.2s;
+        }
+        .link-card:hover .link-card-arrow {
+            transform: translateX(3px);
+            color: var(--accent);
+        }
+
+        /* ===== AI Model Grid ===== */
+        .ai-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .ai-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 20px;
+            text-decoration: none;
+            transition: all 0.25s;
+        }
+        .ai-card:hover {
+            border-color: var(--border-strong);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+        }
+        .ai-logo {
+            width: 48px; height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: 800;
+            flex-shrink: 0;
+            color: #fff;
+        }
+        .ai-logo.gpt { background: linear-gradient(135deg, #10a37f, #0d8a6a); }
+        .ai-logo.claude { background: linear-gradient(135deg, #d4a27f, #c4876a); }
+        .ai-logo.gemini { background: linear-gradient(135deg, #4285f4, #6d5ce7); }
+        .ai-logo.grok { background: linear-gradient(135deg, #1a1a2e, #333); }
+        .ai-card-info { flex: 1; min-width: 0; }
+        .ai-card-name {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+        .ai-card-maker {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+        .ai-card-arrow {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            transition: transform 0.2s, color 0.2s;
+        }
+        .ai-card:hover .ai-card-arrow {
+            transform: translateX(3px);
+            color: var(--accent);
+        }
+
+        /* ===== Callout ===== */
+        .callout {
+            display: flex;
+            gap: 14px;
+            background: var(--surface-warm);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--accent);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            padding: 20px 24px;
+            margin-top: 20px;
+        }
+        .callout-icon {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .callout-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+        .callout-text strong { color: var(--text); }
+
+        /* ===== Step Cards ===== */
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .step-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px 28px;
+            position: relative;
+        }
+        .step-num {
+            position: absolute;
+            top: -12px; left: 24px;
+            background: var(--accent);
+            color: #fff;
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+        .step-card h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 14px;
+            color: var(--text);
+            padding-top: 4px;
+        }
+        .step-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .step-list li {
+            display: flex;
+            gap: 10px;
+            font-size: 0.92rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+        .step-list li .step-letter {
+            flex-shrink: 0;
+            width: 22px; height: 22px;
+            border-radius: 6px;
+            background: var(--bg-warm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* ===== Related Link ===== */
+        .related-section {
+            margin-top: 48px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border);
+        }
+        .related-section h3 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        /* ===== Footer ===== */
+        .article-footer {
+            text-align: center;
+            padding: 40px 24px;
+            border-top: 1px solid var(--border);
+            margin-top: 64px;
+        }
+        .article-footer p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+        .article-footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        .article-footer a:hover { text-decoration: underline; }
+
+        /* ===== Animations ===== */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 640px) {
+            .article-wrap { padding: 32px 16px 60px; }
+            .article-hero { margin-bottom: 40px; padding-bottom: 36px; }
+            .article-hero h1 { font-size: 1.6rem; }
+            .toc-card { padding: 20px; }
+            .step-card { padding: 20px; }
+            .ai-grid { grid-template-columns: 1fr; }
+            .link-card { padding: 14px 16px; }
+            .callout { padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<header class="top-bar" id="topBar">
+    <div class="top-bar-inner">
+        <a href="index.html" class="top-bar-brand">SEN</a>
+        <a href="index.html" class="top-bar-back">
+            <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Back to Home
+        </a>
+    </div>
+</header>
+
+<!-- Article -->
+<main class="article-wrap">
+
+    <!-- Hero -->
+    <div class="article-hero fade-in">
+        <h1>AI 工具指南</h1>
+        <p class="subtitle">主流 AI 大模型汇总与使用指引。从准备账号到上手体验，一份简洁的入门清单。</p>
+        <div class="article-tags">
+            <span class="tag tag-primary">AI</span>
+            <span class="tag tag-outline">LLM</span>
+            <span class="tag tag-outline">Tools</span>
+        </div>
+    </div>
+
+    <!-- TOC -->
+    <div class="toc-card fade-in">
+        <h3>Contents</h3>
+        <ol class="toc-list">
+            <li><a href="#section-noi"><span class="toc-num">1</span> Noi — AI 聚合工具</a></li>
+            <li><a href="#section-account"><span class="toc-num">2</span> 准备 Google 账号</a></li>
+            <li><a href="#section-models"><span class="toc-num">3</span> 主流 AI 大模型</a></li>
+            <li><a href="#section-start"><span class="toc-num">4</span> 开始使用</a></li>
+        </ol>
+    </div>
+
+    <!-- Section 1: Noi -->
+    <div class="content-section fade-in">
+        <span class="section-anchor" id="section-noi"></span>
+        <div class="section-label"><span class="dot"></span> STEP 01</div>
+        <h2>Noi — AI 聚合工具</h2>
+        <p>Noi 是一款开源软件，将当前主流的大模型 AI 聚合在一个桌面客户端中，免去在浏览器里反复切换标签页的麻烦。</p>
+
+        <div class="link-cards">
+            <a href="https://github.com/lencx/Noi/releases/tag/v1.1.0" target="_blank" rel="noopener" class="link-card">
+                <div class="link-card-icon purple">&#9733;</div>
+                <div class="link-card-info">
+                    <div class="link-card-name">Noi GitHub 下载页</div>
+                    <div class="link-card-desc">开源项目，前往 GitHub Releases 下载最新版本</div>
+                </div>
+                <span class="link-card-arrow">&rarr;</span>
+            </a>
+        </div>
+
+        <div class="steps">
+            <div class="step-card">
+                <div class="step-num">1</div>
+                <h3>下载与安装</h3>
+                <ul class="step-list">
+                    <li>
+                        <span class="step-letter">a</span>
+                        <span>Windows 用户下载 <strong>.exe</strong> 后缀的文件，macOS 用户下载 .dmg 文件。</span>
+                    </li>
+                    <li>
+                        <span class="step-letter">b</span>
+                        <span>建议<strong>开启代理网络</strong>后访问 GitHub，下载速度更快。</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="callout" style="margin-top: 20px;">
+            <div class="callout-icon">&#128161;</div>
+            <div class="callout-text">
+                <strong>Tips:</strong> Noi 只是一个工具，它相当于把各个大模型的网址聚合在了一个软件之中。如果你喜欢原汁原味的体验，也可以直接在浏览器中访问各个大模型的官网。
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 2: Google Account -->
+    <div class="content-section fade-in">
+        <span class="section-anchor" id="section-account"></span>
+        <div class="section-label"><span class="dot"></span> STEP 02</div>
+        <h2>准备 Google 账号</h2>
+        <p>注册大部分 AI 大模型的官网，都需要一个 Google 账号。如果你还没有，可以前往 Gmail 页面创建。</p>
+
+        <div class="link-cards">
+            <a href="https://mail.google.com/" target="_blank" rel="noopener" class="link-card">
+                <div class="link-card-icon blue">&#9993;</div>
+                <div class="link-card-info">
+                    <div class="link-card-name">Google Mail (Gmail)</div>
+                    <div class="link-card-desc">注册或登录 Google 账号</div>
+                </div>
+                <span class="link-card-arrow">&rarr;</span>
+            </a>
+        </div>
+
+        <div class="callout">
+            <div class="callout-icon">&#128205;</div>
+            <div class="callout-text">
+                <strong>注意：</strong>目前注册新的 Google 账号可能比较困难（需要手机号验证等）。如果不想自己注册，也可以在闲鱼等平台购买现成的 Google 账号。
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 3: AI Models -->
+    <div class="content-section fade-in">
+        <span class="section-anchor" id="section-models"></span>
+        <div class="section-label"><span class="dot"></span> STEP 03</div>
+        <h2>主流 AI 大模型</h2>
+        <p>以下是目前最主流的四大 AI 大模型，各有特色。点击卡片可以直接跳转到对应的官网。</p>
+
+        <div class="ai-grid">
+            <a href="https://chatgpt.com/" target="_blank" rel="noopener" class="ai-card">
+                <div class="ai-logo gpt">G</div>
+                <div class="ai-card-info">
+                    <div class="ai-card-name">ChatGPT</div>
+                    <div class="ai-card-maker">by OpenAI</div>
+                </div>
+                <span class="ai-card-arrow">&rarr;</span>
+            </a>
+            <a href="https://claude.ai/" target="_blank" rel="noopener" class="ai-card">
+                <div class="ai-logo claude">C</div>
+                <div class="ai-card-info">
+                    <div class="ai-card-name">Claude</div>
+                    <div class="ai-card-maker">by Anthropic</div>
+                </div>
+                <span class="ai-card-arrow">&rarr;</span>
+            </a>
+            <a href="https://gemini.google.com/" target="_blank" rel="noopener" class="ai-card">
+                <div class="ai-logo gemini">G</div>
+                <div class="ai-card-info">
+                    <div class="ai-card-name">Gemini</div>
+                    <div class="ai-card-maker">by Google</div>
+                </div>
+                <span class="ai-card-arrow">&rarr;</span>
+            </a>
+            <a href="https://grok.com/" target="_blank" rel="noopener" class="ai-card">
+                <div class="ai-logo grok">X</div>
+                <div class="ai-card-info">
+                    <div class="ai-card-name">Grok</div>
+                    <div class="ai-card-maker">by xAI</div>
+                </div>
+                <span class="ai-card-arrow">&rarr;</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Section 4: Get Started -->
+    <div class="content-section fade-in">
+        <span class="section-anchor" id="section-start"></span>
+        <div class="section-label"><span class="dot"></span> STEP 04</div>
+        <h2>开始使用</h2>
+
+        <div class="steps">
+            <div class="step-card">
+                <div class="step-num">2</div>
+                <h3>注册与登录</h3>
+                <ul class="step-list">
+                    <li>
+                        <span class="step-letter">a</span>
+                        <span>确保已开启<strong>代理网络</strong>（参考《科学上网指南》）。</span>
+                    </li>
+                    <li>
+                        <span class="step-letter">b</span>
+                        <span>前往上面任一 AI 官网，使用 Google 账号直接登录或注册。</span>
+                    </li>
+                    <li>
+                        <span class="step-letter">c</span>
+                        <span>登录后即可在对话框中向 AI 提问或对话。</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="step-card">
+                <div class="step-num">3</div>
+                <h3>使用 Noi 聚合访问</h3>
+                <ul class="step-list">
+                    <li>
+                        <span class="step-letter">a</span>
+                        <span>安装 Noi 后打开，左侧导航栏会列出所有主流 AI 模型的入口。</span>
+                    </li>
+                    <li>
+                        <span class="step-letter">b</span>
+                        <span>点击某个 AI 模型后，在应用内直接登录使用，无需再开浏览器。</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="callout" style="margin-top: 20px;">
+            <div class="callout-icon">&#128640;</div>
+            <div class="callout-text">
+                <strong>推荐：</strong>每个模型都有自己的风格和擅长领域。建议多试几个，找到最适合自己使用习惯的那一个。
+            </div>
+        </div>
+    </div>
+
+    <!-- Related -->
+    <div class="related-section fade-in">
+        <h3>Related</h3>
+        <div class="link-cards">
+            <a href="guide.html" class="link-card">
+                <div class="link-card-icon orange">&#127760;</div>
+                <div class="link-card-info">
+                    <div class="link-card-name">科学上网指南</div>
+                    <div class="link-card-desc">还没配置代理？先看这篇教程</div>
+                </div>
+                <span class="link-card-arrow">&rarr;</span>
+            </a>
+        </div>
+    </div>
+
+</main>
+
+<!-- Footer -->
+<footer class="article-footer">
+    <p>Made with care by <a href="index.html">SEN</a> &middot; &copy; 2025</p>
+</footer>
+
+<script>
+// Fade-in on scroll
+const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+        if (e.isIntersecting) {
+            e.target.classList.add('visible');
+            obs.unobserve(e.target);
+        }
+    });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+
+// Top bar scroll shadow
+const topBar = document.getElementById('topBar');
+window.addEventListener('scroll', () => {
+    topBar.classList.toggle('scrolled', window.scrollY > 10);
+}, { passive: true });
+</script>
+
+</body>
+</html>

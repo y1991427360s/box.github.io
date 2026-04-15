@@ -12,309 +12,678 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://sen666.cn">
     <meta property="og:locale" content="zh_CN">
-    <meta name="theme-color" content="#d5ddf2">
+    <meta name="theme-color" content="#ffffff">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #ffffff;
+            --bg-alt: #fafafa;
+            --text: #111111;
+            --text-secondary: #555;
+            --text-muted: #999;
+            --border: #e5e5e5;
+            --border-light: #f0f0f0;
+            --accent: #111;
+            --max-w: 1100px;
+            --nav-h: 56px;
+        }
+
+        html { scroll-behavior: smooth; scroll-padding-top: calc(var(--nav-h) + 20px); }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Sans SC', sans-serif;
+            color: var(--text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+            background: var(--bg);
+            min-height: 100vh;
+        }
+
+        .container { max-width: var(--max-w); margin: 0 auto; padding: 0 32px; }
+
+        /* ===== Navbar ===== */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            height: var(--nav-h);
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            transition: box-shadow 0.3s;
+        }
+        .navbar.scrolled { box-shadow: 0 1px 12px rgba(0,0,0,0.05); }
+        .nav-inner {
+            max-width: var(--max-w);
+            margin: 0 auto;
+            padding: 0 32px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-brand {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--text);
+            text-decoration: none;
+            letter-spacing: -0.03em;
+        }
+        .nav-links {
+            display: flex;
+            gap: 4px;
+            list-style: none;
+        }
+        .nav-links a {
+            padding: 6px 14px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: color 0.2s, background 0.2s;
+        }
+        .nav-links a:hover { color: var(--text); background: var(--bg-alt); }
+        .nav-links a.active { color: var(--text); font-weight: 600; }
+        .nav-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+        }
+        .nav-toggle span {
+            display: block;
+            width: 20px;
+            height: 2px;
+            background: var(--text);
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+        .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .nav-toggle.open span:nth-child(2) { opacity: 0; }
+        .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        /* ===== Hero ===== */
+        .hero {
+            padding: 80px 0 64px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: clamp(8px, 1.2vw, 11px);
+            font-weight: 500;
+            color: rgba(0,0,0,0.04);
+            line-height: 2.2;
+            letter-spacing: 0.15em;
+            white-space: nowrap;
+            pointer-events: none;
+            user-select: none;
+            width: 200%;
+            text-align: center;
+        }
+        .hero-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--text);
+            color: #fff;
+            font-size: 2.8rem;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 28px;
+            position: relative;
+            z-index: 1;
+        }
+        .hero h1 {
+            font-size: clamp(2.2rem, 5.5vw, 3.6rem);
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            line-height: 1.1;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+        .hero-subtitle {
+            font-size: 1rem;
+            color: var(--text-muted);
+            max-width: 460px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== Nav Cards (3-col grid) ===== */
+        .nav-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 32px 28px;
+            text-decoration: none;
+            color: var(--text);
+            border-right: 1px solid var(--border);
+            transition: background 0.2s;
+            min-height: 130px;
+        }
+        .nav-card:last-child { border-right: none; }
+        .nav-card:hover { background: var(--bg-alt); }
+        .nav-card-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.01em;
+        }
+        .nav-card-desc {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* ===== Section ===== */
+        .section {
+            padding: 64px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .section-header {
+            margin-bottom: 36px;
+        }
+        .section-header h2 {
+            font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 8px;
+        }
+        .section-header p {
+            font-size: 0.92rem;
+            color: var(--text-muted);
+        }
+
+        /* ===== Numbered List Items ===== */
+        .num-list {
+            display: flex;
+            flex-direction: column;
+        }
+        .num-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border-light);
+            text-decoration: none;
+            color: var(--text);
+            transition: background 0.15s;
+        }
+        .num-item:last-child { border-bottom: none; }
+        .num-item:hover { background: var(--bg-alt); margin: 0 -16px; padding: 20px 16px; border-radius: 8px; }
+        .num-idx {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            flex-shrink: 0;
+            width: 28px;
+        }
+        .num-content { flex: 1; min-width: 0; }
+        .num-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        .num-desc {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+        .num-arrow {
+            color: var(--text-muted);
+            font-size: 1rem;
+            flex-shrink: 0;
+            transition: transform 0.2s;
+        }
+        .num-item:hover .num-arrow { transform: translateX(3px); }
+        .num-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            border-radius: 4px;
+            background: var(--bg-alt);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+        .num-badge.live { background: #f0fdf4; color: #16a34a; border-color: #bbf7d0; }
+        .num-badge.soon { background: #fefce8; color: #a16207; border-color: #fde68a; }
+
+        /* ===== Blog Section ===== */
+        .blog-section .section-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+        }
+        .blog-section .section-header h2 { margin-bottom: 0; }
+
+        .year-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .year-tab {
+            padding: 6px 14px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+        .year-tab:hover { border-color: var(--text); color: var(--text); }
+        .year-tab.active { background: var(--text); color: #fff; border-color: var(--text); }
+
+        .blog-list {
+            display: flex;
+            flex-direction: column;
+        }
+        .blog-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 18px 0;
+            border-bottom: 1px solid var(--border-light);
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .blog-item:last-child { border-bottom: none; }
+        .blog-item:hover { background: var(--bg-alt); margin: 0 -16px; padding: 18px 16px; border-radius: 8px; }
+        .blog-idx {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            flex-shrink: 0;
+            width: 28px;
+        }
+        .blog-content { flex: 1; min-width: 0; }
+        .blog-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        .blog-meta {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+        .blog-thumb {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: var(--bg-alt);
+        }
+        .blog-more {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 24px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .blog-more:hover { background: var(--text); color: #fff; }
+
+        /* ===== About ===== */
+        .about-text {
+            max-width: 640px;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.9;
+        }
+        .about-text p { margin-bottom: 16px; }
+        .about-text strong { color: var(--text); }
+
+        /* ===== Contact ===== */
+        .contact-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .contact-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text);
+            font-size: 0.92rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .contact-link:hover { background: var(--text); color: #fff; }
+
+        /* ===== Footer ===== */
+        .footer {
+            padding: 40px 0;
+            text-align: center;
+        }
+        .footer-links {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+        .footer-links a {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .footer-links a:hover { color: var(--text); }
+        .footer p {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        /* ===== Lightbox ===== */
+        .lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(0,0,0,0.92);
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 16px;
+            padding: 24px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .lightbox.show { opacity: 1; }
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 24px;
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+        .lightbox-media-wrap {
+            max-width: 90vw;
+            max-height: 65vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .lightbox-media-wrap img {
+            max-width: 100%;
+            max-height: 65vh;
+            border-radius: 8px;
+        }
+        .lightbox-nav {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .lightbox-nav button {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .lightbox-counter { color: rgba(255,255,255,0.6); font-size: 0.82rem; }
+        .lightbox-info {
+            text-align: center;
+            color: #fff;
+            max-width: 500px;
+        }
+        .lightbox-date {
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 4px;
+        }
+        .lightbox-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .lightbox-text {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.65);
+            line-height: 1.6;
+        }
+
+        /* ===== BGM ===== */
+        .bgm-btn {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(12px);
+            cursor: pointer;
+            z-index: 100;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        .bgm-btn:hover { background: var(--text); color: #fff; border-color: var(--text); }
+        .bgm-btn.playing .bgm-disc { animation: spin 3s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ===== Mianbao Chat ===== */
         .mianbao-fab {
             position: fixed;
             right: 24px;
-            bottom: 92px;
-            width: 64px;
-            height: 64px;
-            border: 0;
+            bottom: 24px;
+            width: 52px;
+            height: 52px;
+            border: 1px solid var(--border);
             border-radius: 50%;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, rgba(255, 188, 84, 0.96), rgba(255, 132, 87, 0.96));
-            color: #41230e;
-            font-size: 1rem;
-            font-weight: 800;
-            letter-spacing: 0.04em;
-            box-shadow: 0 18px 40px rgba(255, 140, 92, 0.35);
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(12px);
+            color: var(--text);
+            font-size: 0.85rem;
+            font-weight: 700;
             cursor: pointer;
             z-index: 10030;
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            transition: all 0.2s;
         }
-
-        .mianbao-fab:hover {
-            transform: translateY(-3px) scale(1.04);
-            box-shadow: 0 24px 48px rgba(255, 140, 92, 0.42);
-        }
-
-        .mianbao-fab-icon {
-            font-size: 1.25rem;
-            line-height: 1;
-        }
+        .mianbao-fab:hover { background: var(--text); color: #fff; border-color: var(--text); }
 
         .mianbao-panel {
             position: fixed;
             top: 50%;
             right: 24px;
-            width: min(350px, calc(100vw - 24px));
+            width: min(360px, calc(100vw - 32px));
             height: 500px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            border-radius: 28px;
-            background: rgba(255, 255, 255, 0.82);
-            border: 1px solid rgba(255, 255, 255, 0.72);
-            box-shadow: 0 28px 80px rgba(15, 23, 42, 0.18);
-            backdrop-filter: blur(24px) saturate(1.15);
-            -webkit-backdrop-filter: blur(24px) saturate(1.15);
-            transform: translate(24px, -50%);
+            border-radius: 16px;
+            background: #fff;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+            transform: translate(16px, -50%);
             opacity: 0;
             pointer-events: none;
             z-index: 10031;
             transition: transform 0.28s ease, opacity 0.28s ease;
         }
-
         .mianbao-panel.show {
             transform: translate(0, -50%);
             opacity: 1;
             pointer-events: auto;
         }
-
         .mianbao-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 18px 18px 16px;
-            background: linear-gradient(135deg, rgba(255, 188, 84, 0.22), rgba(255, 132, 87, 0.12));
-            border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+            padding: 16px 18px;
+            border-bottom: 1px solid var(--border-light);
         }
-
-        .mianbao-title-wrap {
-            min-width: 0;
-        }
-
-        .mianbao-title {
-            margin: 0;
-            color: #1f2937;
-            font-size: 1.05rem;
-            font-weight: 800;
-        }
-
-        .mianbao-subtitle {
-            margin-top: 5px;
-            color: rgba(31, 41, 55, 0.68);
-            font-size: 0.82rem;
-        }
-
+        .mianbao-title { font-size: 0.95rem; font-weight: 700; }
+        .mianbao-subtitle { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
         .mianbao-close {
-            width: 36px;
-            height: 36px;
-            border: 0;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.78);
-            color: #334155;
-            font-size: 1.05rem;
-            cursor: pointer;
+            width: 32px; height: 32px; border: 1px solid var(--border);
+            border-radius: 8px; background: none; cursor: pointer; font-size: 0.9rem;
         }
-
         .mianbao-messages {
-            flex: 1;
-            padding: 18px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            background:
-                radial-gradient(circle at top right, rgba(255, 211, 142, 0.16), transparent 28%),
-                linear-gradient(180deg, rgba(255,255,255,0.52), rgba(244,247,255,0.72));
+            flex: 1; padding: 16px; overflow-y: auto;
+            display: flex; flex-direction: column; gap: 10px;
+            background: var(--bg-alt);
         }
-
-        .mianbao-row {
-            display: flex;
-            gap: 10px;
-            align-items: flex-end;
-        }
-
-        .mianbao-row.user {
-            justify-content: flex-end;
-        }
-
+        .mianbao-row { display: flex; gap: 8px; align-items: flex-end; }
+        .mianbao-row.user { justify-content: flex-end; }
         .mianbao-avatar {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            flex: 0 0 34px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.84rem;
-            font-weight: 800;
-            color: #41230e;
-            background: linear-gradient(135deg, rgba(255, 198, 104, 0.95), rgba(255, 139, 92, 0.95));
-            box-shadow: 0 10px 24px rgba(255, 144, 92, 0.28);
+            width: 30px; height: 30px; border-radius: 50%;
+            flex: 0 0 30px; display: inline-flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; font-weight: 700; background: var(--text); color: #fff;
         }
-
         .mianbao-row.user .mianbao-avatar {
-            order: 2;
-            background: linear-gradient(135deg, rgba(96, 165, 250, 0.94), rgba(59, 130, 246, 0.94));
-            color: #eff6ff;
-            box-shadow: 0 10px 24px rgba(59, 130, 246, 0.2);
+            order: 2; background: #3b82f6;
         }
-
         .mianbao-bubble {
-            max-width: 76%;
-            padding: 12px 14px;
-            border-radius: 18px;
-            color: #243244;
-            font-size: 0.95rem;
-            line-height: 1.6;
-            white-space: pre-wrap;
-            word-break: break-word;
-            background: rgba(255, 255, 255, 0.92);
-            border: 1px solid rgba(148, 163, 184, 0.16);
-            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+            max-width: 78%; padding: 10px 14px; border-radius: 14px;
+            font-size: 0.88rem; line-height: 1.6; white-space: pre-wrap; word-break: break-word;
+            background: #fff; border: 1px solid var(--border-light);
         }
-
         .mianbao-row.user .mianbao-bubble {
-            background: linear-gradient(135deg, rgba(37, 99, 235, 0.95), rgba(59, 130, 246, 0.9));
-            color: #eff6ff;
+            background: var(--text); color: #fff; border-color: var(--text);
         }
-
         .mianbao-row.typing .mianbao-bubble {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            min-height: 24px;
+            display: inline-flex; align-items: center; gap: 5px; min-height: 22px;
         }
-
         .mianbao-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: rgba(51, 65, 85, 0.46);
-            animation: mianbaoTyping 1s infinite ease-in-out;
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--text-muted); animation: mbTyping 1s infinite ease-in-out;
         }
-
         .mianbao-dot:nth-child(2) { animation-delay: 0.15s; }
         .mianbao-dot:nth-child(3) { animation-delay: 0.3s; }
-
-        @keyframes mianbaoTyping {
+        @keyframes mbTyping {
             0%, 80%, 100% { transform: translateY(0); opacity: 0.35; }
             40% { transform: translateY(-3px); opacity: 1; }
         }
-
         .mianbao-input-wrap {
-            padding: 14px;
-            border-top: 1px solid rgba(148, 163, 184, 0.14);
-            background: rgba(255, 255, 255, 0.86);
+            padding: 12px; border-top: 1px solid var(--border-light); background: #fff;
         }
-
         .mianbao-error {
-            display: none;
-            margin-bottom: 10px;
-            padding: 10px 12px;
-            border-radius: 14px;
-            font-size: 0.82rem;
-            color: #991b1b;
-            background: rgba(254, 226, 226, 0.92);
-            border: 1px solid rgba(248, 113, 113, 0.26);
+            display: none; margin-bottom: 8px; padding: 8px 12px; border-radius: 8px;
+            font-size: 0.78rem; color: #991b1b; background: #fef2f2; border: 1px solid #fecaca;
         }
-
-        .mianbao-error.show {
-            display: block;
-        }
-
-        .mianbao-composer {
-            display: flex;
-            gap: 10px;
-            align-items: flex-end;
-        }
-
+        .mianbao-error.show { display: block; }
+        .mianbao-composer { display: flex; gap: 8px; align-items: flex-end; }
         .mianbao-input {
-            flex: 1;
-            min-height: 52px;
-            max-height: 120px;
-            padding: 14px 16px;
-            resize: none;
-            border: 1px solid rgba(148, 163, 184, 0.24);
-            border-radius: 18px;
-            outline: none;
-            font: inherit;
-            color: #1e293b;
-            background: rgba(248, 250, 252, 0.95);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+            flex: 1; min-height: 44px; max-height: 100px;
+            padding: 10px 14px; resize: none;
+            border: 1px solid var(--border); border-radius: 10px;
+            outline: none; font: inherit; font-size: 0.88rem;
+            color: var(--text); background: var(--bg-alt);
         }
-
-        .mianbao-input:focus {
-            border-color: rgba(249, 115, 22, 0.36);
-            box-shadow: 0 0 0 4px rgba(251, 146, 60, 0.1);
-        }
-
+        .mianbao-input:focus { border-color: var(--text); }
         .mianbao-send {
-            height: 52px;
-            min-width: 72px;
-            padding: 0 16px;
-            border: 0;
-            border-radius: 18px;
-            font: inherit;
-            font-weight: 700;
-            color: #fff7ed;
-            background: linear-gradient(135deg, #f97316, #fb7185);
-            cursor: pointer;
-            box-shadow: 0 14px 32px rgba(249, 115, 22, 0.26);
+            height: 44px; min-width: 60px; padding: 0 14px;
+            border: none; border-radius: 10px;
+            font: inherit; font-size: 0.85rem; font-weight: 600;
+            color: #fff; background: var(--text); cursor: pointer;
         }
+        .mianbao-send:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        .mianbao-send:disabled {
-            opacity: 0.55;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
+        /* ===== Responsive ===== */
         @media (max-width: 768px) {
-            .mianbao-fab {
-                right: 16px;
-                bottom: 82px;
-                width: 58px;
-                height: 58px;
-                font-size: 0.95rem;
+            .container { padding: 0 20px; }
+            .nav-inner { padding: 0 20px; }
+            .nav-toggle { display: flex; }
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: var(--nav-h);
+                left: 0; right: 0;
+                flex-direction: column;
+                background: #fff;
+                border-bottom: 1px solid var(--border);
+                padding: 12px 20px;
+                gap: 2px;
             }
+            .nav-links.open { display: flex; }
+
+            .hero { padding: 48px 0 40px; }
+            .hero-avatar { width: 90px; height: 90px; font-size: 2.2rem; margin-bottom: 20px; }
+            .hero h1 { font-size: 2rem; }
+
+            .nav-cards { grid-template-columns: 1fr; }
+            .nav-card { border-right: none; border-bottom: 1px solid var(--border); min-height: auto; padding: 24px 20px; }
+            .nav-card:last-child { border-bottom: none; }
+
+            .section { padding: 40px 0; }
+            .blog-section .section-header { flex-direction: column; gap: 8px; }
 
             .mianbao-panel {
-                right: 12px;
-                left: 12px;
-                top: auto;
-                bottom: 12px;
-                width: auto;
-                height: min(72vh, 560px);
-                transform: translateY(20px);
+                right: 8px; left: 8px; top: auto; bottom: 8px; width: auto;
+                height: min(72vh, 520px); transform: translateY(16px);
             }
-
-            .mianbao-panel.show {
-                transform: translateY(0);
-            }
-
-            .mianbao-bubble {
-                max-width: 84%;
-            }
+            .mianbao-panel.show { transform: translateY(0); }
+            .mianbao-fab { right: 16px; bottom: 16px; width: 46px; height: 46px; }
+            .bgm-btn { left: 16px; bottom: 16px; width: 40px; height: 40px; }
         }
+
+        /* ===== Fade-in Animations ===== */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
     </style>
 </head>
 <body>
-
-<!-- iOS 26 Liquid Glass Background -->
-<div class="bg-canvas">
-    <div class="bg-orb"></div>
-    <div class="bg-orb"></div>
-    <div class="bg-orb"></div>
-    <div class="bg-orb"></div>
-</div>
-<div class="particles" id="particles"></div>
-
-<!-- Content Layer -->
-<div class="content-layer">
 
 <!-- Navbar -->
 <nav class="navbar" id="navbar">
@@ -327,153 +696,83 @@
             <li><a href="#home" class="active">Home</a></li>
             <li><a href="#blog">Blog</a></li>
             <li><a href="#apps">Apps</a></li>
-            <li><a href="#resources">Resources</a></li>
             <li><a href="#about">About</a></li>
-            <li><a href="#contact">Contact</a></li>
         </ul>
     </div>
 </nav>
 
 <!-- Hero -->
 <section class="hero" id="home">
+    <div class="hero-watermark" aria-hidden="true" id="heroWatermark"></div>
     <div class="container">
-        <div class="hero-avatar reveal">S</div>
-        <h1 class="hero-title reveal">Hello, I'm SEN</h1>
-        <p class="hero-subtitle reveal">记录生活的碎片，捕捉平凡中的光。<br>这些年走过的路，遇见的风景，都在这里。</p>
-        <div class="hero-buttons reveal">
-            <a href="#blog" class="btn btn-primary">浏览日记</a>
-            <a href="#apps" class="btn btn-outline">探索工具</a>
-        </div>
+        <div class="hero-avatar fade-in">S</div>
+        <h1 class="fade-in">HELLO 我是 SEN</h1>
+        <p class="hero-subtitle fade-in">记录生活的碎片，捕捉平凡中的光。</p>
     </div>
 </section>
 
-<!-- Blog / Photo Diary -->
-<section class="section" id="blog">
-    <div class="container">
-        <div class="section-header reveal">
-            <span class="section-badge">Diary</span>
-            <h2>生活日记</h2>
-            <p>从大学到工作，那些值得记住的日子</p>
-        </div>
+<!-- Nav Cards -->
+<div class="container">
+    <div class="nav-cards fade-in">
+        <a href="guide.html" class="nav-card">
+            <div class="nav-card-title">科学上网指南</div>
+            <div class="nav-card-desc">一份清晰简洁的代理配置教程，从零开始顺利访问外网。</div>
+        </a>
+        <a href="ai-guide.html" class="nav-card">
+            <div class="nav-card-title">AI 工具指南</div>
+            <div class="nav-card-desc">主流 AI 大模型汇总与使用指引，从注册到上手。</div>
+        </a>
+        <a href="resources.html" class="nav-card">
+            <div class="nav-card-title">资源站</div>
+            <div class="nav-card-desc">把 Chrome 书签整理成一个可搜索、可分类的资源入口。</div>
+        </a>
     </div>
-    <nav class="year-nav" id="yearNav"></nav>
-    <div class="container" id="diaryContent"></div>
-</section>
+</div>
 
-<!-- Apps -->
-<section class="section section-alt apps-section" id="apps">
+<!-- Apps Section -->
+<section class="section" id="apps">
     <div class="container">
-        <div class="apps-showcase reveal">
-            <div class="apps-showcase-head">
-                <div class="apps-copy">
-                    <div class="apps-heading-line">
-                        <span class="section-badge">Apps</span>
-                        <span class="apps-kicker">Digital Products</span>
-                    </div>
-                    <h2>数字工具箱</h2>
-                    <p>我把自己真正会用到的需求，做成了可以长期使用的工具。</p>
-                </div>
-                <a href="apps.html" class="apps-overview-btn">查看全部</a>
+        <div class="section-header fade-in">
+            <div>
+                <h2>快速体验</h2>
+                <p>一些为真实生活场景设计的数字工具，持续建设中。</p>
             </div>
-            <div class="apps-subnote">
-                <span class="apps-subnote-label">持续建设中</span>
-                <p>记录、整理、规划，把零散的生活变得更有秩序。</p>
-            </div>
-            <div class="apps-grid" id="appsGrid"></div>
-            <p class="apps-footer-note">更多工具正在整理与开发中。</p>
         </div>
+        <div class="num-list fade-in" id="appsNumList"></div>
     </div>
 </section>
 
-<!-- Resources -->
-<section class="section resources-home-section" id="resources">
+<!-- Blog Section -->
+<section class="section blog-section" id="blog">
     <div class="container">
-        <div class="resource-spotlight reveal">
-            <div class="resource-spotlight-copy">
-                <div class="resource-heading-line">
-                    <span class="section-badge">Resources</span>
-                    <span class="resource-kicker">iOS 26 Style</span>
-                </div>
-                <h2>把 Chrome 书签做成真正能用的资源站</h2>
-                <p>把导出的 123 个常用链接整理成一个可搜索、可分类、可快速直达的资源入口，保留原始书签结构，同时换成更适合长期使用的界面。</p>
-                <div class="resource-actions">
-                    <a href="resources.html" class="btn btn-primary">打开资源站</a>
-                    <a href="bookmarks_2026_4_3.html" class="btn btn-outline">查看原始导出</a>
-                </div>
-            </div>
-            <div class="resource-spotlight-panel">
-                <div class="resource-mini-stats">
-                    <div class="resource-stat-card">
-                        <span class="resource-stat-value">123</span>
-                        <span class="resource-stat-label">资源链接</span>
-                    </div>
-                    <div class="resource-stat-card">
-                        <span class="resource-stat-value">9</span>
-                        <span class="resource-stat-label">核心分类</span>
-                    </div>
-                    <div class="resource-stat-card">
-                        <span class="resource-stat-value">AI</span>
-                        <span class="resource-stat-label">最高频目录</span>
-                    </div>
-                </div>
-                <div class="resource-preview-card">
-                    <div class="resource-preview-top">
-                        <span class="resource-preview-badge">Live</span>
-                        <span class="resource-preview-label">Bookmark Library</span>
-                    </div>
-                    <p>覆盖 AI、LLM、Source、Google、图片工具、视频工具等常用入口，首页只保留最轻的一跳，具体浏览交给独立资源页。</p>
-                    <div class="resource-chip-row">
-                        <span class="resource-chip">AI</span>
-                        <span class="resource-chip">LLM</span>
-                        <span class="resource-chip">Source</span>
-                        <span class="resource-chip">Google</span>
-                        <span class="resource-chip">pic</span>
-                        <span class="resource-chip">mov</span>
-                    </div>
-                </div>
+        <div class="section-header fade-in">
+            <div>
+                <h2>Blog</h2>
+                <p>从大学到工作，那些值得记住的日子</p>
             </div>
         </div>
+        <div class="year-tabs fade-in" id="yearTabs"></div>
+        <div class="blog-list fade-in" id="blogList"></div>
+        <button class="blog-more fade-in" id="blogMore" onclick="loadMoreBlog()">Load more</button>
     </div>
 </section>
 
 <!-- About -->
 <section class="section" id="about">
     <div class="container">
-        <div class="section-header reveal">
-            <span class="section-badge">About</span>
-            <h2>关于我</h2>
-        </div>
-        <div class="about-content reveal">
-            <div class="about-card">
-                <p>嗨，我是 <strong>SEN</strong>。</p>
-                <p>电气工程专业，喜欢记录生活和技术探索。从哈尔滨的大学时光，到广东的实习日子，再到青岛的工作生活——每一段路都值得被记住。</p>
-                <p>我会在这里分享：</p>
-                <ul>
-                    <li>旅行记录</li>
-                    <li>校园生活</li>
-                    <li>技术学习</li>
-                    <li>有趣的小工具</li>
-                </ul>
+        <div class="section-header fade-in">
+            <div>
+                <h2>关于我</h2>
             </div>
         </div>
-    </div>
-</section>
-
-<!-- Contact -->
-<section class="section section-alt" id="contact">
-    <div class="container">
-        <div class="section-header reveal">
-            <span class="section-badge">Contact</span>
-            <h2>联系我</h2>
-            <p>有任何想法或问题，欢迎来信</p>
+        <div class="about-text fade-in">
+            <p>嗨，我是 <strong>SEN</strong>。</p>
+            <p>电气工程专业，喜欢记录生活和技术探索。从哈尔滨的大学时光，到广东的实习日子，再到青岛的工作生活——每一段路都值得被记住。</p>
+            <p>旅行记录 / 校园生活 / 技术学习 / 有趣的小工具</p>
         </div>
-        <div class="contact-content reveal">
-            <a href="mailto:ys1991427360@gmail.com" class="contact-card">
-                <div class="contact-icon">&#x2709;&#xFE0F;</div>
-                <div>
-                    <span class="contact-label">Email</span>
-                    <span class="contact-value">ys1991427360@gmail.com</span>
-                </div>
+        <div class="contact-row fade-in" style="margin-top: 28px;">
+            <a href="mailto:ys1991427360@gmail.com" class="contact-link">
+                &#9993; ys1991427360@gmail.com
             </a>
         </div>
     </div>
@@ -482,19 +781,18 @@
 <!-- Footer -->
 <footer class="footer">
     <div class="container">
-        <div class="footer-nav">
+        <div class="footer-links">
             <a href="#home">Home</a>
             <a href="#blog">Blog</a>
             <a href="#apps">Apps</a>
-            <a href="#resources">Resources</a>
+            <a href="guide.html">Guide</a>
+            <a href="ai-guide.html">AI Guide</a>
+            <a href="resources.html">Resources</a>
             <a href="#about">About</a>
-            <a href="#contact">Contact</a>
         </div>
         <p>&copy; 2025 SEN &middot; Powered by GitHub Pages</p>
     </div>
 </footer>
-
-</div><!-- /content-layer -->
 
 <!-- BGM -->
 <audio id="bgm" loop preload="auto">
@@ -503,13 +801,6 @@
 <button class="bgm-btn" id="bgmBtn" aria-label="Toggle music">
     <span class="bgm-disc" id="bgmDisc">&#x266B;</span>
 </button>
-
-<!-- Snow Canvas -->
-<canvas id="snowCanvas"></canvas>
-
-<!-- Cursor Effect Canvas -->
-<canvas id="cursorCanvas"></canvas>
-<canvas id="fireworksCanvas"></canvas>
 
 <!-- Lightbox -->
 <div class="lightbox" id="lightbox">
@@ -527,36 +818,32 @@
     </div>
 </div>
 
-<button class="mianbao-fab" id="mianbaoFab" type="button" aria-label="打开面包聊天窗口">
-    <span class="mianbao-fab-icon">面包</span>
-</button>
-
+<!-- Mianbao Chat -->
+<button class="mianbao-fab" id="mianbaoFab" type="button" aria-label="Chat">&#38754;&#21253;</button>
 <aside class="mianbao-panel" id="mianbaoPanel" aria-hidden="true">
     <div class="mianbao-header">
-        <div class="mianbao-title-wrap">
-            <h3 class="mianbao-title">面包 - 像在跟博主聊天</h3>
-            <div class="mianbao-subtitle">轻松聊日常、技术、博客和那些碎碎念</div>
+        <div>
+            <div class="mianbao-title">面包</div>
+            <div class="mianbao-subtitle">像在跟博主聊天</div>
         </div>
-        <button class="mianbao-close" id="mianbaoClose" type="button" aria-label="关闭聊天窗口">&#x2715;</button>
+        <button class="mianbao-close" id="mianbaoClose" type="button" aria-label="Close">&#x2715;</button>
     </div>
     <div class="mianbao-messages" id="mianbaoMessages"></div>
     <div class="mianbao-input-wrap">
         <div class="mianbao-error" id="mianbaoError"></div>
         <div class="mianbao-composer">
-            <textarea class="mianbao-input" id="mianbaoInput" placeholder="想跟面包聊点什么？按 Enter 发送，Shift + Enter 换行"></textarea>
-            <button class="mianbao-send" id="mianbaoSend" type="button">发送</button>
+            <textarea class="mianbao-input" id="mianbaoInput" placeholder="Enter to send, Shift+Enter for newline"></textarea>
+            <button class="mianbao-send" id="mianbaoSend" type="button">Send</button>
         </div>
     </div>
 </aside>
 
 <script>
-// ===== CDN Config (jsDelivr for China acceleration) =====
+// ===== CDN Config =====
 const CDN_BASE = 'https://cdn.jsdelivr.net/gh/y1991427360s/box.github.io@main/';
 function cdnUrl(path) { return CDN_BASE + encodeURI(path); }
 
 // ===== Mianbao Chat Config =====
-// 代理版：前端不再直接持有 API Key，只请求你部署的代理地址。
-// 部署好 Worker 后，把下面的 proxyUrl 换成你的 Worker 地址即可。
 window.__MIANBAO_CHAT_CONFIG__ = Object.assign({
     proxyUrl: 'https://sen-mianbao-chat.sen666.workers.dev'
 }, window.__MIANBAO_CHAT_CONFIG__ || {});
@@ -564,9 +851,18 @@ window.__MIANBAO_CHAT_CONFIG__ = Object.assign({
 const MIANBAO_STORAGE_KEY = 'senMianbaoChatHistory';
 const MIANBAO_DEFAULT_GREETING = '在呢，确实等你半天了。把我当成站长的分身就行，想聊生活、博客、技术都可以，这是个好事儿啊。';
 
+// ===== Hero Watermark =====
+(function() {
+    const el = document.getElementById('heroWatermark');
+    const word = 'SEN ';
+    const line = word.repeat(30);
+    let lines = '';
+    for (let i = 0; i < 12; i++) lines += line + '\n';
+    el.textContent = lines;
+})();
+
 // ===== Diary Entries Data =====
 const entries = [
-// 2026
 {date:'2026-03-16',title:'同事请吃饭',text:'同事请吃的一顿饭，往往比饭菜本身更让人记住。一碗热汤端上桌，薄荷的清香混着烟火气，忽然觉得工作里那些一起扛过的日子，都有了更具体的温度。',media:['pic/26.3.16同事请吃饭.jpg']},
 {date:'2026-02-25',title:'在尼山圣境',text:'到了尼山圣境，周围的氛围会让人不自觉安静下来。旅行并不总是为了热闹打卡，有时候只是想在一个更有文化和意味的地方，认真地待上一会儿。',media:['pic/26.2.25在尼山圣境.jpg']},
 {date:'2026-02-20',title:'在周口市第一高山',text:'名字里带着一点幽默感的地方，往往会让旅途多一点轻松。到了所谓"周口市第一高山"，也许高度不是重点，重点是愿意为了某个特别的地点出发，这本身就很好。',media:['pic/26.2.20在周口市第一高山.jpg']},
@@ -577,7 +873,6 @@ const entries = [
 {date:'2026-01-03',title:'在济南趵突泉',text:'趵突泉这样的地方，有一种很稳定的文化记忆感。去到那里，不需要刻意安排很多情节，光是看着泉水、走在周围，心情就已经慢慢沉静下来了。',media:['pic/26.1.3在济南趵突泉.jpg']},
 {date:'2026-01-02',title:'在八达岭长城',text:'长城这种地方，亲自站上去和在图片里看到完全是两回事。脚下的路、眼前的山势，还有历史沉淀出来的重量，都让"到此一游"变成了一次更有实感的经历。',media:['pic/26.1.2在八达岭长城.jpg']},
 {date:'2026-01-01',title:'在天安门',text:'新年的第一天出现在天安门，这个开头已经足够有纪念意义。很多人会在这样的地点给新一年寄托一点愿望，而真正重要的，也许只是提醒自己继续认真生活。',media:['pic/26.1.1在天安门.jpg']},
-// 2025
 {date:'2025-12-28',title:'在青岛栈桥',text:'到了青岛，栈桥总像是必须去看看的地方。它之所以经典，大概正因为它承载了太多人关于海边、关于旅行、关于"我真的到过这里"的共同记忆。',media:['pic/25.12.28在青岛栈桥.jpg']},
 {date:'2025-12-20',title:'在青岛山海明月间',text:'"山海明月间"这个名字本身就很有画面感，像把风景和心情都放大了一层。站在那样的地方，人很容易生出一种温柔的感慨，觉得辛苦生活之外，世界还是一直在认真地好看。',media:['pic/25.12.20在青岛山海明月间.jpg']},
 {date:'2025-12-13',title:'在威海',text:'威海给人的感觉常常是清爽、开阔，又带一点海边城市特有的从容。去到这样的地方，会让人觉得生活未必要总是冲得很快，也可以慢一点，好好看一看路边的风景。',media:['pic/25.12.13在威海.jpg']},
@@ -594,7 +889,6 @@ const entries = [
 {date:'2025-06-16',title:'在松花江',text:'再去看松花江的时候，心情可能已经和刚入学时不一样了。熟悉的地方总能承接很多复杂的情绪，尤其在毕业前后，它会像一个沉默的旁观者，看着人慢慢长大。',media:['pic/25.6.16在松花江.jpg']},
 {date:'2025-04-15',title:'打印毕业论文',text:'毕业论文真正被打印出来的时候，很多事情才会突然有了实感。那些熬过的夜、改过的字、反复确认过的细节，终于从电脑里的文件变成了可以拿在手上的一摞纸。',media:['pic/25.4.15打印毕业论文.jpg']},
 {date:'2025-03-18',title:'最爱听的周杰伦的《枫》',text:'有些歌之所以会被反复听，不只是因为旋律好听，更因为它总能准确碰到当下的心情。《枫》这种歌，很适合在某些安静的时刻陪着人，把没说出口的情绪慢慢放出来。',media:['pic/25.3.18最爱听的周杰伦的枫.jpg']},
-// 2024
 {date:'2024-12-29',title:'在西安',text:'到了年末又去了西安，像是给这一年的脚步再添上一座城市。古老和现代混在一起的地方，总会让旅行多一点厚重感，也让人忍不住想把这段路走得更慢些。',media:['pic/24.12.29在西安.jpg']},
 {date:'2024-12-14',title:'哈尔滨的雪',text:'哈尔滨的雪看再多次，好像也还是会想拍下来。它不只是天气，而是一种季节真正降临的证据，也是这座城市最有辨识度的样子。',media:['pic/24.12.14哈尔滨的雪.jpg']},
 {date:'2024-12-10',title:'玩星露谷',text:'《星露谷》这种游戏总有一种治愈的力量，打开之后，节奏会自动慢下来。现实生活已经够忙了，所以偶尔沉进一个种地、钓鱼、经营小日子的世界里，也是一种很好的休息。',media:['pic/24.12.10玩星露谷.jpg']},
@@ -630,14 +924,12 @@ const entries = [
 {date:'2024-01-12',title:'在深圳',text:'城市的节奏到了深圳，好像会自动加快一点。站在陌生的地方，能感觉到一种很强的向前感，也会忍不住想，未来的自己会不会也在这样的城市里生活很久。',media:['pic/24.1.12  在深圳.jpg']},
 {date:'2024-01-11',title:'在长沙',text:'旅行的第一站总是带着一点刚刚出发的兴奋。到了长沙，心情像被切换到了另一个频道，街道、口音、空气里的味道都在提醒我，接下来会有新的见闻。',media:['pic/24.1.11  在长沙.jpg']},
 {date:'2024-01-07',title:'哈尔滨美术馆',text:'冬天去美术馆，很像给自己找了一个能暂时从外面世界退出来的地方。安静地看展、走路、发呆，比起热闹的打卡，我更愿意把那种慢慢沉下来的感觉记住。',media:['pic/24.1.7  哈尔滨美术馆.jpg']},
-// 2023
 {date:'2023-12-31',title:'圆梦之星雪雕',text:'一年走到最后一天，能用一座雪雕来作结，倒也很符合北方冬天的气质。站在年末回头看，很多愿望未必都实现了，但只要还在继续往前走，新的期待就总会在下一年等着自己。',media:['pic/23.12.31  圆梦之星雪雕.jpg']},
 {date:'2023-11-06',title:'哈尔滨的大风把三轮车吹倒了',text:'风大到把三轮车都吹倒的时候，城市一下子就有了电影镜头一样的夸张感。天气有时候会把平凡的一天变得格外难忘，只因为它让人亲眼看见了自然的力气。',media:['pic/23.11.6  哈尔滨的大风把三轮车吹倒了.jpg']},
 {date:'2023-09-08',title:'上课画画',text:'有时候人坐在教室里，心思却会从公式和板书里悄悄逃开一点，落到纸上的线条和涂鸦里。那些随手画下来的东西未必有多成熟，但它们很诚实，记录的是当时那个片刻真正的注意力。',media:['pic/23.9.8  上课画画1.jpg','pic/23.9.8  上课画画2.jpg','pic/23.9.8  上课画画3.jpg','pic/23.9.8  上课画画4.jpg','pic/23.9.8  上课画画5.jpg']},
 {date:'2023-06-24',title:'和郑老师通宵组装电脑',text:'通宵做一件具体的事，会让时间变得很特别。和郑老师一起组装电脑，大概既有折腾的疲惫，也有把一堆零件慢慢拼成完整机器的成就感，这种记忆比单纯"买了一台电脑"要生动得多。',media:['pic/23.6.24  和郑老师通宵组装电脑.jpg']},
 {date:'2023-03-22',title:'哈尔滨沙尘暴',text:'原来北方的城市也会被沙尘裹住，天空一下子变得陌生，人走在路上都有种不真实的感觉。天气变化总会把平常的日子切开，让人短暂意识到自己只是城市里很小的一部分。',media:['pic/23.3.22  哈尔滨沙尘暴.jpg']},
 {date:'2023-03-09',title:'疑似学习电机学破防',text:'有些崩溃是认真的，有些崩溃过后又会变成以后拿来笑自己的素材。电机学大概就是这样一门课，当时觉得难得过不去，后来回头看，反而成了学生时代很鲜明的一块记忆。',media:['pic/23.3.9  疑似学习电机学破防.mp4']},
-// 2022
 {date:'2022-12-10',title:'第一次使用 ChatGPT',text:'第一次接触新的工具时，总会有一种很新鲜的感觉，像是突然看见另一种可能。回头再看，这一天其实挺有纪念意义，因为很多事情就是从某个不起眼的"第一次"开始慢慢改变的。',media:['pic/22.12.10  第一次使用ChatGPT.mp4']},
 {date:'2022-11-25',title:'哈尔滨又下雪了',text:'哈尔滨的冬天，好像总能用一场雪把城市重新覆盖一遍。看到雪落下来，天气虽然更冷了，心里却会莫名安静，像是那些琐碎的情绪也一起被埋进了白色里。',media:['pic/22.11.25  哈尔滨又下雪了.jpg']},
 {date:'2022-11-06',title:'学电气破防的一天',text:'有些课学到某个阶段，真的会让人怀疑自己到底适不适合继续往下走。可回头看，所谓"破防"的那一天，其实也是在告诉自己，成长从来不是轻轻松松就能完成的。',media:['pic/22.11.6  学电气破防的一天.jpg']},
@@ -646,86 +938,49 @@ const entries = [
 {date:'2022-09-02',title:'给寝室室友带饭',text:'学生时代的情谊常常藏在这样的小事里，顺手带一份饭，比很多客套的话都更真诚。大家住在同一个寝室，一起熬课、熬夜、熬情绪，慢慢也就成了可以互相照应的人。',media:['pic/22.9.2  给寝室室友带饭.jpg']},
 {date:'2022-06-01',title:'在实验室做迈克尔逊实验',text:'实验室里的时间总是和外面不太一样，安静、重复，又带着一点必须认真对待的紧张。做迈克尔逊实验的时候，感觉自己像是在和课本上的知识面对面，原来那些抽象的原理也真的会落在眼前。',media:['pic/22.6.1  在实验室做迈克尔逊实验.jpg']},
 {date:'2022-01-05',title:'高铁站防疫',text:'那时候出门还带着很强的时代印记，进站、排队、检查，每一步都提醒着人们生活还没有完全恢复如常。站在高铁站里，既有要出发的期待，也有一点对现实环境的无奈。',media:['pic/22.1.5  高铁站防疫.jpg']},
-// 2021
 {date:'2021-12-30',title:'在家喝胡辣汤',text:'冬天的早晨适合一碗热乎的胡辣汤，端起来的时候，连空气都像慢了下来。假期最舒服的地方，大概就是不用赶时间，可以安心把一顿早餐吃出一点生活的味道。',media:['pic/21.12.30  在家喝胡辣汤.jpg']},
 {date:'2021-12-22',title:'学期结束，回家',text:'学期终于画上句号，心里最明显的感觉不是轻松，而是终于可以把紧绷了很久的自己放下来。回家的路上总会觉得，熟悉的人和熟悉的饭菜，才是这一段时间里最踏实的归处。',media:['pic/21.12.22  学期结束，回家.jpg']},
 ];
 
-// ===== Render =====
-const years = [...new Set(entries.map(e => e.date.slice(0,4)))];
-
+// ===== App Products =====
 const appProducts = [
-    {
-        name: '储物柜',
-        code: 'BX',
-        description: '把分散的物品信息整理成清晰的存储系统，查找与记录都更省心。',
-        status: '已上线',
-        tone: 'live',
-        href: 'box.html',
-        cta: '立即打开',
-        tags: ['Storage', '整理', '存储']
-    },
-    {
-        name: '便签',
-        code: 'NT',
-        description: '随手记下灵感、待办和片段想法，让零散信息有地方沉淀。',
-        status: '持续迭代',
-        tone: 'live',
-        href: 'keep.html',
-        cta: '立即打开',
-        tags: ['Notes', '记录', '灵感']
-    },
-    {
-        name: '目标',
-        code: 'GO',
-        description: '把长期计划拆解为可执行的阶段任务，持续追踪每一次推进。',
-        status: '已上线',
-        tone: 'live',
-        href: 'task.html',
-        cta: '立即打开',
-        tags: ['Goals', '规划', '成长']
-    },
-    {
-        name: '资源站',
-        code: 'RS',
-        description: '把导出的 Chrome 书签整理成一个更适合长期使用的导航页，支持分类浏览与快速搜索。',
-        status: '已上线',
-        tone: 'live',
-        href: 'resources.html',
-        cta: '打开资源库',
-        tags: ['Bookmarks', '资源', '导航']
-    },
-    {
-        name: '习惯',
-        code: 'HB',
-        description: '用更轻量的方式记录每天的小坚持，让长期变化被温和看见。',
-        status: '即将推出',
-        tone: 'soon',
-        href: '',
-        cta: '即将上线',
-        tags: ['Habits', '自律', '日常']
-    },
-    {
-        name: '清单',
-        code: 'LS',
-        description: '把反复出现的任务整理成稳定流程，减少遗忘、拖延与混乱。',
-        status: '即将推出',
-        tone: 'soon',
-        href: '',
-        cta: 'Coming Soon',
-        tags: ['Lists', '流程', '效率']
-    },
-    {
-        name: '记账',
-        code: 'AC',
-        description: '记录日常支出与消费节奏，慢慢建立自己的生活账本与判断。',
-        status: '即将推出',
-        tone: 'soon',
-        href: '',
-        cta: '即将上线',
-        tags: ['Accounting', '消费', '生活']
-    }
+    { name: '储物柜', desc: '把分散的物品信息整理成清晰的存储系统', href: 'box.html', status: 'live' },
+    { name: '便签', desc: '随手记下灵感、待办和片段想法', href: 'keep.html', status: 'live' },
+    { name: '目标', desc: '把长期计划拆解为可执行的阶段任务', href: 'task.html', status: 'live' },
+    { name: '资源站', desc: '把 Chrome 书签整理成可搜索的导航页', href: 'resources.html', status: 'live' },
+    { name: '习惯', desc: '用更轻量的方式记录每天的小坚持', href: '', status: 'soon' },
+    { name: '清单', desc: '把反复出现的任务整理成稳定流程', href: '', status: 'soon' },
+    { name: '记账', desc: '记录日常支出与消费节奏', href: '', status: 'soon' },
 ];
+
+// ===== Render Apps =====
+function renderApps() {
+    const list = document.getElementById('appsNumList');
+    list.innerHTML = appProducts.map((app, i) => {
+        const idx = String(i + 1).padStart(2, '0');
+        const badge = app.status === 'live'
+            ? '<span class="num-badge live">Online</span>'
+            : '<span class="num-badge soon">Coming</span>';
+        const tag = app.href
+            ? 'a'
+            : 'div';
+        const hrefAttr = app.href ? ` href="${app.href}"` : '';
+        return `<${tag} class="num-item"${hrefAttr}>
+            <span class="num-idx">${idx}</span>
+            <div class="num-content">
+                <div class="num-title">${app.name}${badge}</div>
+                <div class="num-desc">${app.desc}</div>
+            </div>
+            ${app.href ? '<span class="num-arrow">&rarr;</span>' : ''}
+        </${tag}>`;
+    }).join('');
+}
+
+// ===== Blog =====
+const years = [...new Set(entries.map(e => e.date.slice(0,4)))];
+let currentYear = years[0];
+let blogPage = 0;
+const BLOG_PAGE_SIZE = 8;
 
 function isVideo(src) { return src.endsWith('.mp4'); }
 
@@ -734,86 +989,50 @@ function formatDate(d) {
     return `${y}年${parseInt(m)}月${parseInt(day)}日`;
 }
 
-function renderYearNav() {
-    document.getElementById('yearNav').innerHTML = years.map(y =>
-        `<button class="year-pill" data-year="${y}" onclick="scrollToYear('${y}')">${y}</button>`
+function renderYearTabs() {
+    document.getElementById('yearTabs').innerHTML = years.map(y =>
+        `<button class="year-tab${y === currentYear ? ' active' : ''}" onclick="switchYear('${y}')">${y}</button>`
     ).join('');
 }
 
-function scrollToYear(y) {
-    const el = document.getElementById('year-' + y);
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
+function switchYear(y) {
+    currentYear = y;
+    blogPage = 0;
+    renderYearTabs();
+    renderBlog();
 }
 
-function renderDiary() {
-    const wrap = document.getElementById('diaryContent');
-    let html = '';
-    for (const year of years) {
-        const yearEntries = entries.filter(e => e.date.startsWith(year));
-        html += `<div class="year-section" id="year-${year}">`;
-        html += `<div class="year-header"><span class="year-number">${year}</span>`;
-        html += `<span class="year-count">${yearEntries.length} 篇</span>`;
-        html += `<span class="year-line"></span></div>`;
-        html += `<div class="diary-grid">`;
-        for (let i = 0; i < yearEntries.length; i++) {
-            const e = yearEntries[i];
-            const idx = entries.indexOf(e);
-            const hasVideo = e.media.some(isVideo);
-            const multiImg = e.media.length > 1;
-            html += `<div class="diary-card reveal" style="transition-delay:${(i % 6) * 0.06}s" onclick="openLightbox(${idx})">`;
-            if (hasVideo) {
-                html += `<div class="card-media"><div class="card-video-ph">`;
-                html += `<div class="play-icon">&#x25B6;</div>`;
-                html += `<span class="video-label">${e.title}</span></div></div>`;
-            } else {
-                html += `<div class="card-media">`;
-                html += `<img src="${cdnUrl(e.media[0])}" alt="${e.title}" loading="lazy" onerror="this.onerror=null;this.src='${e.media[0]}'">`;
-                if (multiImg) html += `<span class="media-badge">${e.media.length} 张</span>`;
-                html += `</div>`;
+function renderBlog() {
+    const yearEntries = entries.filter(e => e.date.startsWith(currentYear));
+    const visible = yearEntries.slice(0, (blogPage + 1) * BLOG_PAGE_SIZE);
+    const list = document.getElementById('blogList');
+
+    list.innerHTML = visible.map((e, i) => {
+        const idx = String(i + 1).padStart(2, '0');
+        const globalIdx = entries.indexOf(e);
+        const hasVideo = e.media.some(isVideo);
+        const thumbSrc = hasVideo ? '' : cdnUrl(e.media[0]);
+
+        return `<div class="blog-item" onclick="openLightbox(${globalIdx})">
+            <span class="blog-idx">${idx}</span>
+            <div class="blog-content">
+                <div class="blog-title">${e.title}</div>
+                <div class="blog-meta">${formatDate(e.date)}${hasVideo ? ' &middot; Video' : e.media.length > 1 ? ' &middot; ' + e.media.length + ' pics' : ''}</div>
+            </div>
+            ${hasVideo
+                ? '<div class="blog-thumb" style="display:flex;align-items:center;justify-content:center;color:#999;font-size:1.2rem;">&#9654;</div>'
+                : '<img class="blog-thumb" src="' + thumbSrc + '" alt="' + e.title + '" loading="lazy" onerror="this.onerror=null;this.src=\'' + e.media[0] + '\'">'
             }
-            html += `<div class="card-body">`;
-            html += `<div class="card-date">${formatDate(e.date)}</div>`;
-            html += `<div class="card-title">${e.title}</div>`;
-            html += `<div class="card-text">${e.text}</div>`;
-            html += `</div></div>`;
-        }
-        html += `</div></div>`;
-    }
-    wrap.innerHTML = html;
-    observeReveal();
+        </div>`;
+    }).join('');
+
+    const moreBtn = document.getElementById('blogMore');
+    moreBtn.style.display = visible.length < yearEntries.length ? 'inline-block' : 'none';
 }
 
-function renderApps() {
-    const grid = document.getElementById('appsGrid');
-    if (!grid) return;
-
-    grid.innerHTML = appProducts.map((app, index) => {
-        const tags = app.tags.map(tag => `<span class="app-tag">${tag}</span>`).join('');
-        const cta = app.tone === 'live'
-            ? `<a href="${app.href}" class="app-cta">${app.cta}<span class="app-cta-arrow" aria-hidden="true">&rarr;</span></a>`
-            : `<span class="app-cta is-disabled" aria-disabled="true">${app.cta}</span>`;
-
-        return `
-            <article class="app-card app-card-${app.tone} reveal" style="transition-delay:${(index % 3) * 0.08}s">
-                <div class="app-card-top">
-                    <span class="app-status-badge">${app.status}</span>
-                    <span class="app-code">${app.code}</span>
-                </div>
-                <div class="app-icon-wrap" aria-hidden="true">
-                    <span class="app-icon">${app.code}</span>
-                </div>
-                <div class="app-content">
-                    <h3>${app.name}</h3>
-                    <p class="app-desc">${app.description}</p>
-                </div>
-                <div class="app-tags">${tags}</div>
-                <div class="app-card-footer">
-                    <span class="app-meta">${app.tone === 'live' ? '生活管理 / 效率工具' : 'Concept / In Progress'}</span>
-                    ${cta}
-                </div>
-            </article>
-        `;
-    }).join('');
+function loadMoreBlog() {
+    blogPage++;
+    renderBlog();
 }
 
 // ===== Lightbox =====
@@ -887,56 +1106,31 @@ navLinksEl.querySelectorAll('a').forEach(a => a.addEventListener('click', () => 
     navLinksEl.classList.remove('open');
 }));
 
-// ===== Navbar Shadow + Scroll Spy =====
+// ===== Navbar Scroll =====
 const spySections = document.querySelectorAll('section[id]');
 const spyLinks = document.querySelectorAll('.nav-links a');
 
 window.addEventListener('scroll', () => {
     document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
-    // nav spy
     const y = window.scrollY + 120;
     let cur = 'home';
     spySections.forEach(s => { if (y >= s.offsetTop) cur = s.id; });
     spyLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + cur));
-    // year nav spy
-    const pills = document.querySelectorAll('.year-pill');
-    let curYear = years[0];
-    years.forEach(yr => {
-        const el = document.getElementById('year-' + yr);
-        if (el && y >= el.offsetTop) curYear = yr;
-    });
-    pills.forEach(p => p.classList.toggle('active', p.dataset.year === curYear));
 }, { passive: true });
 
-// ===== Reveal =====
-function observeReveal() {
+// ===== Fade-in =====
+function observeFadeIn() {
     const obs = new IntersectionObserver(es => {
-        es.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-    }, { threshold: 0.08, rootMargin: '0px 0px -20px 0px' });
-    document.querySelectorAll('.reveal:not(.visible)').forEach(el => obs.observe(el));
-}
-
-// ===== Particles =====
-function createParticles() {
-    const c = document.getElementById('particles');
-    for (let i = 0; i < 25; i++) {
-        const p = document.createElement('div');
-        p.className = 'particle';
-        p.style.left = Math.random() * 100 + '%';
-        p.style.animationDuration = (10 + Math.random() * 14) + 's';
-        p.style.animationDelay = Math.random() * 12 + 's';
-        p.style.width = p.style.height = (2 + Math.random() * 3) + 'px';
-        p.style.opacity = 0.15 + Math.random() * 0.35;
-        c.appendChild(p);
-    }
+        es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.fade-in:not(.visible)').forEach(el => obs.observe(el));
 }
 
 // ===== Init =====
-renderYearNav();
-renderDiary();
 renderApps();
-observeReveal();
-createParticles();
+renderYearTabs();
+renderBlog();
+observeFadeIn();
 
 // ===== BGM Control =====
 (function() {
@@ -947,68 +1141,45 @@ createParticles();
     let saveTimer = null;
 
     function readState() {
-        try {
-            return JSON.parse(localStorage.getItem(STATE_KEY) || '{}');
-        } catch (e) {
-            return {};
-        }
+        try { return JSON.parse(localStorage.getItem(STATE_KEY) || '{}'); }
+        catch (e) { return {}; }
     }
 
     function writeState(partial) {
         const prev = readState();
-        localStorage.setItem(STATE_KEY, JSON.stringify({
-            ...prev,
-            ...partial,
-            updatedAt: Date.now()
-        }));
+        localStorage.setItem(STATE_KEY, JSON.stringify({ ...prev, ...partial, updatedAt: Date.now() }));
     }
 
     const savedState = readState();
     bgm.volume = typeof savedState.volume === 'number' ? savedState.volume : 0.35;
 
-    function syncButtonState() {
-        btn.classList.toggle('playing', !bgm.paused);
-    }
+    function syncButtonState() { btn.classList.toggle('playing', !bgm.paused); }
 
     function persistPlaybackState() {
-        writeState({
-            currentTime: bgm.currentTime || 0,
-            paused: bgm.paused,
-            volume: bgm.volume
-        });
+        writeState({ currentTime: bgm.currentTime || 0, paused: bgm.paused, volume: bgm.volume });
     }
 
     function startProgressSync() {
         if (saveTimer) clearInterval(saveTimer);
-        saveTimer = setInterval(() => {
-            if (!bgm.paused) persistPlaybackState();
-        }, 1000);
+        saveTimer = setInterval(() => { if (!bgm.paused) persistPlaybackState(); }, 1000);
     }
 
     function stopProgressSync() {
-        if (saveTimer) {
-            clearInterval(saveTimer);
-            saveTimer = null;
-        }
+        if (saveTimer) { clearInterval(saveTimer); saveTimer = null; }
     }
 
     function restoreTime() {
         const state = readState();
         if (typeof state.currentTime === 'number' && !Number.isNaN(state.currentTime)) {
-            try {
-                bgm.currentTime = state.currentTime;
-            } catch (e) {}
+            try { bgm.currentTime = state.currentTime; } catch (e) {}
         }
     }
 
     function tryAutoPlay() {
         const state = readState();
         if (state.paused === true) return;
-
         bgm.play().then(() => {
-            syncButtonState();
-            persistPlaybackState();
-            startProgressSync();
+            syncButtonState(); persistPlaybackState(); startProgressSync();
             interactEvents.forEach(e => document.removeEventListener(e, tryAutoPlay, true));
         }).catch(() => {});
     }
@@ -1021,287 +1192,21 @@ createParticles();
 
     btn.addEventListener('click', () => {
         if (!bgm.paused) {
-            bgm.pause();
-            syncButtonState();
-            persistPlaybackState();
-            stopProgressSync();
+            bgm.pause(); syncButtonState(); persistPlaybackState(); stopProgressSync();
         } else {
             bgm.play().then(() => {
-                syncButtonState();
-                persistPlaybackState();
-                startProgressSync();
+                syncButtonState(); persistPlaybackState(); startProgressSync();
                 interactEvents.forEach(e => document.removeEventListener(e, tryAutoPlay, true));
             }).catch(() => {});
         }
     });
 
-    bgm.addEventListener('pause', () => {
-        syncButtonState();
-        persistPlaybackState();
-        stopProgressSync();
-    });
-    bgm.addEventListener('play', () => {
-        syncButtonState();
-        persistPlaybackState();
-        startProgressSync();
-    });
-    bgm.addEventListener('ended', () => {
-        writeState({ currentTime: 0, paused: false, volume: bgm.volume });
-    });
+    bgm.addEventListener('pause', () => { syncButtonState(); persistPlaybackState(); stopProgressSync(); });
+    bgm.addEventListener('play', () => { syncButtonState(); persistPlaybackState(); startProgressSync(); });
+    bgm.addEventListener('ended', () => { writeState({ currentTime: 0, paused: false, volume: bgm.volume }); });
     window.addEventListener('beforeunload', persistPlaybackState);
-    document.addEventListener('visibilitychange', () => {
-        if (document.hidden) persistPlaybackState();
-    });
+    document.addEventListener('visibilitychange', () => { if (document.hidden) persistPlaybackState(); });
     syncButtonState();
-})();
-
-// ===== Snowfall Effect =====
-(function() {
-    const cv = document.getElementById('snowCanvas');
-    const c = cv.getContext('2d');
-    function resize() { cv.width = window.innerWidth; cv.height = window.innerHeight; }
-    resize();
-    window.addEventListener('resize', resize);
-
-    const COUNT = 90;
-    const flakes = [];
-    for (let i = 0; i < COUNT; i++) {
-        flakes.push({
-            x: Math.random() * cv.width,
-            y: Math.random() * cv.height,
-            r: 1 + Math.random() * 3.5,
-            speed: 0.25 + Math.random() * 1.2,
-            wind: (Math.random() - 0.5) * 0.4,
-            swing: Math.random() * Math.PI * 2,
-            swingSpeed: 0.003 + Math.random() * 0.006,
-            opacity: 0.3 + Math.random() * 0.55
-        });
-    }
-
-    function draw() {
-        c.clearRect(0, 0, cv.width, cv.height);
-        for (const f of flakes) {
-            f.swing += f.swingSpeed;
-            f.y += f.speed;
-            f.x += f.wind + Math.sin(f.swing) * 0.5;
-
-            if (f.y > cv.height + 10) { f.y = -10; f.x = Math.random() * cv.width; }
-            if (f.x > cv.width + 10) f.x = -10;
-            if (f.x < -10) f.x = cv.width + 10;
-
-            c.beginPath();
-            c.arc(f.x, f.y, f.r, 0, Math.PI * 2);
-            c.fillStyle = 'rgba(255,255,255,' + f.opacity + ')';
-            c.shadowBlur = f.r * 2;
-            c.shadowColor = 'rgba(255,255,255,0.5)';
-            c.fill();
-        }
-        c.shadowBlur = 0;
-        requestAnimationFrame(draw);
-    }
-    draw();
-})();
-
-// ===== Mouse Sparkle + Trail Effect (desktop only) =====
-// Detect mobile/touch devices — completely skip on phones & tablets
-(function() {
-    var isMobile = 'ontouchstart' in window
-        || navigator.maxTouchPoints > 0
-        || window.innerWidth <= 1024;
-    var cv = document.getElementById('cursorCanvas');
-    if (isMobile) {
-        // Remove canvas from DOM entirely so it can never render
-        if (cv) cv.parentNode.removeChild(cv);
-        return;
-    }
-
-    var c = cv.getContext('2d');
-    function resize() { cv.width = window.innerWidth; cv.height = window.innerHeight; }
-    resize();
-    window.addEventListener('resize', resize);
-
-    var trail = [];
-    var TRAIL_MAX = 35;
-    var sparkles = [];
-    var palette = ['#007AFF','#AF52DE','#5AC8FA','#FF2D55','#34C759','#FFD60A'];
-    var mx = -100, my = -100, lx = -100, ly = -100;
-
-    document.addEventListener('mousemove', function(e) {
-        mx = e.clientX; my = e.clientY;
-        trail.push({ x: mx, y: my });
-        if (trail.length > TRAIL_MAX) trail.shift();
-
-        var dx = mx - lx, dy = my - ly;
-        var spd = Math.sqrt(dx * dx + dy * dy);
-        if (spd > 3) {
-            var n = Math.min(Math.floor(spd / 6), 5);
-            for (var i = 0; i < n; i++) {
-                sparkles.push({
-                    x: mx + (Math.random() - 0.5) * 12,
-                    y: my + (Math.random() - 0.5) * 12,
-                    vx: (Math.random() - 0.5) * 4,
-                    vy: (Math.random() - 0.5) * 4 - 1,
-                    life: 1,
-                    decay: 0.018 + Math.random() * 0.018,
-                    size: 1.5 + Math.random() * 3.5,
-                    color: palette[Math.floor(Math.random() * palette.length)],
-                    star: Math.random() > 0.4
-                });
-            }
-        }
-        lx = mx; ly = my;
-    });
-
-    function drawStar(x, y, r) {
-        c.beginPath();
-        for (var i = 0; i < 8; i++) {
-            var a = i * Math.PI / 4 - Math.PI / 2;
-            var rad = i % 2 === 0 ? r : r * 0.38;
-            c.lineTo(x + Math.cos(a) * rad, y + Math.sin(a) * rad);
-        }
-        c.closePath();
-        c.fill();
-    }
-
-    function animate() {
-        c.clearRect(0, 0, cv.width, cv.height);
-
-        // --- Glowing trail line ---
-        if (trail.length > 1) {
-            for (var i = 1; i < trail.length; i++) {
-                var p = trail[i - 1], q = trail[i];
-                var ratio = i / trail.length;
-                c.beginPath();
-                c.moveTo(p.x, p.y);
-                c.lineTo(q.x, q.y);
-                c.strokeStyle = 'rgba(0,122,255,' + (ratio * 0.5) + ')';
-                c.lineWidth = ratio * 2.5;
-                c.lineCap = 'round';
-                c.stroke();
-            }
-            // Glow dots
-            for (var i = 0; i < trail.length; i++) {
-                var t = trail[i], ratio = (i + 1) / trail.length;
-                var g = c.createRadialGradient(t.x, t.y, 0, t.x, t.y, 10 * ratio);
-                g.addColorStop(0, 'rgba(175,82,222,' + (ratio * 0.35) + ')');
-                g.addColorStop(1, 'rgba(0,122,255,0)');
-                c.fillStyle = g;
-                c.beginPath();
-                c.arc(t.x, t.y, 10 * ratio, 0, Math.PI * 2);
-                c.fill();
-            }
-        }
-
-        // --- Cursor glow ---
-        if (mx > 0) {
-            var glow = c.createRadialGradient(mx, my, 0, mx, my, 35);
-            glow.addColorStop(0, 'rgba(0,122,255,0.18)');
-            glow.addColorStop(0.5, 'rgba(175,82,222,0.06)');
-            glow.addColorStop(1, 'rgba(0,0,0,0)');
-            c.fillStyle = glow;
-            c.beginPath();
-            c.arc(mx, my, 35, 0, Math.PI * 2);
-            c.fill();
-        }
-
-        // --- Sparkle particles ---
-        for (var i = sparkles.length - 1; i >= 0; i--) {
-            var s = sparkles[i];
-            s.x += s.vx; s.y += s.vy;
-            s.vy += 0.03; s.vx *= 0.99;
-            s.life -= s.decay;
-            if (s.life <= 0) { sparkles.splice(i, 1); continue; }
-
-            c.globalAlpha = s.life;
-            c.fillStyle = s.color;
-            c.shadowBlur = 8;
-            c.shadowColor = s.color;
-
-            if (s.star) {
-                drawStar(s.x, s.y, s.size * (0.4 + s.life * 0.6));
-            } else {
-                c.beginPath();
-                c.arc(s.x, s.y, s.size * s.life, 0, Math.PI * 2);
-                c.fill();
-            }
-        }
-        c.globalAlpha = 1;
-        c.shadowBlur = 0;
-
-        requestAnimationFrame(animate);
-    }
-    animate();
-})();
-
-// ===== Click Fireworks (desktop only) =====
-(function() {
-    var isMobile = 'ontouchstart' in window
-        || navigator.maxTouchPoints > 0
-        || window.innerWidth <= 1024;
-    var cv = document.getElementById('fireworksCanvas');
-    if (isMobile) {
-        if (cv) cv.parentNode.removeChild(cv);
-        return;
-    }
-
-    var c = cv.getContext('2d');
-    var particles = [];
-    var palette = ['#007AFF', '#5AC8FA', '#AF52DE', '#34C759', '#FFD60A', '#FF6B6B'];
-
-    function resize() { cv.width = window.innerWidth; cv.height = window.innerHeight; }
-    resize();
-    window.addEventListener('resize', resize);
-
-    function burst(x, y) {
-        var count = 26 + Math.floor(Math.random() * 12);
-        for (var i = 0; i < count; i++) {
-            var angle = Math.PI * 2 * i / count;
-            var speed = 1.2 + Math.random() * 4.4;
-            particles.push({
-                x: x,
-                y: y,
-                vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed,
-                life: 1,
-                decay: 0.014 + Math.random() * 0.02,
-                size: 1.8 + Math.random() * 3.4,
-                color: palette[Math.floor(Math.random() * palette.length)]
-            });
-        }
-    }
-
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('input, textarea, button')) return;
-        burst(e.clientX, e.clientY);
-    }, true);
-
-    function animate() {
-        c.clearRect(0, 0, cv.width, cv.height);
-        for (var i = particles.length - 1; i >= 0; i--) {
-            var p = particles[i];
-            p.x += p.vx;
-            p.y += p.vy;
-            p.vx *= 0.986;
-            p.vy = p.vy * 0.986 + 0.02;
-            p.life -= p.decay;
-            if (p.life <= 0) {
-                particles.splice(i, 1);
-                continue;
-            }
-
-            c.globalAlpha = p.life;
-            c.beginPath();
-            c.fillStyle = p.color;
-            c.shadowBlur = 14;
-            c.shadowColor = p.color;
-            c.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
-            c.fill();
-        }
-        c.globalAlpha = 1;
-        c.shadowBlur = 0;
-        requestAnimationFrame(animate);
-    }
-    animate();
 })();
 
 // ===== Mianbao Chat =====
@@ -1324,50 +1229,33 @@ createParticles();
             if (!saved) return [];
             var parsed = JSON.parse(saved);
             return Array.isArray(parsed) ? parsed : [];
-        } catch (error) {
-            console.warn('面包聊天记录读取失败:', error);
-            return [];
-        }
+        } catch (error) { return []; }
     }
 
     function saveMessages(messages) {
-        try {
-            localStorage.setItem(MIANBAO_STORAGE_KEY, JSON.stringify(messages.slice(-20)));
-        } catch (error) {
-            console.warn('面包聊天记录保存失败:', error);
-        }
+        try { localStorage.setItem(MIANBAO_STORAGE_KEY, JSON.stringify(messages.slice(-20))); }
+        catch (error) {}
     }
 
     var chatMessages = loadMessages();
     if (!chatMessages.length) {
-        chatMessages = [
-            { role: 'assistant', content: MIANBAO_DEFAULT_GREETING }
-        ];
+        chatMessages = [{ role: 'assistant', content: MIANBAO_DEFAULT_GREETING }];
         saveMessages(chatMessages);
     }
 
     function escapeHtml(text) {
-        return String(text)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
+        return String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     }
 
-    function scrollMessagesToBottom() {
-        messagesEl.scrollTop = messagesEl.scrollHeight;
-    }
+    function scrollMessagesToBottom() { messagesEl.scrollTop = messagesEl.scrollHeight; }
 
     function renderMessages() {
         messagesEl.innerHTML = chatMessages.map(function(message) {
             var roleClass = message.role === 'user' ? 'user' : 'assistant';
             var avatar = message.role === 'user' ? '你' : '包';
-            return '' +
-                '<div class="mianbao-row ' + roleClass + '">' +
-                    '<div class="mianbao-avatar">' + avatar + '</div>' +
-                    '<div class="mianbao-bubble">' + escapeHtml(message.content) + '</div>' +
-                '</div>';
+            return '<div class="mianbao-row ' + roleClass + '">' +
+                '<div class="mianbao-avatar">' + avatar + '</div>' +
+                '<div class="mianbao-bubble">' + escapeHtml(message.content) + '</div></div>';
         }).join('');
         scrollMessagesToBottom();
     }
@@ -1375,23 +1263,11 @@ createParticles();
     function setPanelOpen(open) {
         panel.classList.toggle('show', open);
         panel.setAttribute('aria-hidden', open ? 'false' : 'true');
-        if (open) {
-            setTimeout(function() {
-                inputEl.focus();
-                scrollMessagesToBottom();
-            }, 120);
-        }
+        if (open) setTimeout(function() { inputEl.focus(); scrollMessagesToBottom(); }, 120);
     }
 
-    function showError(message) {
-        errorEl.textContent = message;
-        errorEl.classList.add('show');
-    }
-
-    function hideError() {
-        errorEl.textContent = '';
-        errorEl.classList.remove('show');
-    }
+    function showError(message) { errorEl.textContent = message; errorEl.classList.add('show'); }
+    function hideError() { errorEl.textContent = ''; errorEl.classList.remove('show'); }
 
     function setTyping(show) {
         var typing = messagesEl.querySelector('[data-typing="true"]');
@@ -1400,13 +1276,8 @@ createParticles();
         var row = document.createElement('div');
         row.className = 'mianbao-row assistant typing';
         row.setAttribute('data-typing', 'true');
-        row.innerHTML =
-            '<div class="mianbao-avatar">包</div>' +
-            '<div class="mianbao-bubble">' +
-                '<span class="mianbao-dot"></span>' +
-                '<span class="mianbao-dot"></span>' +
-                '<span class="mianbao-dot"></span>' +
-            '</div>';
+        row.innerHTML = '<div class="mianbao-avatar">包</div>' +
+            '<div class="mianbao-bubble"><span class="mianbao-dot"></span><span class="mianbao-dot"></span><span class="mianbao-dot"></span></div>';
         messagesEl.appendChild(row);
         scrollMessagesToBottom();
     }
@@ -1415,107 +1286,67 @@ createParticles();
         isSending = sending;
         sendBtn.disabled = sending;
         inputEl.disabled = sending;
-        sendBtn.textContent = sending ? '思考中' : '发送';
+        sendBtn.textContent = sending ? '...' : 'Send';
     }
 
     function getApiConfigError() {
-        if (!config.proxyUrl || config.proxyUrl.indexOf('__') === 0) {
-            return '还没配置聊天代理地址。当前默认地址应为 `https://sen-mianbao-chat.sen666.workers.dev`。';
-        }
+        if (!config.proxyUrl || config.proxyUrl.indexOf('__') === 0) return 'Chat proxy not configured.';
         return '';
     }
 
     async function requestReply(messages) {
         var response = await fetch(config.proxyUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                messages: messages.slice(-12)
-            })
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messages: messages.slice(-12) })
         });
-
         var data = await response.json().catch(function() { return {}; });
         if (!response.ok) {
             var detail = data && data.error && (data.error.message || data.error.code);
-            throw new Error(detail || ('请求失败，状态码 ' + response.status));
+            throw new Error(detail || ('Request failed: ' + response.status));
         }
-
-        var reply = data && (data.reply ||
-            (data.choices &&
-            data.choices[0] &&
-            data.choices[0].message &&
-            data.choices[0].message.content));
-
-        if (!reply) {
-            throw new Error('接口返回成功了，但没有拿到回复内容。');
-        }
-
+        var reply = data && (data.reply || (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content));
+        if (!reply) throw new Error('No reply content.');
         return Array.isArray(reply) ? reply.join('') : String(reply).trim();
     }
 
     async function sendMessage() {
         var text = inputEl.value.trim();
         if (!text || isSending) return;
-
         hideError();
         var configError = getApiConfigError();
-        if (configError) {
-            showError(configError);
-            setPanelOpen(true);
-            return;
-        }
+        if (configError) { showError(configError); setPanelOpen(true); return; }
 
         chatMessages.push({ role: 'user', content: text });
-        saveMessages(chatMessages);
-        renderMessages();
-        inputEl.value = '';
-        inputEl.style.height = '52px';
-        updateSendingState(true);
-        setTyping(true);
+        saveMessages(chatMessages); renderMessages();
+        inputEl.value = ''; inputEl.style.height = '44px';
+        updateSendingState(true); setTyping(true);
 
         try {
             var reply = await requestReply(chatMessages);
             chatMessages.push({ role: 'assistant', content: reply });
-            saveMessages(chatMessages);
-            renderMessages();
+            saveMessages(chatMessages); renderMessages();
         } catch (error) {
-            console.error('面包聊天请求失败:', error);
-            showError('面包刚刚打了个喷嚏，消息没发出去。' + (error && error.message ? error.message : '请稍后再试。'));
+            showError('发送失败: ' + (error && error.message ? error.message : '请稍后再试'));
         } finally {
-            setTyping(false);
-            updateSendingState(false);
-            inputEl.focus();
+            setTyping(false); updateSendingState(false); inputEl.focus();
         }
     }
 
-    fab.addEventListener('click', function() {
-        setPanelOpen(!panel.classList.contains('show'));
-    });
-
-    closeBtn.addEventListener('click', function() {
-        setPanelOpen(false);
-    });
-
+    fab.addEventListener('click', function() { setPanelOpen(!panel.classList.contains('show')); });
+    closeBtn.addEventListener('click', function() { setPanelOpen(false); });
     sendBtn.addEventListener('click', sendMessage);
 
     inputEl.addEventListener('input', function() {
-        inputEl.style.height = '52px';
-        inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
+        inputEl.style.height = '44px';
+        inputEl.style.height = Math.min(inputEl.scrollHeight, 100) + 'px';
     });
 
     inputEl.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage();
-        }
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
     });
 
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && panel.classList.contains('show')) {
-            setPanelOpen(false);
-        }
+        if (e.key === 'Escape' && panel.classList.contains('show')) setPanelOpen(false);
     });
 
     document.addEventListener('click', function(e) {
