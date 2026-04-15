@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="preload" as="audio" href="assets/老街.mp3">
     <style>
         :root {
             --bg-1: #edf5ff;
@@ -749,6 +750,30 @@
             margin-bottom: 8px;
         }
         .footer-note { text-align: center; color: var(--light); font-size: 0.82rem; padding: 4px 0 20px; }
+
+        /* ===== BGM Button ===== */
+        .bgm-btn {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid var(--glass-border);
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            cursor: pointer;
+            z-index: 9999;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        .bgm-btn:hover { background: var(--text); color: #fff; border-color: var(--text); }
+        .bgm-btn.playing .bgm-disc { animation: bgmSpin 3s linear infinite; }
+        @keyframes bgmSpin { to { transform: rotate(360deg); } }
+
         @media (max-width: 1080px) {
             .app-shell {
                 grid-template-columns: 1fr;
@@ -1169,5 +1194,85 @@
 
         init();
     </script>
+
+<!-- BGM -->
+<audio id="bgm" loop preload="auto">
+    <source src="assets/老街.mp3" type="audio/mpeg">
+</audio>
+<button class="bgm-btn" id="bgmBtn" aria-label="Toggle music">
+    <span class="bgm-disc" id="bgmDisc">&#x266B;</span>
+</button>
+
+<script>
+(function() {
+    var bgm = document.getElementById('bgm');
+    var btn = document.getElementById('bgmBtn');
+    var STATE_KEY = 'senGlobalBgmState';
+    var interactEvents = ['click','touchstart','pointerdown','keydown'];
+    var saveTimer = null;
+
+    function readState() {
+        try { return JSON.parse(localStorage.getItem(STATE_KEY) || '{}'); }
+        catch (e) { return {}; }
+    }
+    function writeState(partial) {
+        var prev = readState();
+        localStorage.setItem(STATE_KEY, JSON.stringify(Object.assign({}, prev, partial, { updatedAt: Date.now() })));
+    }
+
+    var savedState = readState();
+    bgm.volume = typeof savedState.volume === 'number' ? savedState.volume : 0.35;
+
+    function syncButtonState() { btn.classList.toggle('playing', !bgm.paused); }
+    function persistPlaybackState() {
+        writeState({ currentTime: bgm.currentTime || 0, paused: bgm.paused, volume: bgm.volume });
+    }
+    function startProgressSync() {
+        if (saveTimer) clearInterval(saveTimer);
+        saveTimer = setInterval(function() { if (!bgm.paused) persistPlaybackState(); }, 1000);
+    }
+    function stopProgressSync() {
+        if (saveTimer) { clearInterval(saveTimer); saveTimer = null; }
+    }
+    function restoreTime() {
+        var state = readState();
+        if (typeof state.currentTime === 'number' && !isNaN(state.currentTime)) {
+            try { bgm.currentTime = state.currentTime; } catch (e) {}
+        }
+    }
+    function tryAutoPlay() {
+        var state = readState();
+        if (state.paused === true) return;
+        bgm.play().then(function() {
+            syncButtonState(); persistPlaybackState(); startProgressSync();
+            interactEvents.forEach(function(e) { document.removeEventListener(e, tryAutoPlay, true); });
+        }).catch(function() {});
+    }
+
+    if (bgm.readyState >= 1) restoreTime();
+    else bgm.addEventListener('loadedmetadata', restoreTime, { once: true });
+    tryAutoPlay();
+    interactEvents.forEach(function(e) { document.addEventListener(e, tryAutoPlay, { capture: true }); });
+
+    btn.addEventListener('click', function() {
+        if (!bgm.paused) {
+            bgm.pause(); syncButtonState(); persistPlaybackState(); stopProgressSync();
+        } else {
+            bgm.play().then(function() {
+                syncButtonState(); persistPlaybackState(); startProgressSync();
+                interactEvents.forEach(function(e) { document.removeEventListener(e, tryAutoPlay, true); });
+            }).catch(function() {});
+        }
+    });
+
+    bgm.addEventListener('pause', function() { syncButtonState(); persistPlaybackState(); stopProgressSync(); });
+    bgm.addEventListener('play', function() { syncButtonState(); persistPlaybackState(); startProgressSync(); });
+    bgm.addEventListener('ended', function() { writeState({ currentTime: 0, paused: false, volume: bgm.volume }); });
+    window.addEventListener('beforeunload', persistPlaybackState);
+    document.addEventListener('visibilitychange', function() { if (document.hidden) persistPlaybackState(); });
+    syncButtonState();
+})();
+</script>
+
 </body>
 </html>
